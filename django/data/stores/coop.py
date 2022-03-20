@@ -4,7 +4,7 @@ import requests
 from typing import Any
 
 
-TOTAL_PAGES = 3  # we should pull this number from the API automatically later
+PAGE_LIMIT = 5  # don't accidentally DOS the site (for now) (implement ratelimiting later)
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'
 BASE_PAGE_PARAMS: dict[str, str | int] = {
     'orderby': 'name',
@@ -15,7 +15,10 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 
 def get_all():
     """Get all products."""
-    pages = [get_page(page) for page in range(1, TOTAL_PAGES + 1)]
+    result = get_page(1)
+    page_count, _ = result['metadata']['pages'], result['metadata']['count']
+    pages = [get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1)]
+
     for page in pages:
         for product in page['data']:
             print(
