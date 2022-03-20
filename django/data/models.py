@@ -3,21 +3,21 @@ from django.db import models
 
 class Product(models.Model):
     """Platonic product that all individual store instances point to."""
-    name = models.CharField()
+    name = models.CharField(max_length=250)
     description = models.TextField(null=True)
     image_url = models.TextField(null=True)
 
 
 class Store(models.Model):
     """Store."""
-    name = models.CharField()  # what about separate store locations having separate prices? StoreLocation?
+    name = models.CharField(max_length=50)
 
 
 class StoreProduct(models.Model):
     store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
 
-    name = models.CharField()  # store-specific product name
+    name = models.CharField(max_length=250)  # store-specific product name
     last_checked = models.DateTimeField(auto_now=True)
 
 
