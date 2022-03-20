@@ -3,6 +3,8 @@
 import requests
 from typing import Callable, Any
 
+from products import Discount
+
 
 PAGE_LIMIT = 5  # don't accidentally DOS the site (for now) (implement ratelimiting later)
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'

@@ -1,17 +1,8 @@
 from concurrent import futures
-from enum import Enum, auto
 from typing import Callable, NamedTuple
 
 import coop
 import selver
-
-
-class Discount(Enum):
-    """Discount enum."""
-
-    NONE = auto()
-    NORMAL = auto()
-    MEMBER = auto()
 
 
 class StorePool:

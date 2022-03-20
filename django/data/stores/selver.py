@@ -1,16 +1,17 @@
 """Coop."""
 
 import requests
+import csv
 from typing import Callable, Any
 
-from data.stores.main import Discount
+from products import Discount
 
 
-PAGE_LIMIT = 5  # don't accidentally DOS the site (for now) (implement ratelimiting later)
+RESULTS_PER_PAGE = 1000  # too large and python crashes
 BASE_URL = 'https://www.selver.ee/api/catalog/vue_storefront_catalog_et/product/_search'
 PARAMS: dict[str, str | int] = {
-    'from': 0,  # start from result n
-    'size': 96,  # results per page (96 max default)
+    # 'from': 11000,  # start from result n
+    # 'size': 1000,  # results per page (96 max default)
     'sort': 'name.sortable'
 }
 
@@ -25,10 +26,15 @@ def main(save: Callable):
 
 def get_all():
     """Get all products."""
-    pages = [get_page(1)]
+    writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))
 
-    for page in pages:
-        page = page['hits']['hits']
+    for n in range(1, 100):
+        page = get_page(n)['hits']['hits']
+        product_count = len(page)
+        print('Products:', product_count)
+
+        if n == 1:  # first page
+            writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
 
         for product in page:
             product = product['_source']
@@ -43,17 +49,15 @@ def get_all():
                 base_price = prices[1]['original_price']
                 price = prices[1]['price']
 
-            print(
-                f'"{product["name"]}"',
-                base_price,
-                price,
-                discount
-            )
+            writer.writerow([product["name"], base_price, price, str(discount)])
+
+        if product_count < RESULTS_PER_PAGE:
+            break  # last page
 
 
 def get_page(page: int) -> dict[str, Any]:
     """Get a single page of products."""
-    query = PARAMS
+    query = PARAMS | {'size': RESULTS_PER_PAGE, 'from': RESULTS_PER_PAGE * (page - 1)}
     response = requests.get(BASE_URL, params=query)
     return response.json()
 
