@@ -21,7 +21,7 @@ class StoreProduct(models.Model):
     last_checked = models.DateTimeField(auto_now=True)
 
 
-class Price(models.Model):
+class PriceGroup(models.Model):
     """Current or historic price for a store product."""
     product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
 
@@ -29,6 +29,6 @@ class Price(models.Model):
     start = models.DateTimeField(auto_now_add=False)  # some stores may specify a manual add-end date
     end = models.DateTimeField(null=True)  # store-provided campaign end dates, null for historical prices
 
-    base_price = models.IntegerField()
+    base_price = models.IntegerField(null=True)  # null if out of stock / unavailable
     sale_price = models.IntegerField(null=True)  # null if no sale
     members_only = models.BooleanField()
