@@ -3,6 +3,7 @@ repos:
     rev: v2.3.0
     hooks:
     -   id: check-added-large-files
+        exclude: ^client/(?:node_modules/.*|package-lock\.json)
     -   id: check-ast
     -   id: check-json
     -   id: check-toml
@@ -16,7 +17,6 @@ repos:
     -   id: flake8
         additional_dependencies: [flake8-bugbear, flake8-comprehensions, flake8-docstrings]
         args: ['--config=.flake8']
-        exclude: '^(?:docs|sphinx)/.*'
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.910
     hooks:
