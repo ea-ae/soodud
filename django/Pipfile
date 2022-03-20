@@ -9,6 +9,7 @@ psycopg2 = "*"
 djangorestframework = "*"
 markdown = "*"
 requests = "*"
+scrapy = "*"
 
 [dev-packages]
 pre-commit = "*"
