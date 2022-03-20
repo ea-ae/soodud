@@ -4,6 +4,8 @@ from django.db import models
 class Product(models.Model):
     """Platonic product that all individual store instances point to."""
     name = models.CharField()
+    description = models.TextField(null=True)
+    image_url = models.TextField(null=True)
 
 
 class Store(models.Model):
@@ -16,6 +18,7 @@ class StoreProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
 
     name = models.CharField()  # store-specific product name
+    last_checked = models.DateTimeField(auto_now=True)
 
 
 class Price(models.Model):
