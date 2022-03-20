@@ -1,3 +1,31 @@
 from django.db import models
 
-# Create your models here.
+
+class Product(models.Model):
+    """Platonic product that all individual store instances point to."""
+    name = models.CharField()
+
+
+class Store(models.Model):
+    """Store."""
+    name = models.CharField()  # what about separate store locations having separate prices? StoreLocation?
+
+
+class StoreProduct(models.Model):
+    store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+
+    name = models.CharField()  # store-specific product name
+
+
+class Price(models.Model):
+    """Current or historic price for a store product."""
+    product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
+
+    current = models.BooleanField()  # is the price current, potential optimization over date sort?
+    start = models.DateTimeField(auto_now_add=False)  # some stores may specify a manual add-end date
+    end = models.DateTimeField(null=True)  # store-provided campaign end dates, null for historical prices
+
+    base_price = models.IntegerField()
+    sale_price = models.IntegerField(null=True)  # null if no sale
+    members_only = models.BooleanField()
