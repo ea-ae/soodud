@@ -10,6 +10,14 @@ module.exports = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: 'src/index/index.html',
+            filename: 'index.html',
+            chunks: ['index'],
+            // favicon: 'public/favicons/favicon.ico',
+        }),
+    ],
     module: { rules: [
         {
             test: /\.(js|jsx|ts|tsx)$/,

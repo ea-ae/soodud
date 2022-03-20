@@ -26,7 +26,7 @@ module.exports = merge(common, {
         static: { directory: path.join(__dirname, 'public') },
         client: { progress: true },
         compress: true,
-        port: 9001,
+        port: 8001,
         watchFiles: {paths: ['./src/**/*']},
         historyApiFallback: {
             index: '/',
