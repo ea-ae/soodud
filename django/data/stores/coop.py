@@ -1,7 +1,7 @@
 """Coop."""
 
 import requests
-from typing import Any
+from typing import Callable, Any
 
 
 PAGE_LIMIT = 5  # don't accidentally DOS the site (for now) (implement ratelimiting later)
@@ -11,6 +11,14 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
     'order': 'asc',
     'language': 'et'
 }
+
+
+def main(save: Callable):
+    """Coop entrypoint."""
+    save(1)
+    return False
+    get_all()
+    return True
 
 
 def get_all():

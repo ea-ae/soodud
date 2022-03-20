@@ -1,7 +1,7 @@
 """Coop."""
 
 import requests
-from typing import Any
+from typing import Callable, Any
 
 from data.stores.main import Discount
 
@@ -13,6 +13,14 @@ PARAMS: dict[str, str | int] = {
     'size': 96,  # results per page (96 max default)
     'sort': 'name.sortable'
 }
+
+
+def main(save: Callable):
+    """Selver entrypoint."""
+    save(2)
+    return True
+    get_all()
+    return True
 
 
 def get_all():
