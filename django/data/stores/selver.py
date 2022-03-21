@@ -26,7 +26,8 @@ def main(save: Callable):
 
 def get_all():
     """Get all products."""
-    writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))
+    return  # return early to prevent accidental execution for now
+    writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))  # noqa
 
     for n in range(1, 100):
         page = get_page(n)['hits']['hits']
@@ -39,6 +40,7 @@ def get_all():
         for product in page:
             product = product['_source']
 
+            name = product['name']
             prices = product['prices']
             discount = Discount.NORMAL if prices[0]['is_discount'] else Discount.NONE
             if discount == Discount.NORMAL:
@@ -49,7 +51,7 @@ def get_all():
                 base_price = prices[1]['original_price']
                 price = prices[1]['price']
 
-            writer.writerow([product["name"], base_price, price, str(discount)])
+            writer.writerow([name, base_price, price, str(discount)])
 
         if product_count < RESULTS_PER_PAGE:
             break  # last page
@@ -57,8 +59,9 @@ def get_all():
 
 def get_page(page: int) -> dict[str, Any]:
     """Get a single page of products."""
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:77.0) Gecko/20190101 Firefox/77.0'}
     query = PARAMS | {'size': RESULTS_PER_PAGE, 'from': RESULTS_PER_PAGE * (page - 1)}
-    response = requests.get(BASE_URL, params=query)
+    response = requests.get(BASE_URL, headers=headers, params=query)
     return response.json()
 
 
