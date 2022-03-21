@@ -14,7 +14,7 @@ class Discount(Enum):
 
 
 @dataclass
-class ProductData:
+class Product:
     """Product dataclass."""
 
     name: str

@@ -5,10 +5,10 @@ import csv
 from time import sleep
 from typing import Generator, Callable, Any
 
-from products import Discount, ProductData
+from data.stores.products import Discount, Product
 
 
-PAGE_LIMIT = 3  # don't accidentally DOS the site (for now) (implement ratelimiting later)
+PAGE_LIMIT = 4  # don't accidentally DOS the site
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'
 BASE_PAGE_PARAMS: dict[str, str | int] = {
     'orderby': 'name',
@@ -25,7 +25,7 @@ def main(save: Callable):
     return True
 
 
-def get_all(saver: Generator[None, ProductData, None]):
+def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     result = get_page(1)
     page_count, _ = result['metadata']['pages'], result['metadata']['count']
@@ -48,7 +48,7 @@ def get_all(saver: Generator[None, ProductData, None]):
                 price = base_price
 
             writer.writerow([name, base_price, price, str(discount)])
-            product = ProductData(name, float(base_price), float(price), discount)
+            product = Product(name, float(base_price), float(price), discount)
             saver.send(product)
 
 

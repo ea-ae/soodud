@@ -4,7 +4,7 @@ import requests
 import csv
 from typing import Callable, Any
 
-from products import Discount
+from data.stores.products import Discount
 
 
 RESULTS_PER_PAGE = 1000  # too large and python crashes
