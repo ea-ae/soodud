@@ -1,7 +1,6 @@
 """Prisma."""
 
 import requests
-import regex
 from xml.etree import ElementTree as et
 
 

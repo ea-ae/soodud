@@ -11,6 +11,7 @@ markdown = "*"
 requests = "*"
 scrapy = "*"
 regex = "*"
+unidecode = "*"
 
 [dev-packages]
 pre-commit = "*"

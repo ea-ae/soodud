@@ -11,6 +11,7 @@ class Product(models.Model):
     name = models.CharField(max_length=250)
     image_url = models.TextField(null=True)
     tags = models.ManyToManyField(ProductTag, blank=True, null=True)
+    quantity = models.CharField(max_length=250)
 
 
 class Store(models.Model):
