@@ -10,6 +10,7 @@ djangorestframework = "*"
 markdown = "*"
 requests = "*"
 scrapy = "*"
+regex = "*"
 
 [dev-packages]
 pre-commit = "*"
