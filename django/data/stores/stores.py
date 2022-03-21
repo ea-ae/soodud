@@ -36,7 +36,7 @@ class StorePool:
             """Save the new prices."""
             while True:
                 product = yield
-                print(f'{store.name} returned with {product}')
+                # print(f'{store.name} returned with {product}')
 
                 store_product, _ = models.StoreProduct.objects.get_or_create(  # leave Product as null for now!
                     store=store.model,
@@ -46,34 +46,18 @@ class StorePool:
                     }
                 )
                 store_product.last_checked = datetime.now()
-                store_product.save()
-                print(product)
+                # print(product)
+
                 price, created = models.Price.objects.get_or_create(
                     product=store_product,
-                    current=True,
-                    defaults={
-                        'base_price': product.base_price,
-                        'sale_price': None if product.discount == Discount.NONE else product.price,
-                        'members_only': product.discount == Discount.MEMBER
-                    }
+                    base_price=product.base_price,
+                    sale_price=None if product.discount == Discount.NONE else product.price,
+                    members_only=product.discount == Discount.MEMBER
                 )
-                if not created:
-                    stored_prices = (price.base_price, price.sale_price, price.members_only)
-                    new_prices = (product.base_price,
-                                  None if Discount.NONE else product.price,
-                                  product.discount == Discount.MEMBER
-                                  )
-                    if stored_prices != new_prices:  # prices changed
-                        price.current = False
-                        price.save()
-                        new_price = models.Price(
-                            product=store_product,
-                            current=True,
-                            base_price=new_prices[0],
-                            sale_price=new_prices[1],
-                            members_only=new_prices[2]
-                        )
-                        new_price.save()
+                if created:  # price has changed, update
+                    price.save()
+                    store_product.current_price = price
+                store_product.save()
 
         store.entrypoint(save_prices)
 

@@ -8,7 +8,7 @@ from typing import Generator, Callable, Any
 from data.stores.products import Discount, Product
 
 
-PAGE_LIMIT = 4  # don't accidentally DOS the site
+PAGE_LIMIT = 100_000  # don't accidentally DOS the site
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'
 BASE_PAGE_PARAMS: dict[str, str | int] = {
     'orderby': 'name',
@@ -32,10 +32,13 @@ def get_all(saver: Generator[None, Product, None]):
     print('Pages:', page_count)
     pages = (get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1))
 
-    writer = csv.writer(open('coop.csv', 'w', newline='', encoding='utf-8'))
-    writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
+    # writer = csv.writer(open('coop.csv', 'w', newline='', encoding='utf-8'))
+    # writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
 
-    for page in pages:
+    for i, page in enumerate(pages):
+        if i % 50 == 0:
+            print(f'Coop: page {i}')
+
         for product in page['data']:
             name = product['name']
             discount = Discount.NONE
@@ -47,7 +50,10 @@ def get_all(saver: Generator[None, Product, None]):
             else:
                 price = base_price
 
-            writer.writerow([name, base_price, price, str(discount)])
+            # writer.writerow([name, base_price, price, str(discount)])
+            # print(name, base_price, price, type(base_price), type(price))
+            if base_price is None or price is None:
+                continue  # skip non-purchasable items
             product = Product(name, float(base_price), float(price), discount)
             saver.send(product)
 

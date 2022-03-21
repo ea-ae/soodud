@@ -10,6 +10,7 @@ class ProductTagAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'cheapest_price', 'tags_')
+    search_fields = ('name',)
 
     @admin.display()
     def cheapest_price(self, obj: Product):
@@ -18,7 +19,7 @@ class ProductAdmin(admin.ModelAdmin):
         for product in products[::-1]:
             # return str(Price.objects.get(product=product, current=True))
             # prices.append(product.current_price)
-            prices.append(Price.objects.get(product=product, current=True))
+            prices.append(product.current_price)
         return min(prices, key=lambda x: x.price)
 
     @admin.display()
@@ -38,20 +39,23 @@ class StoreAdmin(admin.ModelAdmin):
 @admin.register(StoreProduct)
 class StoreProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'last_checked', 'price', 'discount', 'store')
+    search_fields = ('name', 'store__name')
     date_hierarchy = 'last_checked'
 
     @admin.display()
     def price(self, obj):
-        return Price.objects.get(product=obj, current=True).price
+        return obj.current_price.price
 
     @admin.display()
     def discount(self, obj):
-        return Price.objects.get(product=obj, current=True).discount
+        return obj.current_price.discount
 
 
 @admin.register(Price)
 class PriceAdmin(admin.ModelAdmin):
+    readonly_fields = ('start',)
     list_display = ('product_name', 'price', 'discount', 'base_price', 'sale_price')
+    search_fields = ('product_name', 'discount')
     date_hierarchy = 'start'
 
     @admin.display()

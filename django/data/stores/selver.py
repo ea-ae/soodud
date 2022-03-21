@@ -2,9 +2,9 @@
 
 import requests
 import csv
-from typing import Callable, Any
+from typing import Generator, Callable, Any
 
-from data.stores.products import Discount
+from data.stores.products import Discount, Product
 
 
 RESULTS_PER_PAGE = 1000  # too large and python crashes
@@ -18,24 +18,23 @@ PARAMS: dict[str, str | int] = {
 
 def main(save: Callable):
     """Selver entrypoint."""
-    save(2)
-    return True
-    get_all()
+    saver = save(2)
+    next(saver)
+    get_all(saver)
     return True
 
 
-def get_all():
+def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
-    return  # return early to prevent accidental execution for now
-    writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))  # noqa
+    # writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))  # noqa
 
     for n in range(1, 100):
         page = get_page(n)['hits']['hits']
         product_count = len(page)
         print('Products:', product_count)
 
-        if n == 1:  # first page
-            writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
+        # if n == 1:  # first page
+        #     writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
 
         for product in page:
             product = product['_source']
@@ -51,7 +50,11 @@ def get_all():
                 base_price = prices[1]['original_price']
                 price = prices[1]['price']
 
-            writer.writerow([name, base_price, price, str(discount)])
+            # writer.writerow([name, base_price, price, str(discount)])
+            if base_price is None or price is None:
+                continue  # skip non-purchasable items
+            product = Product(name, float(base_price), float(price), discount)
+            saver.send(product)
 
         if product_count < RESULTS_PER_PAGE:
             break  # last page

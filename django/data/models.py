@@ -33,13 +33,10 @@ class Store(models.Model):
 class StoreProduct(models.Model):
     store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, blank=True, null=True)
+    current_price = models.ForeignKey('Price', on_delete=models.SET_NULL, blank=True, null=True)
 
     name = models.CharField(max_length=250)  # store-specific product name
     last_checked = models.DateTimeField(auto_now=True)
-
-    @property
-    def current_price(self):
-        return Price.objects.get(product=self, current=True).price
 
     def __str__(self):
         return self.name
@@ -50,7 +47,6 @@ class Price(models.Model):
     product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
 
     # todo: 'current' ought to be in StoreProduct, two-way one-to-one relationship = safer & better
-    current = models.BooleanField()  # is the price current, potential optimization over date sort?
     start = models.DateTimeField(auto_now_add=True)  # some stores may specify a manual add/end date
     end = models.DateTimeField(default=None, blank=True, null=True)  # campaign end dates, null for historical prices
 
