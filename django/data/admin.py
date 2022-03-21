@@ -9,7 +9,11 @@ class ProductTagAdmin(admin.ModelAdmin):
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'products')
+
+    @admin.display()
+    def products(self, obj):
+        return f'{StoreProduct.objects.filter(store=obj).count()} products'
 
 
 @admin.register(StoreProduct)
