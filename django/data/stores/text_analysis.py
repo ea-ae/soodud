@@ -155,7 +155,7 @@ def find_clusters(groups):
     results = []
     for a_group, b_group in it.combinations(groups, 2):
         for a in a_group:  # it.product()
-            local_results = []
+            loc_results = []
             for b in b_group:
                 comps += 1
 
@@ -163,17 +163,14 @@ def find_clusters(groups):
                     continue  # quantities do not match
 
                 result = SimilarityScore(similarity_check(a, b), a, b)
-                local_results.append(result)
+                loc_results.append(result)
 
                 if comps % 1_000_000 == 0:
                     print(comps)
             # find best match(es) for A amongst B's
-            local_results.sort(key=lambda x: x.score, reverse=True)
-            for i, candidate_result in enumerate(local_results):
-                if i > 0 and local_results[i - 1].score != candidate_result.score:
-                    break  # allow multiple matches as long as their score is equal (?)
-                if candidate_result.score >= 0.5:
-                    results.append(candidate_result)  # the score is satisfactory enough (saves RAM)
+            loc_results.sort(key=lambda x: x.score, reverse=True)
+            if loc_results[0].score >= 0.5 and (len(loc_results) == 1 or loc_results[0].score != loc_results[1]):
+                results.append(loc_results[0])
 
             if comps > limit:
                 break

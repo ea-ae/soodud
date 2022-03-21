@@ -7,6 +7,16 @@ class ProductTagAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+    # @admin.display()
+    # def tags_(self, obj: ProductTag):
+    #     tags = obj.tags.through.objects.all().count()
+    #     return tags
+
+
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
     list_display = ('name', 'products')

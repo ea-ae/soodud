@@ -14,8 +14,8 @@ class ProductTag(models.Model):
 class Product(models.Model):
     """Platonic product that all individual store instances point to."""
     name = models.CharField(max_length=250, unique=True)
-    image_url = models.TextField(null=True)
-    tags = models.ManyToManyField(ProductTag, blank=True)
+    image_url = models.TextField(blank=True, null=True)
+    tags = models.ManyToManyField(ProductTag, related_name='tags', blank=True)
     quantity = models.CharField(max_length=250, default=None, blank=True, null=True)
 
     def __str__(self):
