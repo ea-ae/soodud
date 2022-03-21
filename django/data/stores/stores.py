@@ -1,6 +1,7 @@
 from concurrent import futures
-from typing import Callable, NamedTuple
+from typing import Generator, Callable, NamedTuple
 
+from products import ProductData
 import coop
 import selver
 
@@ -28,14 +29,16 @@ class StorePool:
     @staticmethod
     def update_store(store: Store):
         """Update a store."""
-        def save_prices(x: int):
+        def save_prices(x: int) -> Generator[None, ProductData, None]:
             """Save the new prices."""
-            print(f'{store.name} returned {x}')
+            while True:
+                y = yield
+                print(f'{store.name} returned {x} with {y}')
         store.entrypoint(save_prices)
 
 
 if __name__ == '__main__':
     stores = StorePool()
     stores.add_store('Coop', coop.main)  # decorators don't work here
-    stores.add_store('Selver', selver.main)
+    # stores.add_store('Selver', selver.main)
     stores.update_all()

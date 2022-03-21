@@ -35,6 +35,6 @@ class Price(models.Model):
     start = models.DateTimeField(auto_now_add=False)  # some stores may specify a manual add/end date
     end = models.DateTimeField(blank=True, null=True)  # store-provided campaign end dates, null for historical prices
 
-    base_price = models.IntegerField(blank=True, null=True)  # null if out of stock / unavailable
+    base_price = models.IntegerField(blank=True, null=True)  # null on certain sales or if out of stock
     sale_price = models.IntegerField(blank=True, null=True)  # null if no sale
     members_only = models.BooleanField()

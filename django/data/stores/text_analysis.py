@@ -9,7 +9,7 @@ from typing import NamedTuple, Optional
 
 COMMON_WORDS = ('ja', )
 
-UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'mm', 'cm', 'dm', 'm', 'km', 'tk', '%')
+UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kl', 'mm', 'cm', 'dm', 'm', 'km', 'tk', '%')
 
 QUANTITY_UNITS = ('g', 'l', 'm')
 QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!

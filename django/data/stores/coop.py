@@ -3,12 +3,12 @@
 import requests
 import csv
 from time import sleep
-from typing import Callable, Any
+from typing import Generator, Callable, Any
 
-from products import Discount
+from products import Discount, ProductData
 
 
-PAGE_LIMIT = 10_000  # don't accidentally DOS the site (for now) (implement ratelimiting later)
+PAGE_LIMIT = 3  # don't accidentally DOS the site (for now) (implement ratelimiting later)
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'
 BASE_PAGE_PARAMS: dict[str, str | int] = {
     'orderby': 'name',
@@ -19,16 +19,15 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 
 def main(save: Callable):
     """Coop entrypoint."""
-    save(1)
-    return False
-    get_all()
+    saver = save(1)
+    next(saver)
+    get_all(saver)
     return True
 
 
-def get_all():
+def get_all(saver: Generator[None, ProductData, None]):
     """Get all products."""
-    return  # return early to prevent accidental execution for now
-    result = get_page(1)  # noqa
+    result = get_page(1)
     page_count, _ = result['metadata']['pages'], result['metadata']['count']
     print('Pages:', page_count)
     pages = (get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1))
@@ -48,8 +47,9 @@ def get_all():
             else:
                 price = base_price
 
-            # print(name, base_price, price, discount)
             writer.writerow([name, base_price, price, str(discount)])
+            product = ProductData(name, float(base_price), float(price), discount)
+            saver.send(product)
 
 
 def get_page(page: int) -> dict[str, Any]:
@@ -59,7 +59,7 @@ def get_page(page: int) -> dict[str, Any]:
     response = requests.get(BASE_URL, headers=headers, params=query)
 
     # slow down!
-    print(f'\rPage {page:03}', end='', flush=True)
+    # print(f'\rPage {page:03}', end='', flush=True)
     if page % 5 == 0:
         sleep(2)
 
