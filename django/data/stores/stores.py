@@ -47,18 +47,22 @@ class StorePool:
                 )
                 store_product.last_checked = datetime.now()
                 store_product.save()
+                print(product)
                 price, created = models.Price.objects.get_or_create(
                     product=store_product,
                     current=True,
                     defaults={
                         'base_price': product.base_price,
-                        'sale_price': product.price,
+                        'sale_price': None if product.discount == Discount.NONE else product.price,
                         'members_only': product.discount == Discount.MEMBER
                     }
                 )
                 if not created:
                     stored_prices = (price.base_price, price.sale_price, price.members_only)
-                    new_prices = (product.base_price, product.price, product.discount == Discount.MEMBER)
+                    new_prices = (product.base_price,
+                                  None if Discount.NONE else product.price,
+                                  product.discount == Discount.MEMBER
+                                  )
                     if stored_prices != new_prices:  # prices changed
                         price.current = False
                         price.save()
