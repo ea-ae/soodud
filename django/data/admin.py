@@ -9,12 +9,21 @@ class ProductTagAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'cheapest_price', 'tags_')
 
-    # @admin.display()
-    # def tags_(self, obj: ProductTag):
-    #     tags = obj.tags.through.objects.all().count()
-    #     return tags
+    @admin.display()
+    def cheapest_price(self, obj: Product):
+        products = StoreProduct.objects.filter(product=obj)
+        prices = []
+        for product in products[::-1]:
+            # return str(Price.objects.get(product=product, current=True))
+            # prices.append(product.current_price)
+            prices.append(Price.objects.get(product=product, current=True))
+        return min(prices, key=lambda x: x.price)
+
+    @admin.display()
+    def tags_(self, obj: Product):
+        return ', '.join(tag.producttag.name for tag in obj.tags.through.objects.filter(product=obj))
 
 
 @admin.register(Store)

@@ -37,6 +37,10 @@ class StoreProduct(models.Model):
     name = models.CharField(max_length=250)  # store-specific product name
     last_checked = models.DateTimeField(auto_now=True)
 
+    @property
+    def current_price(self):
+        return Price.objects.get(product=self, current=True).price
+
     def __str__(self):
         return self.name
 
