@@ -1,11 +1,9 @@
 """Coop."""
 
 import requests
-import csv
 from time import sleep
 from typing import Generator, Callable, Any
 
-# from data.stores.products import Discount, Product
 from data.stores import Discount, Product, StoreRegistry
 
 

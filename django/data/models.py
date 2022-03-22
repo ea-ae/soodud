@@ -1,7 +1,5 @@
 from django.db import models
 
-# from data.stores import Discount
-
 
 class ProductTag(models.Model):
     """Category or tag for a product."""
@@ -58,13 +56,14 @@ class Price(models.Model):
     def price(self) -> float:
         return self.sale_price if self.sale_price is not None else self.base_price
 
-    # @property
-    # def discount(self) -> products.Discount:
-    #     if self.members_only and self.sale_price is not None:
-    #         return Discount.MEMBER
-    #     if self.sale_price is None:
-    #         return Discount.NONE
-    #     return Discount.NORMAL
+    @property
+    def discount(self):
+        from .stores import Discount  # prevent circular imports
+        if self.members_only and self.sale_price is not None:
+            return Discount.MEMBER
+        if self.sale_price is None:
+            return Discount.NONE
+        return Discount.NORMAL
 
     def __str__(self) -> str:
         return f'{self.price:.2f} @ {self.product.name}'
