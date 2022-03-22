@@ -15,9 +15,12 @@ repos:
     rev: 4.0.1
     hooks:
     -   id: flake8
+        exclude: ^django/[^/]+/migrations/.*
         additional_dependencies: [flake8-bugbear, flake8-comprehensions, flake8-docstrings]
-        args: ['--config=.flake8']
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.910
+        args: ['--config=django/.flake8']
+-   repo: https://github.com/ecugol/pre-commit-hooks-django
+    rev: v0.4.0
     hooks:
-    -   id: mypy
+    -   id: check-untracked-migrations
+    -   id: check-unapplied-migrations
+    -   id: check-absent-migrations

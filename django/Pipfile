@@ -8,6 +8,12 @@ django = "==4.0.3"
 psycopg2 = "*"
 djangorestframework = "*"
 markdown = "*"
+requests = "*"
+scrapy = "*"
+regex = "*"
+unidecode = "*"
+bs4 = "*"
+soupsieve = "*"
 
 [dev-packages]
 pre-commit = "*"
