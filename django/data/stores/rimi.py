@@ -7,8 +7,8 @@ from typing import Callable, Generator, Any
 import bs4
 import soupsieve as sv
 
+from data.stores import Discount, Product, StoreRegistry
 
-from data.stores.products import Discount, Product
 
 SITEMAPS = [
     'https://www.rimi.ee/epood/sitemaps/categories/siteMap_rimiEeSite_Category_et_1.xml',
@@ -42,6 +42,7 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 }
 
 
+@StoreRegistry('Rimi')
 def main(save: Callable):
     """Rimi entrypoint."""
     saver = save(3)

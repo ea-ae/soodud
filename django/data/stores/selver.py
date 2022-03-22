@@ -4,7 +4,7 @@ import requests
 import csv
 from typing import Generator, Callable, Any
 
-from data.stores.products import Discount, Product
+from data.stores import Discount, Product, StoreRegistry
 
 
 RESULTS_PER_PAGE = 1000  # too large and python crashes
@@ -16,6 +16,7 @@ PARAMS: dict[str, str | int] = {
 }
 
 
+@StoreRegistry('Selver')
 def main(save: Callable):
     """Selver entrypoint."""
     saver = save(2)

@@ -1,3 +1,5 @@
+"""Admin pages."""
+
 from django.contrib import admin
 from .models import *
 
@@ -38,7 +40,7 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(StoreProduct)
 class StoreProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'last_checked', 'price', 'discount', 'store')
+    list_display = ('name', 'last_checked', 'price', 'store')
     search_fields = ('name', 'store__name')
     date_hierarchy = 'last_checked'
 
@@ -46,16 +48,16 @@ class StoreProductAdmin(admin.ModelAdmin):
     def price(self, obj):
         return obj.current_price.price
 
-    @admin.display()
-    def discount(self, obj):
-        return obj.current_price.discount
+    # @admin.display()
+    # def discount(self, obj):
+    #     return obj.current_price.discount
 
 
 @admin.register(Price)
 class PriceAdmin(admin.ModelAdmin):
     readonly_fields = ('start',)
-    list_display = ('product_name', 'price', 'discount', 'base_price', 'sale_price')
-    search_fields = ('product_name', 'discount')
+    list_display = ('product_name', 'price', 'base_price', 'sale_price')
+    search_fields = ('product_name',)
     date_hierarchy = 'start'
 
     @admin.display()

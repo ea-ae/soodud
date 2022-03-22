@@ -12,6 +12,8 @@ requests = "*"
 scrapy = "*"
 regex = "*"
 unidecode = "*"
+bs4 = "*"
+soupsieve = "*"
 
 [dev-packages]
 pre-commit = "*"

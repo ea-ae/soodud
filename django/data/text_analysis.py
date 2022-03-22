@@ -4,7 +4,7 @@ import regex
 from unidecode import unidecode
 import itertools as it
 import csv
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Sequence, Optional
 
 
 COMMON_WORDS = ('ja', )
@@ -16,7 +16,7 @@ QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1} 
 QUANTITY_SPECIAL = ('tk', 'kmpl')
 
 
-Text = NamedTuple('Text', tokens=list[str], original=str, quantity=Optional[tuple[int, str]])
+Text = NamedTuple('Text', tokens=Sequence[str], original=str, quantity=Optional[tuple[int, str]])
 
 
 def prepare_all():
@@ -86,7 +86,7 @@ def prepare(text: str):
     return (tuple(tokens), original_text) if len(tokens) > 0 else None
 
 
-def parse_quantity(tokens: list[str]) -> Optional[tuple[list[str], int, str]]:
+def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[Sequence[str], int, str]]:
     """Parses quantities from tokens and deletes quantity tokens."""
     matches, final, processed_tokens = 0, None, []
 
@@ -124,15 +124,15 @@ def quantity_equality_check(a: Text, b: Text) -> bool:
     return a.quantity == b.quantity
 
 
-def lexical_token_similarity_check(a: list[str], b: list[str]):
+def lexical_token_similarity_check(a: Sequence[str], b: Sequence[str]):
     """Checks for lexically similar tokens."""
 
 
-def token_sequence_similarity_check(a: list[str], b: list[str]):
+def token_sequence_similarity_check(a: Sequence[str], b: Sequence[str]):
     """Checks for token sequence similarities, including non-ideal sequence matches and similar tokens."""
 
 
-def similarity_check(a: list[str], b: list[str]) -> float:
+def similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
     """Performs similary checks on two token sequences (combining multiple similarity check algorithms).
 
     Different stores have differing naming formats, meaning that certain store crossovers will tend to have
@@ -142,7 +142,7 @@ def similarity_check(a: list[str], b: list[str]) -> float:
     return token_equality_check(a, b)
 
 
-SimilarityScore = NamedTuple('SimilarityScore', score=float, alpha=list[str], beta=list[str])
+SimilarityScore = NamedTuple('SimilarityScore', score=float, alpha=Sequence[str], beta=Sequence[str])
 
 
 def find_clusters(groups):

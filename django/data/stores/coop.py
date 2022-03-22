@@ -5,7 +5,8 @@ import csv
 from time import sleep
 from typing import Generator, Callable, Any
 
-from data.stores.products import Discount, Product
+# from data.stores.products import Discount, Product
+from data.stores import Discount, Product, StoreRegistry
 
 
 PAGE_LIMIT = 100_000  # don't accidentally DOS the site
@@ -17,6 +18,7 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 }
 
 
+@StoreRegistry('Selver')
 def main(save: Callable):
     """Coop entrypoint."""
     saver = save(1)

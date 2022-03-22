@@ -3,29 +3,35 @@ from datetime import datetime
 from typing import Generator, Callable, NamedTuple
 
 from data import models
-from data.stores.products import Discount, Product
-from data.stores import coop
-from data.stores import selver
+from . import Discount
+from . import Product
 
 
-class StorePool:
+class StoreRegistry:
     """Manage store instances."""
 
     Store = NamedTuple('Store', name=str, entrypoint=Callable, model=models.Store)
+    registry: list[Store] = []
 
-    def __init__(self):
+    def __init__(self, name):
         """Initialize."""
-        self.registry: list[StorePool.Store] = []
+        self.store_name = name
 
-    def add_store(self, name: str, func: Callable):
+    def __call__(self, func: Callable):
+        """Called by decorators."""
+        self.add_store(self.store_name, func)
+
+    @classmethod
+    def add_store(cls, name: str, func: Callable):
         """Add store to registry."""
-        model, created = models.Store.objects.get_or_create(name=name)
-        self.registry.append(StorePool.Store(name, func, model))
+        model, _ = models.Store.objects.get_or_create(name=name)
+        cls.registry.append(cls.Store(name, func, model))
 
-    def update_all(self):
+    @classmethod
+    def update_stores(cls):
         """Concurrently update all stores. Requests releases GIL."""
         with futures.ThreadPoolExecutor() as executor:  # alternatively: ProcessPoolExecutor
-            tasks = executor.map(self.update_store, self.registry)
+            tasks = executor.map(cls.update_store, cls.registry)
             for _ in tasks:
                 pass
 
@@ -46,7 +52,6 @@ class StorePool:
                     }
                 )
                 store_product.last_checked = datetime.now()
-                # print(product)
 
                 price, created = models.Price.objects.get_or_create(
                     product=store_product,
@@ -60,10 +65,3 @@ class StorePool:
                 store_product.save()
 
         store.entrypoint(save_prices)
-
-
-if __name__ == '__main__':
-    stores = StorePool()
-    stores.add_store('Coop', coop.main)  # decorators don't work here
-    # stores.add_store('Selver', selver.main)
-    stores.update_all()
