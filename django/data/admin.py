@@ -16,19 +16,21 @@ class ProductAdmin(admin.ModelAdmin):
 
     @staticmethod
     def cheapest_store(obj: Product):
-        products = StoreProduct.objects.filter(product=obj)
+        products = StoreProduct.objects.filter(product=obj).only('current_price')
         prices = []
         for product in products:
             prices.append(product.current_price)
-        return min(prices, key=lambda x: x.price)
+        return None if len(prices) == 0 else min(prices, key=lambda x: x.price)
 
     @admin.display()
     def cheapest_store_name(self, obj):
-        return self.cheapest_store(obj).product.store.name
+        store = self.cheapest_store(obj)
+        return store.product.store.name if store is not None else None
 
     @admin.display()
     def cheapest_store_price(self, obj: Product):
-        return self.cheapest_store(obj).price
+        store = self.cheapest_store(obj)
+        return store.price if store is not None else None
 
     @admin.display()
     def tags_(self, obj: Product):
@@ -60,7 +62,8 @@ class StoreProductAdmin(admin.ModelAdmin):
     @admin.display()
     def price_history(self, obj):
         return '\n'.join(str(f'{price.price} @ {str(price.start)}')
-                         for price in Price.objects.filter(product=obj).order_by('start')[:10])
+                         for price
+                         in Price.objects.filter(product=obj).defer('product', 'members_only')[:10])
 
     @admin.display()
     def discount(self, obj):

@@ -21,11 +21,3 @@ class Product:
     discount: Discount
     hash: int
     has_barcode: bool
-
-
-def launch():
-    """Quick launch for use in interactive shells."""
-    from . import coop
-    from . import selver
-    from . import StoreRegistry
-    StoreRegistry.update_stores()
