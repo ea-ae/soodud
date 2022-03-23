@@ -9,11 +9,11 @@ psycopg2 = "*"
 djangorestframework = "*"
 markdown = "*"
 requests = "*"
-scrapy = "*"
 regex = "*"
 unidecode = "*"
 bs4 = "*"
 soupsieve = "*"
+django-extensions = "*"
 
 [dev-packages]
 pre-commit = "*"

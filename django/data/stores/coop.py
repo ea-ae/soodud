@@ -7,7 +7,7 @@ from typing import Generator, Callable, Any
 from data.stores import Discount, Product, StoreRegistry
 
 
-PAGE_LIMIT = 5  # don't accidentally DOS the site
+PAGE_LIMIT = 100_000  # don't accidentally DOS the site
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'
 BASE_PAGE_PARAMS: dict[str, str | int] = {
     'orderby': 'name',
@@ -16,7 +16,7 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 }
 
 
-@StoreRegistry('Coop', has_barcodes=True)
+@StoreRegistry('Coop')
 def main(save: Callable):
     """Coop entrypoint."""
     saver = save(1)
@@ -36,12 +36,12 @@ def get_all(saver: Generator[None, Product, None]):
     # writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
 
     for i, page in enumerate(pages):
-        if i % 50 == 0:
+        if (i + 1) % 50 == 0:
             print(f'Coop: page {i + 1}')
 
         for product in page['data']:
             name = product['name']
-            hash_value = int(str(product['id2'])[:-15:-1])
+            hash_value, has_barcode = int(str(product['id2'])[:-15:-1]), True
             discount = Discount.NONE
             base_price = product['price']
             if (price := product['price_sale_mbr']) is not None:
@@ -57,16 +57,9 @@ def get_all(saver: Generator[None, Product, None]):
                 continue  # skip non-purchasable items
 
             if hash_value is None:
-                print('WTF')
-                print(product['ean'])
-                hash_value = 0
+                hash_value, has_barcode = int(str(hash(f'coop{product[0]["id"]}'))[:-15:-1]), False
 
-            try:
-                product = Product(name, hash_value, float(base_price), float(price), discount)
-            except Exception:
-                print('ohhhh onooo')
-                print(name)
-                price(hash_value)
+            product = Product(name, float(base_price), float(price), discount, hash_value, has_barcode)
             saver.send(product)
 
 

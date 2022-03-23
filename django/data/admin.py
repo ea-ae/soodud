@@ -49,7 +49,7 @@ class StoreProductAdmin(admin.ModelAdmin):
     raw_id_fields = ('current_price',)  # 'product'
     readonly_fields = ('price_history',)
 
-    list_display = ('id', 'name', 'last_checked', 'price', 'hash', 'store')
+    list_display = ('id', 'name', 'last_checked', 'price', 'store', 'hash', 'has_barcode')
     search_fields = ('name', 'store__name', 'hash')
     date_hierarchy = 'last_checked'
 

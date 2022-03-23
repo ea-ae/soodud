@@ -13,10 +13,9 @@ class StoreRegistry:
     Store = NamedTuple('Store', name=str, entrypoint=Callable, model=models.Store)
     registry: list[Store] = []
 
-    def __init__(self, name: str, *, has_barcodes: bool = False):
+    def __init__(self, name: str):
         """Initialize."""
         self.store_name = name
-        self.has_barcodes = has_barcodes
 
     def __call__(self, func: Callable):
         """Called by decorators."""
@@ -48,9 +47,10 @@ class StoreRegistry:
                 store_product, _ = models.StoreProduct.objects.get_or_create(  # leave Product as null for now!
                     store=store.model,
                     name=product.name,
+                    hash=product.hash,
                     defaults={
                         'product': None,
-                        'hash': product.hash
+                        'has_barcode': product.has_barcode
                     }
                 )
                 store_product.last_checked = datetime.now()

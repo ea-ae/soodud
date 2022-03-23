@@ -16,10 +16,11 @@ class Product:
     """Product dataclass."""
 
     name: str
-    hash: int
     base_price: Optional[float]
     price: float
     discount: Discount
+    hash: int
+    has_barcode: bool
 
 
 def launch():

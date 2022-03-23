@@ -15,7 +15,7 @@ PARAMS: dict[str, str | int] = {
 }
 
 
-@StoreRegistry('Selver', has_barcodes=True)
+@StoreRegistry('Selver')
 def main(save: Callable):
     """Selver entrypoint."""
     saver = save(2)
@@ -30,15 +30,13 @@ def get_all(saver: Generator[None, Product, None]):
         page = get_page(n)['hits']['hits']
         product_count = len(page)
         print('Products:', product_count)
-        if n == 2:
-            break
 
         for product in page:
             product = product['_source']
 
             name = product['name']
             prices = product['prices']
-            hash_value = int(str(product['product_main_ean'])[:-15:-1])
+            hash_value, has_barcode = int(str(product['product_main_ean'])[:-15:-1]), True
             discount = Discount.NORMAL if prices[0]['is_discount'] else Discount.NONE
             if discount == Discount.NORMAL:
                 base_price = prices[0]['original_price']
@@ -49,17 +47,12 @@ def get_all(saver: Generator[None, Product, None]):
                 price = prices[1]['price']
 
             if base_price is None or price is None:
-                continue  # skip non-purchasable items
+                hash_value, has_barcode = int(str(hash(f'selver{prices[0]["id"]}'))[:-15:-1]), False
 
             if hash_value is None:
                 hash_value = 0
 
-            try:
-                product = Product(name, hash_value, float(base_price), float(price), discount)
-            except Exception:
-                print('ohhhh onooo')
-                print(name)
-                price(hash_value)
+            product = Product(name, float(base_price), float(price), discount, hash_value, has_barcode)
             saver.send(product)
 
         if product_count < RESULTS_PER_PAGE:
