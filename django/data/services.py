@@ -13,19 +13,14 @@ def launch():
 
 def match(*, size=500_000, start_offset=0):
     """Match products together."""
-    # for offset in it.count(start_offset, size):
-    #     found = _match_product_set(size, offset)
-    #     print(found, offset)
-    #     if size != found:
-    #         break
     _match_stores(
-        StoreProduct.objects.filter(store=1).only('id', 'name').values(),
-        StoreProduct.objects.filter(store=2).only('id', 'name').values()
+        StoreProduct.objects.filter(store=1).values('id', 'name'),
+        StoreProduct.objects.filter(store=2).values('id', 'name')
     )
 
 
 def _match_stores(*args):
-    """Find matches between two stores."""
+    """Find matches between two stores. TODO 3+ store clusters."""
     groups = []
     for store in args:
         # print(store, 'M<<')
@@ -36,9 +31,29 @@ def _match_stores(*args):
 
     matches = text_analysis.find_clusters(groups)
     for match in matches:
-        print(match.score,
-              StoreProduct.objects.get(id=match.id_a).name,
-              StoreProduct.objects.get(id=match.id_b).name)
+        # print(match.score,
+        #       StoreProduct.objects.get(id=match.id_a).name,
+        #       StoreProduct.objects.get(id=match.id_b).name)
+        a = StoreProduct.objects.only('name', 'product').get(id=match.id_a)
+        b = StoreProduct.objects.only('name', 'product').get(id=match.id_b)
+        product = a.product if a.product_id is not None else None
+        if product is None:
+            product = b.product if a.product_id != b.product_id else None
+        if product is None:
+            obj, created = Product.objects.get_or_create(
+                name=sorted((a.name, b.name))[-1],
+                quantity='todo',
+                certainty=match.score
+            )
+            assert created
+            obj.save()
+            a.product, b.product = obj, obj
+            a.save()
+            b.save()
+        else:
+            for one, two in ((a, b), (b, a)):
+                if one.product_id is None:
+                    one.product = two.product
 
 
 # def _match_product_set(limit: int, offset: int) -> int:

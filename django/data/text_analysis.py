@@ -152,7 +152,6 @@ def find_clusters(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]
     for a_group, b_group in it.combinations(groups, 2):
         for a in a_group:  # it.product()
             loc_results: list[SimilarityScore] = []
-            b = ''
             for b in b_group:
                 comps += 1
 

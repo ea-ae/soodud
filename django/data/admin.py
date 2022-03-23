@@ -12,13 +12,13 @@ class ProductTagAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('price_list',)
-    list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price', 'tags_')
+    list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price', 'certainty', 'tags_')
     search_fields = ('name',)
 
     @admin.display()
     def price_list(self, obj):
         prices = sorted(self.get_prices(obj), key=lambda p: p.price)
-        return '\n'.join(f'{price.price} @ {price.product.store.name}' for price in prices)
+        return '\n'.join(f'{price} ({price.product.store.name})' for price in prices)
 
     @staticmethod
     def get_prices(obj: Product):
@@ -53,7 +53,7 @@ class StoreAdmin(admin.ModelAdmin):
 
 @admin.register(StoreProduct)
 class StoreProductAdmin(admin.ModelAdmin):
-    raw_id_fields = ('current_price',)  # 'product'
+    raw_id_fields = ('current_price', 'product')  # 'product'
     readonly_fields = ('price_history',)
 
     list_display = ('id', 'name', 'last_checked', 'price', 'store', 'hash', 'has_barcode')
