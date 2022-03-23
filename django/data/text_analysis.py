@@ -3,46 +3,42 @@
 import regex
 from unidecode import unidecode
 import itertools as it
-import csv
-from typing import NamedTuple, Sequence, Optional
+from typing import Iterable, NamedTuple, Sequence, Optional
 
 
-COMMON_WORDS = ('ja', )
+COMMON_WORDS = ('ja',)
 
 UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kl', 'mm', 'cm', 'dm', 'm', 'km', 'tk', '%')
 
 QUANTITY_UNITS = ('g', 'l', 'm')
 QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
-QUANTITY_SPECIAL = ('tk', 'kmpl')
+QUANTITY_SPECIAL = ('tk', 'rl', 'kmpl')
 
 
-Text = NamedTuple('Text', tokens=Sequence[str], original=str, quantity=Optional[tuple[int, str]])
+Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Optional[tuple[int, str]])  # original=str
 
 
-def prepare_all():
-    """Prepare product texts of all stores."""
-    selver = {line[0] for line in csv.reader(open('selver.csv', 'r', encoding='utf-8'))}
-    coop = {line[0] for line in csv.reader(open('coop.csv', 'r', encoding='utf-8'))}
+def prepare_store(store: dict) -> list[Text]:
+    """Prepare all products of a store."""
+    # selver = {line[0] for line in csv.reader(open('selver.csv', 'r', encoding='utf-8'))}
+    # coop = {line[0] for line in csv.reader(open('coop.csv', 'r', encoding='utf-8'))}
 
-    groups = []
-    for products in (selver, coop):
-        results: list[Text] = []
-        for text in products:
-            result = prepare(text)
-            if result is None:
-                continue
-            tokens, original = result
+    results: list[Text] = []
+    for product in store:
+        result = prepare(product['name'])
+        if result is None:
+            continue
+        tokens, _ = result
 
-            quantity = None
-            if (parse_result := parse_quantity(tokens)) is not None:
-                tokens = parse_result[0]
-                quantity = parse_result[1:]
+        quantity = None
+        if (parse_result := parse_quantity(tokens)) is not None:
+            tokens = parse_result[0]
+            quantity = parse_result[1:]
 
-            text_record = Text(tokens, original, quantity)
-            results.append(text_record)
-            # print(text_record)
-        groups.append(results)
-    return groups
+        text_record = Text(product['id'], tokens, quantity)
+        results.append(text_record)
+        # print(text_record)
+    return results
 
 
 def prepare(text: str):
@@ -124,11 +120,11 @@ def quantity_equality_check(a: Text, b: Text) -> bool:
     return a.quantity == b.quantity
 
 
-def lexical_token_similarity_check(a: Sequence[str], b: Sequence[str]):
+def lexical_token_similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
     """Checks for lexically similar tokens."""
 
 
-def token_sequence_similarity_check(a: Sequence[str], b: Sequence[str]):
+def token_sequence_similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
     """Checks for token sequence similarities, including non-ideal sequence matches and similar tokens."""
 
 
@@ -142,48 +138,46 @@ def similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
     return token_equality_check(a, b)
 
 
-SimilarityScore = NamedTuple('SimilarityScore', score=float, alpha=Sequence[str], beta=Sequence[str])
+SimilarityScore = NamedTuple('SimilarityScore', score=float, id_a=int, id_b=int)
 
 
-def find_clusters(groups):
+def find_clusters(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
     """Find clusters of similar texts between stores (max one element from each set per cluster).
 
     In the future, potentially search for intragroup clusters as well (similar product recommendation feature).
     """
     comps, limit = 0, 1_000_000_000
     # comps, limit = 0, 1_000_000  # limit total comparisons for testing purposes
-    results = []
+    results: list[SimilarityScore] = []
     for a_group, b_group in it.combinations(groups, 2):
         for a in a_group:  # it.product()
-            loc_results = []
+            loc_results: list[SimilarityScore] = []
+            b = ''
             for b in b_group:
                 comps += 1
 
                 if not quantity_equality_check(a, b):
                     continue  # quantities do not match
 
-                result = SimilarityScore(similarity_check(a, b), a, b)
-                loc_results.append(result)
+                result = SimilarityScore(similarity_check(a, b), a.id, b.id)
+                if result.score >= 0.75:
+                    loc_results.append(result)
 
                 if comps % 1_000_000 == 0:
                     print(comps)
             # find best match(es) for A amongst B's
+            if len(loc_results) == 0:
+                continue
+
             loc_results.sort(key=lambda x: x.score, reverse=True)
-            if loc_results[0].score >= 0.5 and (len(loc_results) == 1 or loc_results[0].score != loc_results[1]):
-                results.append(loc_results[0])
+            if len(loc_results) == 1 or loc_results[0].score != loc_results[1]:
+                results.append(loc_results[0])  # multiple equal strength matches = all bad!
 
             if comps > limit:
                 break
 
-    results.sort(key=lambda x: x.score)
-    for result in results[-100:-1]:
-        # sep = '     <|>     '
-        # print(f'{result.score:.2f}', sep, result.alpha[1], sep, result.beta[1])
-        print(result)
-
-    writer = csv.writer(open('matches.csv', 'w', newline='', encoding='utf-8'))
-    for result in results[::-1]:
-        writer.writerow([result.score, result.alpha[1], result.beta[1]])
+    results.sort(key=lambda x: -x.score)
+    yield from results
 
 
 if __name__ == '__main__':
@@ -195,6 +189,6 @@ if __name__ == '__main__':
         print(' '.join(result[0]))
         quantity = parse_quantity(result[0])
         print(quantity)
-    else:
-        groups = prepare_all()
-        find_clusters(groups)
+    # else:
+        # groups = prepare_all()
+        # find_clusters(groups)

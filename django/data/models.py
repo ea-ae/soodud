@@ -31,6 +31,7 @@ class Store(models.Model):
 class StoreProduct(models.Model):
     store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, blank=True, null=True)
+    certainty = models.FloatField(default=0)
     current_price = models.ForeignKey('Price', on_delete=models.SET_NULL, blank=True, null=True)
 
     name = models.CharField(max_length=250)  # store-specific product name

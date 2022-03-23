@@ -41,7 +41,7 @@ def get_all(saver: Generator[None, Product, None]):
 
         for product in page['data']:
             name = product['name']
-            hash_value, has_barcode = int(str(product['id2'])[:-15:-1]), True
+            hash_value = int(str(product['id2'])[:-15:-1]), True
             discount = Discount.NONE
             base_price = product['price']
             if (price := product['price_sale_mbr']) is not None:
@@ -57,9 +57,9 @@ def get_all(saver: Generator[None, Product, None]):
                 continue  # skip non-purchasable items
 
             if hash_value is None:
-                hash_value, has_barcode = int(str(hash(f'coop{product[0]["id"]}'))[:-15:-1]), False
+                hash_value = int(str(hash(f'coop{product[0]["id"]}'))[:-15:-1])
 
-            product = Product(name, float(base_price), float(price), discount, hash_value, has_barcode)
+            product = Product(name, float(base_price), float(price), discount, hash_value, False)
             saver.send(product)
 
 

@@ -11,25 +11,30 @@ class ProductTagAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    readonly_fields = ('price_list',)
     list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price', 'tags_')
     search_fields = ('name',)
 
+    @admin.display()
+    def price_list(self, obj):
+        prices = sorted(self.get_prices(obj), key=lambda p: p.price)
+        return '\n'.join(f'{price.price} @ {price.product.store.name}' for price in prices)
+
     @staticmethod
-    def cheapest_store(obj: Product):
+    def get_prices(obj: Product):
         products = StoreProduct.objects.filter(product=obj).only('current_price')
-        prices = []
-        for product in products:
-            prices.append(product.current_price)
-        return None if len(prices) == 0 else min(prices, key=lambda x: x.price)
+        return [product.current_price for product in products]
 
     @admin.display()
     def cheapest_store_name(self, obj):
-        store = self.cheapest_store(obj)
+        prices = self.get_prices(obj)
+        store = None if len(prices) == 0 else min(prices, key=lambda x: x.price)
         return store.product.store.name if store is not None else None
 
     @admin.display()
     def cheapest_store_price(self, obj: Product):
-        store = self.cheapest_store(obj)
+        prices = self.get_prices(obj)
+        store = None if len(prices) == 0 else min(prices, key=lambda x: x.price)
         return store.price if store is not None else None
 
     @admin.display()
