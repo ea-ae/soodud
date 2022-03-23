@@ -34,6 +34,8 @@ class StoreProduct(models.Model):
     current_price = models.ForeignKey('Price', on_delete=models.SET_NULL, blank=True, null=True)
 
     name = models.CharField(max_length=250)  # store-specific product name
+    hash = models.PositiveIntegerField()
+    has_barcode = models.BooleanField(default=False)
     last_checked = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -44,10 +46,7 @@ class Price(models.Model):
     """Current or historic price for a store product."""
     product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
 
-    # todo: 'current' ought to be in StoreProduct, two-way one-to-one relationship = safer & better
     start = models.DateTimeField(auto_now_add=True)  # some stores may specify a manual add/end date
-    end = models.DateTimeField(default=None, blank=True, null=True)  # campaign end dates, null for historical prices
-
     base_price = models.FloatField(default=None, blank=True, null=True)  # null on certain sales or if out of stock
     sale_price = models.FloatField(default=None, blank=True, null=True)  # null if no sale
     members_only = models.BooleanField()

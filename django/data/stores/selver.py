@@ -1,7 +1,6 @@
 """Coop."""
 
 import requests
-import csv
 from typing import Generator, Callable, Any
 
 from data.stores import Discount, Product, StoreRegistry
@@ -16,7 +15,7 @@ PARAMS: dict[str, str | int] = {
 }
 
 
-@StoreRegistry('Selver')
+@StoreRegistry('Selver', has_barcodes=True)
 def main(save: Callable):
     """Selver entrypoint."""
     saver = save(2)
@@ -27,21 +26,19 @@ def main(save: Callable):
 
 def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
-    # writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))  # noqa
-
     for n in range(1, 100):
         page = get_page(n)['hits']['hits']
         product_count = len(page)
         print('Products:', product_count)
-
-        # if n == 1:  # first page
-        #     writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
+        if n == 2:
+            break
 
         for product in page:
             product = product['_source']
 
             name = product['name']
             prices = product['prices']
+            hash_value = int(str(product['product_main_ean'])[:-15:-1])
             discount = Discount.NORMAL if prices[0]['is_discount'] else Discount.NONE
             if discount == Discount.NORMAL:
                 base_price = prices[0]['original_price']
@@ -51,10 +48,18 @@ def get_all(saver: Generator[None, Product, None]):
                 base_price = prices[1]['original_price']
                 price = prices[1]['price']
 
-            # writer.writerow([name, base_price, price, str(discount)])
             if base_price is None or price is None:
                 continue  # skip non-purchasable items
-            product = Product(name, float(base_price), float(price), discount)
+
+            if hash_value is None:
+                hash_value = 0
+
+            try:
+                product = Product(name, hash_value, float(base_price), float(price), discount)
+            except Exception:
+                print('ohhhh onooo')
+                print(name)
+                price(hash_value)
             saver.send(product)
 
         if product_count < RESULTS_PER_PAGE:
