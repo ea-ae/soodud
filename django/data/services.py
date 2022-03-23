@@ -1,13 +1,14 @@
 """Services."""
 import itertools as it
 
-from .stores import StoreRegistry, coop, selver
+from .stores import StoreRegistry
 from .models import Store, Product, StoreProduct
 from . import text_analysis
 
 
 def launch():
     """Update stores, for use by task schedulers and interactive shells."""
+    from .stores import coop
     StoreRegistry.update_stores()
 
 

@@ -15,15 +15,14 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price', 'certainty', 'tags_')
     search_fields = ('name',)
 
-    @admin.display()
-    def price_list(self, obj):
-        prices = sorted(self.get_prices(obj), key=lambda p: p.price)
-        return '\n'.join(f'{price} ({price.product.store.name})' for price in prices)
-
     @staticmethod
     def get_prices(obj: Product):
         products = StoreProduct.objects.filter(product=obj).only('current_price')
         return [product.current_price for product in products]
+
+    def price_list(self, obj):
+        prices = sorted(self.get_prices(obj), key=lambda p: p.price)
+        return '\n'.join(f'{price} ({price.product.store.name})' for price in prices)
 
     @admin.display()
     def cheapest_store_name(self, obj):
@@ -56,13 +55,17 @@ class StoreProductAdmin(admin.ModelAdmin):
     raw_id_fields = ('current_price', 'product')  # 'product'
     readonly_fields = ('price_history',)
 
-    list_display = ('id', 'name', 'last_checked', 'price', 'store', 'hash', 'has_barcode')
+    list_display = ('id', 'name', 'last_checked', 'price', 'price_amount', 'store', 'hash', 'has_barcode')
     search_fields = ('name', 'store__name', 'hash')
     date_hierarchy = 'last_checked'
 
     @admin.display()
     def price(self, obj):
         return obj.current_price.price
+
+    @admin.display()
+    def price_amount(self, obj):
+        return Price.objects.filter(product=obj).count()
 
     @admin.display()
     def price_history(self, obj):
