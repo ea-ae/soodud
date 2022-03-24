@@ -44,7 +44,7 @@ class StoreRegistry:
                 product = yield
                 # print(f'{store.name} returned with {product}')
 
-                store_product, _ = models.StoreProduct.objects.get_or_create(  # leave Product as null for now!
+                store_product, product_created = models.StoreProduct.objects.get_or_create(
                     store=store.model,
                     name=product.name,
                     hash=product.hash,
@@ -55,14 +55,18 @@ class StoreRegistry:
                 )
                 store_product.last_checked = datetime.now()
 
-                price, created = models.Price.objects.get_or_create(
+                price, price_created = models.Price.objects.get_or_create(
                     product=store_product,
                     base_price=product.base_price,
                     sale_price=None if product.discount == Discount.NONE else product.price,
                     members_only=product.discount == Discount.MEMBER
                 )
-                if created:  # price has changed, update
+                if price_created:  # price has changed, update
+                    if not product_created:  # price update
+                        print(store_product.name, store_product.current_price, '->', price)
                     price.save()
+                    store_product.current_price = price
+                else:  # should be redundant, somewhy isn't
                     store_product.current_price = price
                 store_product.save()
 

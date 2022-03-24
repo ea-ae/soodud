@@ -32,9 +32,6 @@ def get_all(saver: Generator[None, Product, None]):
     print('Pages:', page_count)
     pages = (get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1))
 
-    # writer = csv.writer(open('coop.csv', 'w', newline='', encoding='utf-8'))
-    # writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
-
     for i, page in enumerate(pages):
         if (i + 1) % 50 == 0:
             print(f'Coop: page {i + 1}')
@@ -51,7 +48,6 @@ def get_all(saver: Generator[None, Product, None]):
             else:
                 price = base_price
 
-            # writer.writerow([name, base_price, price, str(discount)])
             # print(name, base_price, price, type(base_price), type(price))
             if base_price is None or price is None:
                 continue  # skip non-purchasable items

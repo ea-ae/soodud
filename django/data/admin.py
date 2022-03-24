@@ -69,9 +69,11 @@ class StoreProductAdmin(admin.ModelAdmin):
 
     @admin.display()
     def price_history(self, obj):
-        return '\n'.join(str(f'{price.price} @ {str(price.start)}')
-                         for price
-                         in Price.objects.filter(product=obj).defer('product', 'members_only')[:10])
+        return '\n'.join(
+            str(f'{price.price} @ {str(price.start)}')
+            for price
+            in Price.objects.filter(product=obj).only('base_price', 'sale_price', 'start')[:10]
+        )
 
     @admin.display()
     def discount(self, obj):
