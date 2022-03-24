@@ -141,8 +141,8 @@ def similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
 SimilarityScore = NamedTuple('SimilarityScore', score=float, id_a=int, id_b=int)
 
 
-def find_clusters(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
-    """Find clusters of similar texts between stores (max one element from each set per cluster).
+def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
+    """Find similar texts between stores (max one element from each set per cluster).
 
     In the future, potentially search for intragroup clusters as well (similar product recommendation feature).
     """
@@ -150,6 +150,7 @@ def find_clusters(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]
     # comps, limit = 0, 1_000_000  # limit total comparisons for testing purposes
     results: list[SimilarityScore] = []
     for a_group, b_group in it.combinations(groups, 2):
+        print('Processing new store combination...')
         for a in a_group:  # it.product()
             loc_results: list[SimilarityScore] = []
             for b in b_group:
@@ -176,6 +177,7 @@ def find_clusters(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]
                 break
 
     results.sort(key=lambda x: -x.score)
+    print('Storing results...')
     yield from results
 
 

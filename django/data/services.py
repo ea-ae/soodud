@@ -8,45 +8,61 @@ from . import text_analysis
 
 def launch():
     """Update stores, for use by task schedulers and interactive shells."""
-    from .stores import rimi
+    from .stores import coop, selver, rimi
     StoreRegistry.update_stores()
 
 
 def match(*, size=500_000, start_offset=0):
     """Match products together."""
-    _match_stores(
-        StoreProduct.objects.filter(store=1).values('id', 'name'),
-        StoreProduct.objects.filter(store=2).values('id', 'name')
-    )
+    stores = [StoreProduct.objects.filter(store=store.id).values('id', 'name')
+              for store in Store.objects.only('id').all()]
+    _match_stores(*stores)
 
 
 def _match_stores(*args):
     """Find matches between two stores. TODO 3+ store clusters."""
     groups = []
-    for store in args:
-        # print(store, 'M<<')
+    for i, store in enumerate(args):
         processed_store = text_analysis.prepare_store(store)
-        # print(processed_store)
-        print('Store processed!')
+        print(f'Store processed ({i + 1}/{len(args)})')
         groups.append(processed_store)
 
-    matches = text_analysis.find_clusters(groups)
-    for match in matches:
-        # print(match.score,
-        #       StoreProduct.objects.get(id=match.id_a).name,
-        #       StoreProduct.objects.get(id=match.id_b).name)
+    for match in text_analysis.find_matches(groups):
         a = StoreProduct.objects.only('name', 'product').get(id=match.id_a)
         b = StoreProduct.objects.only('name', 'product').get(id=match.id_b)
+
+        if None not in (a.product_id, b.product_id) and a.product_id != b.product_id:
+            # items in two separate clusters matched, merge them
+            print('Merging product clusters', a.product_id, b.product_id)
+            cluster_products = []  # get all products from clusters
+            for product in (StoreProduct.objects.filter(product=p) for p in (a.product, b.product)):
+                cluster_products.append(product)
+            cluster_products.sort(key=lambda p: p.name, reverse=True)  # prioritize shorter names
+
+            for product in (a.product, b.product):  # delete the two old clusters
+                product.delete()
+
+            obj, created = Product.objects.get_or_create(  # create a merged cluster
+                name=cluster_products[0].name,
+                quantity='todo',
+                certainty=match.score
+            )
+            assert created  # must be new as the previous clusters were deleted
+            obj.save()
+            for product in cluster_products:  # assign StoreProducts from both clusters to the new Product
+                product.product = obj
+                product.save()
+
         product = a.product if a.product_id is not None else None
-        if product is None:
-            product = b.product if a.product_id != b.product_id else None
-        if product is None:
+        product = b.product if product is None else product
+
+        if product is None:  # neither match is already attached to a product (in cluster)
             obj, created = Product.objects.get_or_create(
                 name=sorted((a.name, b.name))[-1],
                 quantity='todo',
                 certainty=match.score
             )
-            assert created
+            assert created  # the object may already exist elsewhere in case we are dealing with two new StoreProducts
             obj.save()
             a.product, b.product = obj, obj
             a.save()
