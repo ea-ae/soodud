@@ -17,7 +17,7 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 
 
 @StoreRegistry('Coop')
-def main(save: Callable):
+def main(save: Callable) -> bool:
     """Coop entrypoint."""
     saver = save(1)
     next(saver)
@@ -29,7 +29,7 @@ def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     result = get_page(1)
     page_count, _ = result['metadata']['pages'], result['metadata']['count']
-    print('Pages:', page_count)
+    print('Coop pages:', page_count)
     pages = (get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1))
 
     for i, page in enumerate(pages):

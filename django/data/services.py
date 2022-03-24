@@ -8,7 +8,7 @@ from . import text_analysis
 
 def launch():
     """Update stores, for use by task schedulers and interactive shells."""
-    from .stores import coop
+    from .stores import rimi
     StoreRegistry.update_stores()
 
 

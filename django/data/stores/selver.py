@@ -16,7 +16,7 @@ PARAMS: dict[str, str | int] = {
 
 
 @StoreRegistry('Selver')
-def main(save: Callable):
+def main(save: Callable) -> bool:
     """Selver entrypoint."""
     saver = save(2)
     next(saver)
