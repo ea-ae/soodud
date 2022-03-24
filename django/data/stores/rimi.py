@@ -7,8 +7,8 @@ from typing import Callable, Generator, Any
 import bs4
 import soupsieve as sv
 
-from data.stores import Discount, Product, StoreRegistry
 
+from data.stores.products import Discount, Product
 
 SITEMAPS = [
     'https://www.rimi.ee/epood/sitemaps/categories/siteMap_rimiEeSite_Category_et_1.xml',
@@ -42,7 +42,6 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 }
 
 
-@StoreRegistry('Rimi')
 def main(save: Callable):
     """Rimi entrypoint."""
     saver = save(3)
@@ -56,12 +55,10 @@ def get_all():  # saver: Generator[None, Product, None]):
     for page in CACHED_URLS:
         soup = bs4.BeautifulSoup(get_page(page, 1), 'html5lib')
         names = sv.select('p:is(.card__name)', soup)
-        base_prices = sv.select_one('div:is(.price-tag)', soup)
-        print(base_prices)
-        for name, base_price in zip(names, base_prices):
-            print(name.text, base_price.text)
+        base_prices = sv.select('div.price-tag > span, div.price-tag > div > sup', soup)
+        # TODO add price and discount and fix up the base_price(Putting bills and cents on separate lines)
 
-        # print(name, base_price)
+        print(names, base_prices)
         # product = Product(name, float(base_price))  # , float(price), discount)
         # saver.send(product)
 
