@@ -112,20 +112,10 @@ def token_equality_check(a: Text, b: Text) -> float:
     matches = len(set(a.tokens) & set(b.tokens))
     length = min(lengths) if min(lengths) >= 4 else max(lengths)  # 'Aura apple juice 0.5L' vs 'Apple'
 
-    return matches / length
-
-
-def quantity_equality_check(a: Text, b: Text) -> bool:
-    """Checks for entirely equal quantities. Inequal quantities disqualify match."""
-    return a.quantity == b.quantity
-
-
-def lexical_token_similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
-    """Checks for lexically similar tokens."""
-
-
-def token_sequence_similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
-    """Checks for token sequence similarities, including non-ideal sequence matches and similar tokens."""
+    if length >= 6:
+        return matches / length
+    else:  # demand more accuracy for short names (todo: detect brand names? caps lock etc)
+        return (matches / length) ** 2
 
 
 def similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
@@ -142,39 +132,28 @@ SimilarityScore = NamedTuple('SimilarityScore', score=float, id_a=int, id_b=int)
 
 
 def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
-    """Find similar texts between stores (max one element from each set per cluster).
-
-    In the future, potentially search for intragroup clusters as well (similar product recommendation feature).
-    """
-    comps, limit = 0, 1_000_000_000
-    # comps, limit = 0, 1_000_000  # limit total comparisons for testing purposes
+    """Find similar texts between stores (max one element from each set per cluster)."""
+    # comps, limit = 0, 100_000_000
     results: list[SimilarityScore] = []
-    for a_group, b_group in it.combinations(groups, 2):
-        print('Processing new store combination...')
+    combinations = list(it.combinations(groups, 2))
+    for i, (a_group, b_group) in enumerate(combinations):
+        print(f'Processing new store combination... ({i + 1}/{len(combinations)})')
         for a in a_group:  # it.product()
             loc_results: list[SimilarityScore] = []
             for b in b_group:
-                comps += 1
-
-                if not quantity_equality_check(a, b):
+                if a.quantity != b.quantity:
                     continue  # quantities do not match
 
                 result = SimilarityScore(similarity_check(a, b), a.id, b.id)
-                if result.score >= 0.75:
+                if result.score >= 0.8:
                     loc_results.append(result)
 
-                if comps % 1_000_000 == 0:
-                    print(comps)
             # find best match(es) for A amongst B's
             if len(loc_results) == 0:
                 continue
-
             loc_results.sort(key=lambda x: x.score, reverse=True)
             if len(loc_results) == 1 or loc_results[0].score != loc_results[1]:
                 results.append(loc_results[0])  # multiple equal strength matches = all bad!
-
-            if comps > limit:
-                break
 
     results.sort(key=lambda x: -x.score)
     print('Storing results...')

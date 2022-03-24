@@ -33,41 +33,58 @@ def _match_stores(*args):
 
         if None not in (a.product_id, b.product_id) and a.product_id != b.product_id:
             # items in two separate clusters matched, merge them
-            print('Merging product clusters', a.product_id, b.product_id)
+            print('Merging product clusters', a.product_id, b.product_id, match)
             cluster_products = []  # get all products from clusters
-            for product in (StoreProduct.objects.filter(product=p) for p in (a.product, b.product)):
-                cluster_products.append(product)
-            cluster_products.sort(key=lambda p: p.name, reverse=True)  # prioritize shorter names
+            for cluster in (StoreProduct.objects.filter(product=p) for p in (a.product, b.product)):
+                for cluster_product in cluster:
+                    cluster_products.append(cluster_product)
+            # todo: len() not alph v
+            # todo: if merged clusters contain same store products, don't merge (multi-match rule)
+            cluster_products.sort(key=lambda p: len(p.name), reverse=True)  # prioritize shorter names
 
             for product in (a.product, b.product):  # delete the two old clusters
                 product.delete()
 
+            print(cluster_products)
+            print(cluster_products[0])
+            print(a.product_id)
+            print(b.product_id)
+
             obj, created = Product.objects.get_or_create(  # create a merged cluster
                 name=cluster_products[0].name,
                 quantity='todo',
-                certainty=match.score
+                defaults={
+                    'certainty': round(match.score, 2)
+                }
             )
             assert created  # must be new as the previous clusters were deleted
-            obj.save()
             for product in cluster_products:  # assign StoreProducts from both clusters to the new Product
                 product.product = obj
                 product.save()
+            continue
 
         product = a.product if a.product_id is not None else None
         product = b.product if product is None else product
 
         if product is None:  # neither match is already attached to a product (in cluster)
             obj, created = Product.objects.get_or_create(
-                name=sorted((a.name, b.name))[-1],
+                name=sorted((a.name, b.name), key=lambda x: len(x))[-1],
                 quantity='todo',
-                certainty=match.score
+                defaults={
+                    'certainty': round(match.score, 2)
+                }
             )
-            assert created  # the object may already exist elsewhere in case we are dealing with two new StoreProducts
-            obj.save()
+            if not created:
+                print(a.name, b.name)
+                print(a.product, b.product)
+                print(obj)
+                assert created  # the object may already exist elsewhere in case of 2 new StoreProducts
             a.product, b.product = obj, obj
             a.save()
             b.save()
         else:
+            product.certainty = round(match.score, 2)  # todo: min() here!
+            product.save()
             for one, two in ((a, b), (b, a)):
                 if one.product_id is None:
                     one.product = two.product

@@ -34,7 +34,7 @@ class StoreProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, blank=True, null=True)
     current_price = models.ForeignKey('Price', on_delete=models.SET_NULL, blank=True, null=True)
 
-    name = models.CharField(max_length=250)  # store-specific product name
+    name = models.CharField(max_length=250)
     hash = models.PositiveIntegerField()
     has_barcode = models.BooleanField(default=False)
     last_checked = models.DateTimeField(auto_now=True)

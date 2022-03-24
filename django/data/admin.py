@@ -12,8 +12,9 @@ class ProductTagAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('price_list',)
-    list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price', 'certainty', 'tags_')
-    search_fields = ('name',)
+    list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price',
+                    'certainty', 'products', 'tags_')
+    search_fields = ('id', 'name',)
 
     @staticmethod
     def get_prices(obj: Product):
@@ -37,6 +38,10 @@ class ProductAdmin(admin.ModelAdmin):
         return store.price if store is not None else None
 
     @admin.display()
+    def products(self, obj: Product):
+        return obj.storeproduct_set.count()
+
+    @admin.display()
     def tags_(self, obj: Product):
         return ', '.join(tag.producttag.name for tag in obj.tags.through.objects.filter(product=obj))
 
@@ -53,10 +58,10 @@ class StoreAdmin(admin.ModelAdmin):
 @admin.register(StoreProduct)
 class StoreProductAdmin(admin.ModelAdmin):
     raw_id_fields = ('current_price', 'product')  # 'product'
-    readonly_fields = ('price_history',)
+    readonly_fields = ('id', 'price_history',)
 
     list_display = ('id', 'name', 'last_checked', 'price', 'price_amount', 'store', 'hash', 'has_barcode')
-    search_fields = ('name', 'store__name', 'hash')
+    search_fields = ('id', 'name', 'store__name', 'hash')
     date_hierarchy = 'last_checked'
 
     @admin.display()
