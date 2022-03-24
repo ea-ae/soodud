@@ -8,7 +8,7 @@ import itertools as it
 import soupsieve as sv
 from typing import Callable, Iterable, Generator, Any
 
-from data.stores import Discount, Product, StoreRegistry
+from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
 SITEMAPS = [
@@ -76,7 +76,9 @@ def parse_page(soup: BeautifulSoup) -> Iterable[Product]:
         discount = Discount.NONE
         link = sv.select('.card__url', listing)[0].attrs['href']
         product_id = int(regex.search(r'/(\d+)$', link).group(1))
-        hash_value = int(str(hash(f'rimi{product_id}'))[:-15:-1])
+        old_hash_value = int(str(hash(f'rimi{product_id}'))[:-15:-1])
+        hash_value = product_hash('coop', product_id)
+        assert old_hash_value == hash_value
 
         # main price
         price_eur = sv.select('.price-tag.card__price > span', listing)[0].text

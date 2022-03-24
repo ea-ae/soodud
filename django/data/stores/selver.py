@@ -3,7 +3,7 @@
 import requests
 from typing import Generator, Callable, Any
 
-from data.stores import Discount, Product, StoreRegistry
+from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
 RESULTS_PER_PAGE = 1000  # too large and python crashes
@@ -29,7 +29,7 @@ def get_all(saver: Generator[None, Product, None]):
     for n in range(1, 100):
         page = get_page(n)['hits']['hits']
         product_count = len(page)
-        print('Products:', product_count)
+        print(f'Selver page: {n} ({product_count})')
 
         for product in page:
             product = product['_source']
@@ -47,7 +47,9 @@ def get_all(saver: Generator[None, Product, None]):
                 price = prices[1]['price']
 
             if base_price is None or price is None:
-                hash_value, has_barcode = int(str(hash(f'selver{prices[0]["id"]}'))[:-15:-1]), False
+                old_hash_value = int(str(hash(f'selver{prices[0]["id"]}'))[:-15:-1])
+                hash_value, has_barcode = product_hash('selver', prices[0]['id']), False
+                assert old_hash_value == hash_value
 
             if hash_value is None:
                 hash_value = 0
