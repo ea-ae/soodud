@@ -39,3 +39,12 @@ def test_adding_stores(store_registry, store_func_factory, stores):
     for test_store, registry_store in zip(stores, store_registry.registry):
         assert test_store == registry_store.name
         assert test_store == registry_store.entrypoint()
+
+
+@pytest.mark.django_db
+def test_adding_duplicate_stores(store_registry, store_func_factory):
+    """Test adding duplicate stores."""
+    store_registry('coop').__call__(store_func_factory('coop'))
+    store_registry('rimi').__call__(store_func_factory('rimi'))
+    store_registry('coop').__call__(store_func_factory('coop'))
+    assert 2 == len(store_registry.registry)

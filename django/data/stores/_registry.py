@@ -25,7 +25,8 @@ class StoreRegistry:
     def add_store(cls, name: str, func: Callable):
         """Add store to registry."""
         model, _ = models.Store.objects.get_or_create(name=name)
-        cls.registry.append(cls.Store(name, func, model))
+        if name not in (store.name for store in cls.registry):  # do not add duplicate stores
+            cls.registry.append(cls.Store(name, func, model))
 
     @classmethod
     def update_stores(cls):
