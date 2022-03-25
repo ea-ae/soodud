@@ -2,46 +2,62 @@
 
 import regex
 from unidecode import unidecode
+from collections import Counter
 import itertools as it
 from typing import Iterable, NamedTuple, Sequence, Optional
 
 
-COMMON_WORDS = ('ja',)
+BLACKLIST = ('ja', 'hulgi', 'rimi', 'coop', 'selver', 'selveri pagarid', 'selveri köök', 'coop kokad')
+WHITELIST = ()
 
 UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kl', 'mm', 'cm', 'dm', 'm', 'km', 'tk', '%')
 
 QUANTITY_UNITS = ('g', 'l', 'm')
 QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
-QUANTITY_SPECIAL = ('tk', 'rl', 'kmpl')
+QUANTITY_SPECIAL = ('%', 'tk')  # rl, kmpl
 
 
-Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Optional[tuple[int, str]])  # original=str
+Quantity = NamedTuple('Quantity', amount=int, unit=str)
+Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Sequence[Quantity])  # original=str
+
+
+ratios = {}
 
 
 def prepare_store(store: dict) -> list[Text]:
     """Prepare all products of a store."""
-    # selver = {line[0] for line in csv.reader(open('selver.csv', 'r', encoding='utf-8'))}
-    # coop = {line[0] for line in csv.reader(open('coop.csv', 'r', encoding='utf-8'))}
-
     results: list[Text] = []
+    counter, tokens_total = Counter(), 0
     for product in store:
         result = prepare(product['name'])
         if result is None:
             continue
         tokens, _ = result
 
-        quantity = None
+        quantities = set()
         if (parse_result := parse_quantity(tokens)) is not None:
             tokens = parse_result[0]
-            quantity = parse_result[1:]
+            quantities = parse_result[1:]
 
-        text_record = Text(product['id'], tokens, quantity)
+        counter.update(tokens)
+        tokens_total += len(tokens)
+
+        text_record = Text(product['id'], tokens, quantities)
         results.append(text_record)
-        # print(text_record)
+    for k, v in counter.items():
+        ratios.setdefault(k, []).append(v / tokens_total)
+
+    real_ratios = {k: sum(v) / 3 for k, v in ratios.items()}
+    real_ratios = sorted(real_ratios.items(), key=lambda it: -it[1])[:300]
+    hi = max(real_ratios, key=lambda r: r[1])[1]
+    for k, v in real_ratios[::-1]:
+        print(f'{k}: {v / hi:.2%}', end=' | ')
+    print()
+
     return results
 
 
-def prepare(text: str):
+def prepare(text: str) -> Optional[tuple[list[str], str]]:
     """Prepares text through tokenization, transformation, normalization, and filtering."""
     original_text = text
 
@@ -50,8 +66,7 @@ def prepare(text: str):
     text = regex.sub(r'\u00D7|\+|&|\(|\)', ' ', text)
     text = regex.sub(r',\s*(\D)', r' \1', text)
 
-    # remove diacritics
-    text = unidecode(text)
+    text = unidecode(text)  # remove diacritics
 
     # transform units
     for unit in UNITS:  # for transform in zip(find, replace)
@@ -60,20 +75,21 @@ def prepare(text: str):
         text += ' '
         text = text.replace(f' {unit} ', f'{unit} ')
 
-    # normalize commas
-    text = regex.sub(r'(\d+\s*),(\s*\d+)', r'\1.\2', text)
-
     # todo: hyphenated words, e.g. 'singi-juustupirukas'; do we separate, add, keep, multiple?
-
+    text = regex.sub(r'(\d+\s*),(\s*\d+)', r'\1.\2', text)  # normalize commas
     text = regex.sub(r'(\d+)\s*(?:\*|x)\s*(\d+)(?=\s*+\D)', r'\1x\2', text)  # 3 * 5 kg -> 3x5 kg
+
+    for blacklist_item in BLACKLIST:  # get rid of junk words
+        for whitelist_item in WHITELIST:  # unless they are part of a brand name, etc
+            if blacklist_item in whitelist_item:
+                break
+        else:
+            text = regex.sub(f'\\b{blacklist_item}\\b', '', text)
 
     # tokenize the string
     tokens = []
     for token in text.split():
-        if token in COMMON_WORDS:  # filter common words
-            continue
         token = regex.sub(r'(?:-|,|\.|/)$', '', token)  # remove junk characters
-        # token = regex.sub(r'(\d)\*(\d)', r'\1x\2', token)  # 3*5tk -> 3x5tk
         token = token.strip()
 
         if len(token) >= 2 or token.isdigit():  # remove 1-letter tokens
@@ -82,28 +98,25 @@ def prepare(text: str):
     return (tuple(tokens), original_text) if len(tokens) > 0 else None
 
 
-def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[Sequence[str], int, str]]:
+def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[list[str], set[Quantity]]]:
     """Parses quantities from tokens and deletes quantity tokens."""
-    matches, final, processed_tokens = 0, None, []
+    quantities, processed_tokens = set(), []
 
     for token in tokens:
         # quantities = '|'.join(QUANTITY_UNITS + QUANTITY_SPECIAL)
-        quantities = '|'.join(f'{x}{y}' for x, y in it.product(QUANTITY_WEIGHTS.keys(), QUANTITY_UNITS))
-        if regex.fullmatch(f'(\\b\\d+\\.)?\\d+({quantities})\\b', token) is not None:
-            matches += 1
-            if matches >= 2 and token == final:
-                matches -= 1
-            final = token
+        units = '|'.join(f'{w}{q}' for w, q in it.product(QUANTITY_WEIGHTS.keys(), QUANTITY_UNITS))
+        units += '|' + '|'.join(q for q in QUANTITY_SPECIAL)
+
+        if (match := regex.fullmatch(f'(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)', token)) is not None:
+            unit = match.group('u')
+            i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''
+            amount = float(token[:i]) if unit in QUANTITY_SPECIAL else float(token[:i]) * QUANTITY_WEIGHTS[quantifier]
+            base_unit = unit if unit in QUANTITY_SPECIAL else unit.replace(quantifier, '')
+            quantities.add(Quantity(amount, base_unit))
         else:
             processed_tokens.append(token)
 
-    if matches >= 2 or final is None:
-        return None
-
-    unit = final[-1]
-    i, quantifier = (-1, '') if final[-2].isdigit() else (-2, final[-2])
-    amount = float(final[:i]) * QUANTITY_WEIGHTS[quantifier]
-    return processed_tokens, amount, unit
+    return processed_tokens, quantities if len(processed_tokens) > 0 else None
 
 
 def token_equality_check(a: Text, b: Text) -> float:
@@ -118,13 +131,15 @@ def token_equality_check(a: Text, b: Text) -> float:
         return (matches / length) ** 2
 
 
-def similarity_check(a: Sequence[str], b: Sequence[str]) -> float:
+def similarity_check(a: Text, b: Text) -> float:
     """Performs similary checks on two token sequences (combining multiple similarity check algorithms).
 
     Different stores have differing naming formats, meaning that certain store crossovers will tend to have
     higher similarity scores on average. Because of this, similarities must be normalized against a whole
     set of comparisons between two stores.
     """
+    if a.quantity != b.quantity:
+        return 0
     return token_equality_check(a, b)
 
 
@@ -141,9 +156,6 @@ def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
         for a in a_group:  # it.product()
             loc_results: list[SimilarityScore] = []
             for b in b_group:
-                if a.quantity != b.quantity:
-                    continue  # quantities do not match
-
                 result = SimilarityScore(similarity_check(a, b), a.id, b.id)
                 if result.score >= 0.8:
                     loc_results.append(result)
@@ -164,7 +176,7 @@ if __name__ == '__main__':
     SAMPLE = True
 
     if SAMPLE:
-        sample = 'Aktivia Kirsi jogurt 2.6% 4*120g'
+        sample = 'Minu rimi toode 37.5 % 0.5l'
         result = prepare(sample)
         print(' '.join(result[0]))
         quantity = parse_quantity(result[0])

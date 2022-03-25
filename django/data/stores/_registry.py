@@ -76,11 +76,12 @@ class StoreRegistry:
     @classmethod
     def match_stores(cls):
         """Find and update all store matches."""
-        stores = [models.StoreProduct.objects.filter(store=store.model.id) for store in cls.registry]
+        stores = [models.StoreProduct.objects.filter(store=store.model.id).values('id', 'name')
+                  for store in cls.registry]
         processed_stores = []
         for i, store in enumerate(stores):
             processed_store = text_analysis.prepare_store(store)
-            print(f'Store processed ({i + 1}/{len(stores)})')
+            print(f'Store \'{cls.registry[i].name}\' processed ({i + 1}/{len(stores)})')
             processed_stores.append(processed_store)
 
         for match in text_analysis.find_matches(processed_stores):
