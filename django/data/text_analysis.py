@@ -10,10 +10,11 @@ from typing import Iterable, NamedTuple, Sequence, Optional
 BLACKLIST = ('ja', 'hulgi', 'rimi', 'coop', 'selver', 'selveri pagarid', 'selveri köök', 'coop kokad')
 WHITELIST = ()
 
-UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kl', 'mm', 'cm', 'dm', 'm', 'km', 'tk', '%')
+UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kl', 'mm', 'cm', 'dm', 'm', 'km', '%', 'tk')
 
 QUANTITY_UNITS = ('g', 'l', 'm')
 QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
+SI_UNITS = tuple(f'{w}{q}' for w, q in it.product(QUANTITY_WEIGHTS.keys(), QUANTITY_UNITS))
 QUANTITY_SPECIAL = ('%', 'tk')  # rl, kmpl
 
 
@@ -48,7 +49,7 @@ def prepare_store(store: dict) -> list[Text]:
         ratios.setdefault(k, []).append(v / tokens_total)
 
     real_ratios = {k: sum(v) / 3 for k, v in ratios.items()}
-    real_ratios = sorted(real_ratios.items(), key=lambda it: -it[1])[:300]
+    real_ratios = sorted(real_ratios.items(), key=lambda it: -it[1])[:1000]
     hi = max(real_ratios, key=lambda r: r[1])[1]
     for k, v in real_ratios[::-1]:
         print(f'{k}: {v / hi:.2%}', end=' | ')
@@ -68,12 +69,8 @@ def prepare(text: str) -> Optional[tuple[list[str], str]]:
 
     text = unidecode(text)  # remove diacritics
 
-    # transform units
-    for unit in UNITS:  # for transform in zip(find, replace)
-        if unit != '%':
-            text = regex.sub(f'(\\D)\\s+({unit})(?:\\s|$)', r'\1 1\2', text)  # kg -> 1kg
-        text += ' '
-        text = text.replace(f' {unit} ', f'{unit} ')
+    for unit in UNITS:
+        text = regex.sub(f'(\\d)\\s+{unit}($|\\s)', f'\\1{unit}\\2', text)  # 5 kg -> 5kg
 
     # todo: hyphenated words, e.g. 'singi-juustupirukas'; do we separate, add, keep, multiple?
     text = regex.sub(r'(\d+\s*),(\s*\d+)', r'\1.\2', text)  # normalize commas
@@ -89,8 +86,12 @@ def prepare(text: str) -> Optional[tuple[list[str], str]]:
     # tokenize the string
     tokens = []
     for token in text.split():
-        token = regex.sub(r'(?:-|,|\.|/)$', '', token)  # remove junk characters
+        token = regex.sub(r'(?:-|,|!|\.|/)$', '', token)  # remove junk characters
         token = token.strip()
+
+        for unit in SI_UNITS:
+            if token == unit:
+                token = '1' + unit  # kg -> 1kg
 
         if len(token) >= 2 or token.isdigit():  # remove 1-letter tokens
             tokens.append(token)
@@ -104,7 +105,7 @@ def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[list[str], set[Quant
 
     for token in tokens:
         # quantities = '|'.join(QUANTITY_UNITS + QUANTITY_SPECIAL)
-        units = '|'.join(f'{w}{q}' for w, q in it.product(QUANTITY_WEIGHTS.keys(), QUANTITY_UNITS))
+        units = '|'.join(SI_UNITS)
         units += '|' + '|'.join(q for q in QUANTITY_SPECIAL)
 
         if (match := regex.fullmatch(f'(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)', token)) is not None:
@@ -176,7 +177,7 @@ if __name__ == '__main__':
     SAMPLE = True
 
     if SAMPLE:
-        sample = 'Minu rimi toode 37.5 % 0.5l'
+        sample = '- MINU, rimi coop! 3,5  % 3 * 0,5l kg % plus+ leib- sai a b c '
         result = prepare(sample)
         print(' '.join(result[0]))
         quantity = parse_quantity(result[0])
