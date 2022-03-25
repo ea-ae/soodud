@@ -6,6 +6,9 @@ from collections import Counter
 import itertools as it
 from typing import Iterable, NamedTuple, Sequence, Optional
 
+import line_profiler
+profile = line_profiler.LineProfiler()
+
 
 BLACKLIST = ('ja', 'hulgi', 'rimi', 'coop', 'selver', 'selveri pagarid', 'selveri köök', 'coop kokad')
 WHITELIST = ()
@@ -25,15 +28,15 @@ Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Sequence[Quanti
 ratios = {}
 
 
+@profile
 def prepare_store(store: dict) -> list[Text]:
     """Prepare all products of a store."""
     results: list[Text] = []
     counter, tokens_total = Counter(), 0
     for product in store:
-        result = prepare(product['name'])
-        if result is None:
+        tokens = prepare(product['name'])
+        if len(tokens) == 0:
             continue
-        tokens, _ = result
 
         quantities = set()
         if (parse_result := parse_quantity(tokens)) is not None:
@@ -45,32 +48,28 @@ def prepare_store(store: dict) -> list[Text]:
 
         text_record = Text(product['id'], tokens, quantities)
         results.append(text_record)
-    for k, v in counter.items():
-        ratios.setdefault(k, []).append(v / tokens_total)
 
-    real_ratios = {k: sum(v) / 3 for k, v in ratios.items()}
-    real_ratios = sorted(real_ratios.items(), key=lambda it: -it[1])[:1000]
-    hi = max(real_ratios, key=lambda r: r[1])[1]
-    for k, v in real_ratios[::-1]:
-        print(f'{k}: {v / hi:.2%}', end=' | ')
-    print()
+    # for k, v in counter.items():
+    #     ratios.setdefault(k, []).append(v / tokens_total)
+    # real_ratios = {k: sum(v) / 3 for k, v in ratios.items()}
+    # real_ratios = sorted(real_ratios.items(), key=lambda it: -it[1])[:1000]
+    # hi = max(real_ratios, key=lambda r: r[1])[1]
+    # for k, v in real_ratios[::-1]:
+    #     print(f'{k}: {v / hi:.2%}', end=' | ')
+    # print()
 
+    profile.print_stats()
     return results
 
 
-def prepare(text: str) -> Optional[tuple[list[str], str]]:
+@profile
+def prepare(text: str) -> list[str]:
     """Prepares text through tokenization, transformation, normalization, and filtering."""
-    original_text = text
-
-    # replace special characters
     text = regex.sub(r'\u00B4|\u24C7|`|"|\'|\+', '', text.lower())
     text = regex.sub(r'\u00D7|\+|&|\(|\)', ' ', text)
     text = regex.sub(r',\s*(\D)', r' \1', text)
 
     text = unidecode(text)  # remove diacritics
-
-    for unit in UNITS:
-        text = regex.sub(f'(\\d)\\s+{unit}($|\\s)', f'\\1{unit}\\2', text)  # 5 kg -> 5kg
 
     # todo: hyphenated words, e.g. 'singi-juustupirukas'; do we separate, add, keep, multiple?
     text = regex.sub(r'(\d+\s*),(\s*\d+)', r'\1.\2', text)  # normalize commas
@@ -81,7 +80,7 @@ def prepare(text: str) -> Optional[tuple[list[str], str]]:
             if blacklist_item in whitelist_item:
                 break
         else:
-            text = regex.sub(f'\\b{blacklist_item}\\b', '', text)
+            text = (' ' + text + ' ').replace(blacklist_item, '')
 
     # tokenize the string
     tokens = []
@@ -89,25 +88,26 @@ def prepare(text: str) -> Optional[tuple[list[str], str]]:
         token = regex.sub(r'(?:-|,|!|\.|/)$', '', token)  # remove junk characters
         token = token.strip()
 
-        for unit in SI_UNITS:
-            if token == unit:
-                token = '1' + unit  # kg -> 1kg
+        if token in UNITS:
+            if len(tokens) > 0 and tokens[-1].replace('.', '').isdigit():
+                tokens[-1] = tokens[-1] + token  # 3 tk -> 3tk
+                continue
+            elif token not in QUANTITY_SPECIAL:
+                token = '1' + token  # kg -> 1kg
 
         if len(token) >= 2 or token.isdigit():  # remove 1-letter tokens
             tokens.append(token)
 
-    return (tuple(tokens), original_text) if len(tokens) > 0 else None
+    return tokens
 
 
+@profile
 def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[list[str], set[Quantity]]]:
     """Parses quantities from tokens and deletes quantity tokens."""
     quantities, processed_tokens = set(), []
+    units = '|'.join(SI_UNITS + QUANTITY_SPECIAL)
 
     for token in tokens:
-        # quantities = '|'.join(QUANTITY_UNITS + QUANTITY_SPECIAL)
-        units = '|'.join(SI_UNITS)
-        units += '|' + '|'.join(q for q in QUANTITY_SPECIAL)
-
         if (match := regex.fullmatch(f'(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)', token)) is not None:
             unit = match.group('u')
             i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''
@@ -120,6 +120,7 @@ def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[list[str], set[Quant
     return processed_tokens, quantities if len(processed_tokens) > 0 else None
 
 
+@profile
 def token_equality_check(a: Text, b: Text) -> float:
     """Checks for entirely equal tokens. Very rudimentary."""
     lengths = (len(a.tokens), len(b.tokens))
@@ -132,6 +133,7 @@ def token_equality_check(a: Text, b: Text) -> float:
         return (matches / length) ** 2
 
 
+@profile
 def similarity_check(a: Text, b: Text) -> float:
     """Performs similary checks on two token sequences (combining multiple similarity check algorithms).
 
@@ -147,9 +149,9 @@ def similarity_check(a: Text, b: Text) -> float:
 SimilarityScore = NamedTuple('SimilarityScore', score=float, id_a=int, id_b=int)
 
 
+@profile
 def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
     """Find similar texts between stores (max one element from each set per cluster)."""
-    # comps, limit = 0, 100_000_000
     results: list[SimilarityScore] = []
     combinations = list(it.combinations(groups, 2))
     for i, (a_group, b_group) in enumerate(combinations):
@@ -179,8 +181,8 @@ if __name__ == '__main__':
     if SAMPLE:
         sample = '- MINU, rimi coop! 3,5  % 3 * 0,5l kg % plus+ leib- sai a b c '
         result = prepare(sample)
-        print(' '.join(result[0]))
-        quantity = parse_quantity(result[0])
+        print(' '.join(result))
+        quantity = parse_quantity(result)
         print(quantity)
     # else:
         # groups = prepare_all()

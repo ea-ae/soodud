@@ -64,7 +64,8 @@ class StoreRegistry:
 
                 if price_created:  # price has changed, update
                     if not product_created:  # price update
-                        print(store_product.name, store_product.current_price, '->', price)
+                        print(f'{store_product.name} {store_product.current_price.price} -> {price.price} '
+                              f'({store_product.current_price.discount} -> {price.discount})')
                     price.save()
                     store_product.current_price = price
                 else:  # should be redundant, somewhy isn't
