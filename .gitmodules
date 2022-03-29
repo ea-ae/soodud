@@ -1,0 +1,4 @@
+[submodule "clustering/extern/pybind"]
+	path = clustering/extern/pybind
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
