@@ -40,7 +40,7 @@ class StoreRegistry:
     @staticmethod
     def update_store(store: Store):
         """Update a store."""
-        def save_prices(x: int) -> Generator[None, Product, None]:
+        def save_prices() -> Generator[None, Product, None]:
             """Save the new prices."""
             while True:
                 product = yield

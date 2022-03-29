@@ -46,7 +46,7 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 @StoreRegistry('Rimi')
 def main(save: Callable) -> bool:
     """Rimi entrypoint."""
-    saver = save(3)
+    saver = save()
     next(saver)
     get_all(saver)
     return True

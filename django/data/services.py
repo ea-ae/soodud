@@ -14,7 +14,7 @@ def match(*, size=500_000, start_offset=0):
     """Match products together."""
     # stores = [StoreProduct.objects.filter(store=store.id).values('id', 'name')
     #           for store in Store.objects.only('id').all()]
-    from .stores import selver
+    from .stores import coop, selver, rimi
     StoreRegistry.match_stores()
 
 

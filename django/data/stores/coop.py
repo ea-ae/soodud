@@ -19,7 +19,7 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 @StoreRegistry('Coop')
 def main(save: Callable) -> bool:
     """Coop entrypoint."""
-    saver = save(1)
+    saver = save()
     next(saver)
     get_all(saver)
     return True

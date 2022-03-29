@@ -4,47 +4,43 @@ import regex
 from unidecode import unidecode
 from collections import Counter
 import itertools as it
-from typing import Iterable, NamedTuple, Sequence, Optional
+from typing import Iterable, NamedTuple, Sequence, Collection
 
-import line_profiler
-profile = line_profiler.LineProfiler()
+# import line_profiler
+# import atexit
+# profile = line_profiler.LineProfiler()
+# atexit.register(profile.print_stats)
 
 
 BLACKLIST = ('ja', 'hulgi', 'rimi', 'coop', 'selver', 'selveri pagarid', 'selveri köök', 'coop kokad')
 WHITELIST = ()
 
-UNITS = ('mg', 'cg', 'dg', 'g', 'kg', 'ml', 'cl', 'dl', 'l', 'kl', 'mm', 'cm', 'dm', 'm', 'km', '%', 'tk')
-
 QUANTITY_UNITS = ('g', 'l', 'm')
 QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
 SI_UNITS = tuple(f'{w}{q}' for w, q in it.product(QUANTITY_WEIGHTS.keys(), QUANTITY_UNITS))
-QUANTITY_SPECIAL = ('%', 'tk')  # rl, kmpl
+SPECIAL_UNITS = ('%', 'tk')  # rl, kmpl
+UNITS = SI_UNITS + SPECIAL_UNITS
 
 
 Quantity = NamedTuple('Quantity', amount=int, unit=str)
-Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Sequence[Quantity])  # original=str
+Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Collection[Quantity])  # original=str
 
 
-ratios = {}
+# ratios = {}
 
 
-@profile
 def prepare_store(store: dict) -> list[Text]:
     """Prepare all products of a store."""
     results: list[Text] = []
-    counter, tokens_total = Counter(), 0
+    # counter, tokens_total = Counter(), 0
     for product in store:
         tokens = prepare(product['name'])
         if len(tokens) == 0:
             continue
+        tokens, quantities = parse_quantity(tokens)
 
-        quantities = set()
-        if (parse_result := parse_quantity(tokens)) is not None:
-            tokens = parse_result[0]
-            quantities = parse_result[1:]
-
-        counter.update(tokens)
-        tokens_total += len(tokens)
+        # counter.update(tokens)
+        # tokens_total += len(tokens)
 
         text_record = Text(product['id'], tokens, quantities)
         results.append(text_record)
@@ -57,12 +53,9 @@ def prepare_store(store: dict) -> list[Text]:
     # for k, v in real_ratios[::-1]:
     #     print(f'{k}: {v / hi:.2%}', end=' | ')
     # print()
-
-    profile.print_stats()
     return results
 
 
-@profile
 def prepare(text: str) -> list[str]:
     """Prepares text through tokenization, transformation, normalization, and filtering."""
     text = regex.sub(r'\u00B4|\u24C7|`|"|\'|\+', '', text.lower())
@@ -92,7 +85,7 @@ def prepare(text: str) -> list[str]:
             if len(tokens) > 0 and tokens[-1].replace('.', '').isdigit():
                 tokens[-1] = tokens[-1] + token  # 3 tk -> 3tk
                 continue
-            elif token not in QUANTITY_SPECIAL:
+            elif token not in SPECIAL_UNITS:
                 token = '1' + token  # kg -> 1kg
 
         if len(token) >= 2 or token.isdigit():  # remove 1-letter tokens
@@ -101,26 +94,24 @@ def prepare(text: str) -> list[str]:
     return tokens
 
 
-@profile
-def parse_quantity(tokens: Sequence[str]) -> Optional[tuple[list[str], set[Quantity]]]:
+def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]:
     """Parses quantities from tokens and deletes quantity tokens."""
     quantities, processed_tokens = set(), []
-    units = '|'.join(SI_UNITS + QUANTITY_SPECIAL)
+    units = '|'.join(SI_UNITS + SPECIAL_UNITS)
 
     for token in tokens:
         if (match := regex.fullmatch(f'(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)', token)) is not None:
             unit = match.group('u')
             i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''
-            amount = float(token[:i]) if unit in QUANTITY_SPECIAL else float(token[:i]) * QUANTITY_WEIGHTS[quantifier]
-            base_unit = unit if unit in QUANTITY_SPECIAL else unit.replace(quantifier, '')
+            amount = float(token[:i]) if unit in SPECIAL_UNITS else float(token[:i]) * QUANTITY_WEIGHTS[quantifier]
+            base_unit = unit if unit in SPECIAL_UNITS else unit.replace(quantifier, '')
             quantities.add(Quantity(amount, base_unit))
         else:
             processed_tokens.append(token)
 
-    return processed_tokens, quantities if len(processed_tokens) > 0 else None
+    return (processed_tokens, quantities) if len(processed_tokens) > 0 else (tokens, set())
 
 
-@profile
 def token_equality_check(a: Text, b: Text) -> float:
     """Checks for entirely equal tokens. Very rudimentary."""
     lengths = (len(a.tokens), len(b.tokens))
@@ -133,7 +124,6 @@ def token_equality_check(a: Text, b: Text) -> float:
         return (matches / length) ** 2
 
 
-@profile
 def similarity_check(a: Text, b: Text) -> float:
     """Performs similary checks on two token sequences (combining multiple similarity check algorithms).
 
@@ -149,7 +139,6 @@ def similarity_check(a: Text, b: Text) -> float:
 SimilarityScore = NamedTuple('SimilarityScore', score=float, id_a=int, id_b=int)
 
 
-@profile
 def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
     """Find similar texts between stores (max one element from each set per cluster)."""
     results: list[SimilarityScore] = []
