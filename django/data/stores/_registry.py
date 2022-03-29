@@ -86,7 +86,6 @@ class StoreRegistry:
             processed_stores.append(processed_store)
 
         for match in text_analysis.find_matches(processed_stores):
-            match.score = round(match.score, 2)
             a = models.StoreProduct.objects.only('name', 'product').get(id=match.id_a)
             b = models.StoreProduct.objects.only('name', 'product').get(id=match.id_b)
 

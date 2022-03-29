@@ -146,20 +146,21 @@ def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
     for i, (a_group, b_group) in enumerate(combinations):
         print(f'Processing new store combination... ({i + 1}/{len(combinations)})')
         for a in a_group:  # it.product()
-            loc_results: list[SimilarityScore] = []
+            highest = 0.8  # lower bound is 0.8, else score is ignored entirely at start
+            highest_b_id = None  # ID of highest match so far
+            valid_match = False  # no match at first if the lower bound isn't surpassed
+
             for b in b_group:
-                result = SimilarityScore(similarity_check(a, b), a.id, b.id)
-                if result.score >= 0.8:
-                    loc_results.append(result)
+                if (score := similarity_check(a, b)) >= 0.8:
+                    if score > highest:
+                        # highest, valid_match = SimilarityScore(round(score, 2), a.id, b.id), False
+                        highest, highest_b_id, valid_match = score, b.id, True
+                    elif score == highest:  # multiple equal strength matches -> there is no quality match
+                        valid_match = False
 
-            # find best match(es) for A amongst B's
-            if len(loc_results) == 0:
-                continue
-            loc_results.sort(key=lambda x: x.score, reverse=True)
-            if len(loc_results) == 1 or loc_results[0].score != loc_results[1]:
-                results.append(loc_results[0])  # multiple equal strength matches = all bad!
+            if valid_match:
+                results.append(SimilarityScore(round(highest, 2), a.id, highest_b_id))
 
-    results.sort(key=lambda x: -x.score)
     print('Storing results...')
     yield from results
 
