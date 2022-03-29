@@ -11,7 +11,10 @@ from . import Product
 class StoreRegistry:
     """Manage store instances."""
 
-    Store = NamedTuple('Store', name=str, entrypoint=Callable, model=models.Store)
+    Store = NamedTuple('Store',
+                       name=str,
+                       entrypoint=Callable[[Generator[None, Product, None]], None],
+                       model=models.Store)
     registry: list[Store] = []
 
     def __init__(self, name: str):
@@ -72,7 +75,9 @@ class StoreRegistry:
                     store_product.current_price = price
                 store_product.save()
 
-        store.entrypoint(save_prices)
+        saver_gen = save_prices()
+        next(saver_gen)
+        store.entrypoint(saver_gen)
 
     @classmethod
     def match_stores(cls):
