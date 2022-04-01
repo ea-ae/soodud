@@ -18,10 +18,13 @@
     <ClCompile Include="product.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="analysis.cpp">
+    <ClCompile Include="analyser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="matchers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +32,7 @@
     <ClInclude Include="product.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="analysis.h">
+    <ClInclude Include="analyser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

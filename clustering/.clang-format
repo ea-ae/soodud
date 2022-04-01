@@ -1,5 +1,6 @@
 Language: Cpp
 BasedOnStyle: Google
 ColumnLimit: 0
-UseTab: AlignWithSpaces
+# UseTab: AlignWithSpaces
 IndentWidth: 4
+# ContinuationIndentWidth: 2

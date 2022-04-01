@@ -5,30 +5,40 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
+#include <vector>
+
+class StoreProduct;
 
 class BaseProduct {
-    virtual std::optional<uint32_t> getId();
-    virtual std::optional<std::string> getName();
-    virtual BaseProduct* getLeft();
-    virtual BaseProduct* getRight();
+   public:
+    virtual std::vector<StoreProduct> linearize() const = 0;
+
+   private:
+    virtual int32_t getId() const = 0;
+    virtual std::string getName() const = 0;
+    virtual BaseProduct* getLeft() const = 0;
+    virtual BaseProduct* getRight() const = 0;
 };
 
-class StoreProduct : BaseProduct {
+class StoreProduct : public BaseProduct {
    public:
-    uint32_t id;  // public fields due to pybind STL property issues
-    std::string name;
+    const int32_t id;  // public fields due to pybind STL property issues
+    const std::string name;
 
-    StoreProduct(uint32_t id, std::string name);
-    std::optional<uint32_t> getId();
-    std::optional<std::string> getName();
+    StoreProduct(int32_t id, std::string name);
+    int32_t getId() const;
+    std::string getName() const;
+    std::vector<StoreProduct> linearize() const;
 };
 
-class Product : BaseProduct {
+class Product : public BaseProduct {
    public:
-    std::unique_ptr<BaseProduct> left;
-    std::unique_ptr<BaseProduct> right;
+    const std::unique_ptr<BaseProduct> left;
+    const std::unique_ptr<BaseProduct> right;
 
     Product(std::unique_ptr<BaseProduct> left, std::unique_ptr<BaseProduct> right);
-    BaseProduct* getLeft();
-    BaseProduct* getRight();
+    BaseProduct* getLeft() const;
+    BaseProduct* getRight() const;
+    std::vector<StoreProduct> linearize() const;
 };
