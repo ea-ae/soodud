@@ -151,12 +151,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="matchers.cpp" />
+    <ClCompile Include="matcher.cpp" />
     <ClCompile Include="product.cpp" />
     <ClCompile Include="analyser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="analyser.h" />
+    <ClInclude Include="matcher.h" />
     <ClInclude Include="product.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

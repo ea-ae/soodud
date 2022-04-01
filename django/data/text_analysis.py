@@ -23,7 +23,7 @@ UNITS = SI_UNITS + SPECIAL_UNITS
 
 
 Quantity = NamedTuple('Quantity', amount=int, unit=str)
-Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Collection[Quantity])  # original=str
+Text = NamedTuple('Text', id=int, tokens=list[str], quantity=set[Quantity])  # original=str
 
 
 # ratios = {}

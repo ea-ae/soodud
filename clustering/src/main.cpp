@@ -4,12 +4,13 @@
 #include <iostream>
 
 #include "analyser.h"
+#include "matcher.h"
 #include "product.h"
 
 namespace py = pybind11;
 using namespace py::literals;
 
-int test() {
+Analyser& test() {
     std::cout << "start!\n";
 
     auto sp = std::make_unique<StoreProduct>(1, "product one");
@@ -25,11 +26,11 @@ int test() {
     auto p5 = Product(std::move(p3), std::move(p4));
     std::cout << p5.items.size() << "\n";
 
-    return 123;
-
-    /*auto analyzer = Analyser([](std::string a, std::string b) {
-        return 1;
-    });*/
+    auto stuff = std::make_unique<SingleLinkageMatcher>();
+    auto analyser = Analyser(std::move(stuff));
+    return analyser;
+    // std::function<double(const std::string, const std::string)> matcher = single_linkage;
+    // auto analyzer = Analyser(matcher);
 
     // return analyzer.compare(p, *sp3.get());
 }
@@ -40,7 +41,7 @@ PYBIND11_MODULE(clustering, m) {
     m.def("test", &test);
 
     py::class_<Analyser>(m, "Analyser")
-        .def(py::init<std::function<float_t(std::string, std::string)>, float_t>())
+        .def(py::init<std::shared_ptr<Matcher>, double>())
         .def("__repr__", [](const Analyser& o) {
             return std::format("Analyser(threshold={})", o.threshold);
         });
@@ -50,6 +51,6 @@ PYBIND11_MODULE(clustering, m) {
         .def_readonly("id", &StoreProduct::id)
         .def_readonly("name", &StoreProduct::name)
         .def("__repr__", [](const StoreProduct& o) {
-            return std::format("StoreProduct(id={}, name=\"{}\")", o.id, o.name);
+            return std::format("StoreProduct(id={}, name='{}')", o.id, o.name);
         });
 }

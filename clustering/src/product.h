@@ -23,4 +23,5 @@ class Product {
     Product();
     Product(std::unique_ptr<StoreProduct> singleton);
     Product(Product&& first, Product&& second);
+    std::size_t hash() const;
 };
