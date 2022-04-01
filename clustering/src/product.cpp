@@ -26,6 +26,9 @@ std::optional<std::string> StoreProduct::getName() {
     return this->name;
 }
 
+Product::Product(std::unique_ptr<BaseProduct> left, std::unique_ptr<BaseProduct> right)
+    : left(std::move(left)), right(std::move(right)) {}
+
 BaseProduct* Product::getLeft() {
     return this->left.get();
 }

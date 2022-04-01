@@ -15,7 +15,7 @@ class BaseProduct {
 
 class StoreProduct : BaseProduct {
    public:
-    uint32_t id;
+    uint32_t id;  // public fields due to pybind STL property issues
     std::string name;
 
     StoreProduct(uint32_t id, std::string name);
@@ -24,6 +24,7 @@ class StoreProduct : BaseProduct {
 };
 
 class Product : BaseProduct {
+   public:
     std::unique_ptr<BaseProduct> left;
     std::unique_ptr<BaseProduct> right;
 
