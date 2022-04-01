@@ -15,13 +15,12 @@ class BaseProduct {
 
 class StoreProduct : BaseProduct {
    public:
+    uint32_t id;
+    std::string name;
+
     StoreProduct(uint32_t id, std::string name);
     std::optional<uint32_t> getId();
     std::optional<std::string> getName();
-
-   private:
-    uint32_t id;
-    std::string name;
 };
 
 class Product : BaseProduct {

@@ -40,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -79,10 +79,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)out\$(Configuration)\</OutDir>
-    <IntDir>out\$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>out\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)out\$(Configuration)\</OutDir>
+    <IntDir>out\$(Configuration)\</IntDir>
+    <TargetExt>.pyd</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -128,107 +131,30 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Python310\include;$(SolutionDir)extern\pybind\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Python310\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="extern\pybind\tests\cross_module_gil_utils.cpp" />
-    <ClCompile Include="extern\pybind\tests\pybind11_cross_module_tests.cpp" />
-    <ClCompile Include="extern\pybind\tests\pybind11_tests.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_async.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_buffers.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_builtin_casters.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_callbacks.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_call_policies.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_chrono.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_class.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_cmake_build\embed.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_cmake_build\main.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_constants_and_functions.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_const_name.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_copy_move.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_custom_type_casters.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_custom_type_setup.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_docstring_options.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_eigen.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_embed\catch.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_embed\external_module.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_embed\test_interpreter.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_enum.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_eval.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_exceptions.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_factory_constructors.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_gil_scoped.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_iostream.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_kwargs_and_defaults.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_local_bindings.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_methods_and_attributes.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_modules.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_multiple_inheritance.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_numpy_array.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_numpy_dtypes.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_numpy_vectorize.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_opaque_types.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_operator_overloading.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_pickling.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_pytypes.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_sequences_and_iterators.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_smart_ptr.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_stl.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_stl_binders.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_tagbased_polymorphic.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_thread.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_union.cpp" />
-    <ClCompile Include="extern\pybind\tests\test_virtual_functions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="product.cpp" />
     <ClCompile Include="analysis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="analysis.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\attr.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\buffer_info.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\cast.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\chrono.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\common.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\complex.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\class.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\common.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\descr.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\init.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\internals.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\typeid.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\detail\type_caster_base.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\eigen.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\embed.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\eval.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\functional.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\gil.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\iostream.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\numpy.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\operators.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\options.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\pybind11.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\pytypes.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\stl.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\stl\filesystem.h" />
-    <ClInclude Include="extern\pybind\include\pybind11\stl_bind.h" />
-    <ClInclude Include="extern\pybind\tests\constructor_stats.h" />
-    <ClInclude Include="extern\pybind\tests\local_bindings.h" />
-    <ClInclude Include="extern\pybind\tests\object.h" />
-    <ClInclude Include="extern\pybind\tests\pybind11_tests.h" />
-    <ClInclude Include="extern\pybind\tests\test_exceptions.h" />
     <ClInclude Include="product.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
