@@ -10,7 +10,7 @@ class Analyser {
     const double threshold;
 
     Analyser(std::function<double(const std::string, const std::string)> linkage_criterion, double threshold = 0.8);
-    double compare(const BaseProduct& a, const BaseProduct& b);
+    double compare(const Product& a, const Product& b);
 
    private:
     std::unordered_map<std::size_t, double> cached_matches;

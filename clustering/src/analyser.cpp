@@ -9,7 +9,7 @@ Analyser::Analyser(std::function<double(const std::string, const std::string)> l
                    double threshold)
     : match_strings(linkage_criterion), threshold(threshold) {}
 
-double Analyser::compare(const BaseProduct& a, const BaseProduct& b) {
+double Analyser::compare(const Product& a, const Product& b) {
     /*if (a.getName() == std::nullopt) {
 
     }*/

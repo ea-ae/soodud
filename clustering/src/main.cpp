@@ -10,19 +10,28 @@ namespace py = pybind11;
 using namespace py::literals;
 
 int test() {
-    std::cout << "start\n";
+    std::cout << "start!\n";
 
     auto sp = std::make_unique<StoreProduct>(1, "product one");
     auto sp2 = std::make_unique<StoreProduct>(2, "product two");
     auto sp3 = std::make_unique<StoreProduct>(3, "product three");
 
-    auto p = Product(std::move(sp), std::move(sp2));
+    auto p = Product(std::move(sp));
+    auto p2 = Product(std::move(sp2));
+    auto p3 = Product(std::move(sp3));
+    auto p4 = Product(std::move(p), std::move(p2));
+    std::cout << p4.items.size() << "\n";
 
-    auto analyzer = Analyser([](std::string a, std::string b) {
+    auto p5 = Product(std::move(p3), std::move(p4));
+    std::cout << p5.items.size() << "\n";
+
+    return 123;
+
+    /*auto analyzer = Analyser([](std::string a, std::string b) {
         return 1;
-    });
+    });*/
 
-    return analyzer.compare(p, *sp3.get());
+    // return analyzer.compare(p, *sp3.get());
 }
 
 PYBIND11_MODULE(clustering, m) {
