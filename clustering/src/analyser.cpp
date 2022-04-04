@@ -9,6 +9,6 @@ Analyser::Analyser(std::shared_ptr<Matcher> linkage_criterion, double threshold)
     : matcher(linkage_criterion), threshold(threshold) {}
 
 double Analyser::compare(const Product& a, const Product& b) {
-    // auto similarity = this->match_strings(a, b);
-    return 0;
+    // auto similarity = this->matcher->match(a, b);
+    return 12345;
 }

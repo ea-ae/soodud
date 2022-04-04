@@ -21,18 +21,12 @@ Analyser& test() {
     auto p2 = Product(std::move(sp2));
     auto p3 = Product(std::move(sp3));
     auto p4 = Product(std::move(p), std::move(p2));
-    std::cout << p4.items.size() << "\n";
-
     auto p5 = Product(std::move(p3), std::move(p4));
     std::cout << p5.items.size() << "\n";
 
     auto stuff = std::make_unique<SingleLinkageMatcher>();
     auto analyser = Analyser(std::move(stuff));
     return analyser;
-    // std::function<double(const std::string, const std::string)> matcher = single_linkage;
-    // auto analyzer = Analyser(matcher);
-
-    // return analyzer.compare(p, *sp3.get());
 }
 
 PYBIND11_MODULE(clustering, m) {
@@ -40,8 +34,19 @@ PYBIND11_MODULE(clustering, m) {
 
     m.def("test", &test);
 
+    py::class_<Matcher>(m, "Matcher")
+        .def("__repr__", [](const Analyser& o) {
+            return "Matcher()";
+        });
+
+    py::class_<SingleLinkageMatcher>(m, "SingleLinkageMatcher")
+        .def(py::init<>())
+        .def("__repr__", [](const Analyser& o) {
+            return "SingleLinkageMatcher()";
+        });
+
     py::class_<Analyser>(m, "Analyser")
-        .def(py::init<std::shared_ptr<Matcher>, double>())
+        .def(py::init<std::shared_ptr<Matcher>, double>(), "matcher"_a, "threshold"_a = 0.8)
         .def("__repr__", [](const Analyser& o) {
             return std::format("Analyser(threshold={})", o.threshold);
         });
