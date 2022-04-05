@@ -25,7 +25,7 @@ class Product {
     std::vector<std::unique_ptr<const StoreProduct>> items;
 
     Product();
-    Product(std::unique_ptr<const StoreProduct> singleton);
+    Product(std::unique_ptr<const StoreProduct> singleton);  // todo: ref it, store elsewhere
     Product(Product&& first, Product&& second);
     std::size_t hash() const;
 };
