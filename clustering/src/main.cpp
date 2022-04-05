@@ -13,7 +13,7 @@
 namespace py = pybind11;
 using namespace py::literals;
 
-Analyser& test() {
+int test() {
     auto sp = std::make_unique<StoreProduct>(1, "product one");
     auto sp2 = std::make_unique<StoreProduct>(2, "product two");
     auto sp3 = std::make_unique<StoreProduct>(3, "product three");
@@ -25,9 +25,10 @@ Analyser& test() {
     auto p5 = Product(std::move(p3), std::move(p4));
     std::cout << p5.items.size() << "\n";
 
-    auto analyser = Analyser(std::make_shared<SingleLinkageMatcher>());
+    // auto analyser = Analyser(std::make_shared<SingleLinkageMatcher>());
 
-    return analyser;
+    // return analyser;
+    return 123;
 }
 
 PYBIND11_MODULE(clustering, m) {
@@ -35,7 +36,7 @@ PYBIND11_MODULE(clustering, m) {
 
     m.def("test", &test);
 
-    py::class_<Matcher>(m, "Matcher")
+    /*py::class_<Matcher>(m, "Matcher")
         .def("__repr__", [](const Analyser& o) {
             return "Matcher()";
         });
@@ -51,7 +52,7 @@ PYBIND11_MODULE(clustering, m) {
              "matcher"_a, "threshold"_a = 0.8)
         .def("__repr__", [](const Analyser& o) {
             return std::format("Analyser(threshold={})", o.threshold);
-        });
+        });*/
 
     py::class_<StoreProduct>(m, "StoreProduct")
         .def(py::init<uint32_t, std::string, tokens_t>(),

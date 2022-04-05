@@ -15,6 +15,7 @@ class StoreProduct {
     const int32_t id;
     const std::string name;
     const tokens_t tokens;
+    const std::string store_name;
 
     StoreProduct(int32_t id, std::string name, tokens_t tokens = {});
 };
@@ -27,4 +28,13 @@ class Product {
     Product(std::unique_ptr<const StoreProduct> singleton);
     Product(Product&& first, Product&& second);
     std::size_t hash() const;
+};
+
+class Store {
+   public:
+    std::string name;
+    // std::vector<std::unique_ptr<Product>> products;
+
+    Store(std::string name, std::vector<std::unique_ptr<Product>> products);
+    // void add_product();
 };

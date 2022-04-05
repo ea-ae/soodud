@@ -28,3 +28,6 @@ std::size_t Product::hash() const {
     return seed;
 }
 #pragma warning(pop)
+
+// Store::Store(std::string name, std::vector<std::unique_ptr<Product>> products)
+//     : name(name), products(products) {}
