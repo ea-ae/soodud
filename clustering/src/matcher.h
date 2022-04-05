@@ -1,19 +1,19 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
-#include <unordered_set>
 
 #include "product.h"
 
 class Matcher {
    public:
-    double match(std::unordered_set<std::string> a, std::unordered_set<std::string> b);
-    virtual double match(Product& a, Product& b) = 0;
+    double match_tokens(const tokens_t& a, const tokens_t& b) const;
+    virtual double match(const Product& a, const Product& b) const = 0;
 };
 
 class SingleLinkageMatcher : public Matcher {
    public:
     // double match(std::vector<std::string> a, std::vector<std::string> b);
-    double match(Product& a, Product& b);
+    double match(const Product& a, const Product& b) const;
 };
