@@ -1,7 +1,9 @@
 #include "product.h"
 
-StoreProduct::StoreProduct(int32_t id, std::string name, tokens_t)
-    : id(id), name(name), tokens(tokens) {}
+StoreProduct::StoreProduct() : StoreProduct(0, 0) {}
+
+StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t)
+    : id(id), store_id(store_id), tokens(tokens) {}
 
 Product::Product() {}
 
@@ -31,3 +33,5 @@ std::size_t Product::hash() const {
 
 // Store::Store(std::string name, std::vector<std::unique_ptr<Product>> products)
 //     : name(name), products(products) {}
+
+Store::Store(std::string name) : name(name) {}

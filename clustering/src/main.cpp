@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <format>
 #include <iostream>
@@ -14,9 +15,9 @@ namespace py = pybind11;
 using namespace py::literals;
 
 int test() {
-    auto sp = std::make_unique<StoreProduct>(1, "product one");
-    auto sp2 = std::make_unique<StoreProduct>(2, "product two");
-    auto sp3 = std::make_unique<StoreProduct>(3, "product three");
+    auto sp = std::make_unique<StoreProduct>();
+    auto sp2 = std::make_unique<StoreProduct>();
+    auto sp3 = std::make_unique<StoreProduct>();
 
     auto p = Product(std::move(sp));
     auto p2 = Product(std::move(sp2));
@@ -55,11 +56,11 @@ PYBIND11_MODULE(clustering, m) {
         });*/
 
     py::class_<StoreProduct>(m, "StoreProduct")
-        .def(py::init<uint32_t, std::string, tokens_t>(),
-             "id"_a, "name"_a, "tokens"_a = tokens_t{})
+        .def(py::init<int32_t, int32_t, std::set<std::string>>(),
+             "id"_a, "store_id"_a, "tokens"_a = std::set<std::string>{})
         .def_readonly("id", &StoreProduct::id)
-        .def_readonly("name", &StoreProduct::name)
+        .def_readonly("store_id", &StoreProduct::store_id)
         .def("__repr__", [](const StoreProduct& o) {
-            return std::format("StoreProduct(id={}, name='{}')", o.id, o.name);
+            return std::format("StoreProduct(id={}, store_id={})", o.id, o.store_id);
         });
 }

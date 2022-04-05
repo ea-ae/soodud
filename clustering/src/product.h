@@ -13,11 +13,11 @@ using tokens_t = std::set<std::string>;
 class StoreProduct {
    public:
     const int32_t id;
-    const std::string name;
+    const int32_t store_id;
     const tokens_t tokens;
-    const std::string store_name;
 
-    StoreProduct(int32_t id, std::string name, tokens_t tokens = {});
+    StoreProduct();
+    StoreProduct(int32_t id, int32_t store_id, tokens_t tokens = {});
 };
 
 class Product {
@@ -33,8 +33,8 @@ class Product {
 class Store {
    public:
     std::string name;
-    // std::vector<std::unique_ptr<Product>> products;
+    std::vector<std::unique_ptr<Product>> products;
 
-    Store(std::string name, std::vector<std::unique_ptr<Product>> products);
+    Store(std::string name);
     // void add_product();
 };
