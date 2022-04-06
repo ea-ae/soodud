@@ -29,8 +29,9 @@ class Analyser {
     const std::shared_ptr<Matcher> matcher;
 
     Analyser(std::shared_ptr<Matcher> linkage_criterion, double threshold = 0.8);
-    void add_store_product(std::unique_ptr<StoreProduct> product);
+    void create_store_product(int32_t id, int32_t store_id, tokens_t tokens = {});
     double compare(Product& a, Product& b);
+    size_t get_product_amount() const;
 
    private:
     std::vector<std::unique_ptr<Product>> products;

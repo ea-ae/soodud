@@ -37,27 +37,27 @@ PYBIND11_MODULE(clustering, m) {
 
     m.def("test", &test);
 
-    /*py::class_<Matcher>(m, "Matcher")
-        .def("__repr__", [](const Analyser& o) {
+    py::class_<Matcher, std::shared_ptr<Matcher>>(m, "Matcher")
+        .def("__repr__", [](const Matcher& o) {
             return "Matcher()";
         });
 
-    py::class_<SingleLinkageMatcher>(m, "SingleLinkageMatcher")
+    py::class_<SingleLinkageMatcher, std::shared_ptr<SingleLinkageMatcher>>(m, "SingleLinkageMatcher")
         .def(py::init<>())
-        .def("__repr__", [](const Analyser& o) {
+        .def("__repr__", [](const SingleLinkageMatcher& o) {
             return "SingleLinkageMatcher()";
         });
 
     py::class_<Analyser>(m, "Analyser")
-        .def(py::init<std::shared_ptr<Matcher>, double>(),
-             "matcher"_a, "threshold"_a = 0.8)
+        .def(py::init<std::shared_ptr<SingleLinkageMatcher>, double>(), "matcher"_a, "threshold"_a = 0.8)
+        .def("create_store_product", &Analyser::create_store_product)
         .def("__repr__", [](const Analyser& o) {
-            return std::format("Analyser(threshold={})", o.threshold);
-        });*/
+            return std::format("Analyser(threshold={}, product_amount={})", o.threshold, o.get_product_amount());
+        });
 
     py::class_<StoreProduct>(m, "StoreProduct")
-        .def(py::init<int32_t, int32_t, std::set<std::string>>(),
-             "id"_a, "store_id"_a, "tokens"_a = std::set<std::string>{})
+        .def(py::init<int32_t, int32_t, tokens_t>(),
+             "id"_a, "store_id"_a, "tokens"_a = tokens_t{})
         .def_readonly("id", &StoreProduct::id)
         .def_readonly("store_id", &StoreProduct::store_id)
         .def("__repr__", [](const StoreProduct& o) {

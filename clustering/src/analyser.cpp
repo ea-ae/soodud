@@ -15,8 +15,8 @@ bool MatchComparator::operator()(const std::unique_ptr<Match>& a, const std::uni
 Analyser::Analyser(std::shared_ptr<Matcher> linkage_criterion, double threshold)
     : matcher(linkage_criterion), threshold(threshold) {}
 
-void Analyser::add_store_product(std::unique_ptr<StoreProduct> product) {
-    // products.push_back(std::make_unique<Product>(std::move(product)));
+void Analyser::create_store_product(int32_t id, int32_t store_id, tokens_t tokens) {
+    products.push_back(std::make_unique<Product>(std::make_unique<StoreProduct>(id, store_id, tokens)));
 }
 
 double Analyser::compare(Product& a, Product& b) {
@@ -26,6 +26,10 @@ double Analyser::compare(Product& a, Product& b) {
     }
 
     return 12345;
+}
+
+size_t Analyser::get_product_amount() const {
+    return products.size();
 }
 
 void Analyser::update_queue() {}

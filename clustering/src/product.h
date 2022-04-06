@@ -30,11 +30,11 @@ class Product {
     std::size_t hash() const;
 };
 
-class Store {
-   public:
-    std::string name;
-    std::vector<std::unique_ptr<Product>> products;
-
-    Store(std::string name);
-    // void add_product();
-};
+// class Store {
+//    public:
+//     std::string name;
+//     std::vector<std::unique_ptr<Product>> products;
+//
+//     Store(std::string name);
+//     // void add_product();
+// };

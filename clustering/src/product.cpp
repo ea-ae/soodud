@@ -34,4 +34,4 @@ std::size_t Product::hash() const {
 // Store::Store(std::string name, std::vector<std::unique_ptr<Product>> products)
 //     : name(name), products(products) {}
 
-Store::Store(std::string name) : name(name) {}
+// Store::Store(std::string name) : name(name) {}
