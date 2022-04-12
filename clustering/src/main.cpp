@@ -14,24 +14,6 @@
 namespace py = pybind11;
 using namespace py::literals;
 
-int test() {
-    auto sp = std::make_unique<StoreProduct>();
-    auto sp2 = std::make_unique<StoreProduct>();
-    auto sp3 = std::make_unique<StoreProduct>();
-
-    auto p = Product(std::move(sp));
-    auto p2 = Product(std::move(sp2));
-    auto p3 = Product(std::move(sp3));
-    auto p4 = Product(std::move(p), std::move(p2));
-    auto p5 = Product(std::move(p3), std::move(p4));
-    std::cout << p5.items.size() << "\n";
-
-    // auto analyser = Analyser(std::make_shared<SingleLinkageMatcher>());
-
-    // return analyser;
-    return 123;
-}
-
 int main() {
     std::cout << "hi\n";
     auto analyser = Analyser();
@@ -47,8 +29,6 @@ int main() {
 
 PYBIND11_MODULE(clustering, m) {
     m.doc() = "Cluster analysis algorithm.";
-
-    m.def("test", &test);
 
     py::class_<Matcher, std::shared_ptr<Matcher>>(m, "Matcher")
         .def("__repr__", [](const Matcher& o) {

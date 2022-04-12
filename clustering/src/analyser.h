@@ -17,14 +17,6 @@ class Match {
     bool contains_merged_products() const;
 };
 
-// class MatchComparator {
-//    public:
-//     bool operator()(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b);
-// };
-
-bool compare(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b);
-
-// using match_queue_t = std::priority_queue<std::unique_ptr<Match>, std::vector<std::unique_ptr<Match>>, decltype(compare)>;
 using match_queue_t = std::priority_queue<std::unique_ptr<Match>, std::vector<std::unique_ptr<Match>>, auto(*)(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b)->bool>;
 
 class Analyser {

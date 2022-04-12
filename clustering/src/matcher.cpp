@@ -16,13 +16,19 @@ double Matcher::match_tokens(const tokens_t& a, const tokens_t& b) const {
         return 0;
     }
 
-    return matches / ((shorter >= 4) ? shorter : std::max<size_t>(a.size(), b.size()));
+    double x = matches / shorter;
+    return x;
+    // return matches / ((shorter >= 4) ? shorter : std::max<size_t>(a.size(), b.size()));
 }
 
 double SingleLinkageMatcher::match(const Product& a, const Product& b) const {
+    if (a.merged || b.merged) return 0;
+
     double most_similar = 0;
     for (const auto& a_product : a.items) {
         for (const auto& b_product : b.items) {
+            if (a_product->store_id == b_product->store_id) return 0;
+
             double new_match = this->match_tokens(a_product->tokens, b_product->tokens);
             most_similar = std::max<double>(most_similar, new_match);
         }

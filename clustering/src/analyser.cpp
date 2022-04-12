@@ -53,8 +53,7 @@ void Analyser::analyse() {
     while (!merge_queue->empty()) {
         process_match();
     }
-
-    std::cout << "ok\n";
+    std::cout << "xd\n";
 }
 
 size_t Analyser::get_product_amount() const {
@@ -74,7 +73,7 @@ void Analyser::process_match() {
     merge_queue->pop();
 
     for (auto& product : products) {  // add new products
-        if (product->merged) continue;
+        // if (product->merged) continue;
 
         auto score = matcher->match(*new_product, *product);  // .get()?
         if (score >= threshold) {
