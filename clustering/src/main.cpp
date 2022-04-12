@@ -32,6 +32,17 @@ int test() {
     return 123;
 }
 
+int main() {
+    std::cout << "hi\n";
+    auto analyser = Analyser();
+    analyser.create_product(1, 1, std::set<std::string>{"a", "b", "c", "d", "e", "f"});
+    analyser.create_product(1, 2, std::set<std::string>{"a", "b", "c", "d", "e", "x"});
+    analyser.create_product(2, 2, std::set<std::string>{"a", "b", "c", "d", "e", "y"});
+    analyser.create_product(2, 2, std::set<std::string>{"a", "b", "c", "d", "e", "x"});
+    analyser.analyse();
+    return 0;
+}
+
 PYBIND11_MODULE(clustering, m) {
     m.doc() = "Cluster analysis algorithm.";
 
@@ -49,8 +60,11 @@ PYBIND11_MODULE(clustering, m) {
         });
 
     py::class_<Analyser>(m, "Analyser")
-        .def(py::init<std::shared_ptr<SingleLinkageMatcher>, double>(), "matcher"_a, "threshold"_a = 0.8)
-        .def("create_store_product", &Analyser::create_store_product)
+        .def(py::init<std::shared_ptr<SingleLinkageMatcher>, double>(),
+             "matcher"_a = std::make_shared<SingleLinkageMatcher>(),
+             "threshold"_a = 0.8)
+        .def("create_product", &Analyser::create_product)
+        .def("analyse", &Analyser::analyse)
         .def("__repr__", [](const Analyser& o) {
             return std::format("Analyser(threshold={}, product_amount={})", o.threshold, o.get_product_amount());
         });

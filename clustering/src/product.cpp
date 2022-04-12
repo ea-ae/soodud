@@ -2,7 +2,7 @@
 
 StoreProduct::StoreProduct() : StoreProduct(0, 0) {}
 
-StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t)
+StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t tokens)
     : id(id), store_id(store_id), tokens(tokens) {}
 
 Product::Product() {}
