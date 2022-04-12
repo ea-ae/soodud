@@ -10,12 +10,11 @@
 class Match {
    public:
     double score;
-
-    Match(double score, Product& a, Product& b);
-
-   private:
     Product& a;
     Product& b;
+
+    Match(double score, Product& a, Product& b);
+    bool contains_merged_products() const;
 };
 
 // class MatchComparator {
@@ -34,7 +33,7 @@ class Analyser {
     const std::shared_ptr<Matcher> matcher;
 
     Analyser(std::shared_ptr<Matcher> linkage_criterion = std::make_shared<SingleLinkageMatcher>(),
-             double threshold = 0.1);
+             double threshold = 0.5);
     void create_product(int32_t id, int32_t store_id, tokens_t tokens = {});
     void analyse();
     size_t get_product_amount() const;
@@ -43,5 +42,6 @@ class Analyser {
     std::vector<std::unique_ptr<Product>> products;
     std::unique_ptr<match_queue_t> merge_queue;
 
+    void process_match();
     void update_queue();
 };

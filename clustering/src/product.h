@@ -23,6 +23,7 @@ class StoreProduct {
 class Product {
    public:
     std::vector<std::unique_ptr<const StoreProduct>> items;
+    bool merged = false;
 
     Product();
     Product(std::unique_ptr<const StoreProduct> singleton);  // todo: ref it, store elsewhere

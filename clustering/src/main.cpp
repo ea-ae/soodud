@@ -36,9 +36,11 @@ int main() {
     std::cout << "hi\n";
     auto analyser = Analyser();
     analyser.create_product(1, 1, std::set<std::string>{"a", "b", "c", "d", "e", "f"});
-    analyser.create_product(1, 2, std::set<std::string>{"a", "b", "c", "d", "e", "x"});
-    analyser.create_product(2, 2, std::set<std::string>{"a", "b", "c", "d", "e", "y"});
-    analyser.create_product(2, 2, std::set<std::string>{"a", "b", "c", "d", "e", "x"});
+    analyser.create_product(2, 2, std::set<std::string>{"a", "b", "c", "d", "1", "2"});
+    analyser.create_product(3, 2, std::set<std::string>{"a", "b", "c", "d", "e", "3"});
+    analyser.create_product(4, 3, std::set<std::string>{"a", "b", "c", "d", "4", "5"});
+    analyser.create_product(5, 1, std::set<std::string>{"x", "y", "z"});
+    analyser.create_product(6, 2, std::set<std::string>{"x", "y", "6"});
     analyser.analyse();
     return 0;
 }

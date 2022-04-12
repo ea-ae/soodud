@@ -11,9 +11,11 @@ double Matcher::match_tokens(const tokens_t& a, const tokens_t& b) const {
     double matches = std::count_if(std::execution::par_unseq, a.begin(), a.end(),
                                    [&b](std::string i) { return b.find(i) != b.end(); });
     double shorter = std::min<size_t>(a.size(), b.size());
-    /*if (shorter == 0) {
+
+    if (shorter == 0) {
         return 0;
-    }*/
+    }
+
     return matches / ((shorter >= 4) ? shorter : std::max<size_t>(a.size(), b.size()));
 }
 
