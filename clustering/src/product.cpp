@@ -2,8 +2,8 @@
 
 StoreProduct::StoreProduct() : StoreProduct(0, 0) {}
 
-StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t tokens)
-    : id(id), store_id(store_id), tokens(tokens) {}
+StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t tokens, quantities_t quantities)
+    : id(id), store_id(store_id), tokens(tokens), quantities(quantities) {}
 
 Product::Product() {}
 
@@ -30,8 +30,3 @@ std::size_t Product::hash() const {
     return seed;
 }
 #pragma warning(pop)
-
-// Store::Store(std::string name, std::vector<std::unique_ptr<Product>> products)
-//     : name(name), products(products) {}
-
-// Store::Store(std::string name) : name(name) {}

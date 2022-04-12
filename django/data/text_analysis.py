@@ -4,7 +4,7 @@ import regex
 from unidecode import unidecode
 # from collections import Counter
 import itertools as it
-from typing import Iterable, NamedTuple, Sequence, Collection
+from typing import Iterable, NamedTuple, Sequence
 
 # import line_profiler
 # import atexit
@@ -23,7 +23,7 @@ UNITS = SI_UNITS + SPECIAL_UNITS
 
 
 Quantity = NamedTuple('Quantity', amount=int, unit=str)
-Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=Collection[Quantity])  # original=str
+Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=set[Quantity])  # original=str
 
 
 # ratios = {}

@@ -8,8 +8,10 @@
 
 class Matcher {
    public:
-    double match_tokens(const tokens_t& a, const tokens_t& b) const;
     virtual double match(const Product& a, const Product& b) const = 0;
+
+   protected:
+    double match_products(const StoreProduct& a, const StoreProduct& b) const;
 };
 
 class SingleLinkageMatcher : public Matcher {

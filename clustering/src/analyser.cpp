@@ -1,9 +1,8 @@
+#include "analyser.h"
+
 #include <pybind11/pybind11.h>
-// #include <pybind11/stl.h>
 
 #include <iostream>
-
-#include "analyser.h"
 
 using namespace pybind11::literals;
 
@@ -14,10 +13,6 @@ bool Match::contains_merged_products() const {
     return a.merged || b.merged;
 }
 
-// bool MatchComparator::operator()(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b) {
-//     return a->score < b->score;
-// }
-
 bool compare(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b) {
     return a->score < b->score;
 }
@@ -25,8 +20,8 @@ bool compare(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b) {
 Analyser::Analyser(std::shared_ptr<Matcher> linkage_criterion, double threshold)
     : matcher(linkage_criterion), threshold(threshold) {}
 
-void Analyser::create_product(int32_t id, int32_t store_id, tokens_t tokens) {
-    products.push_back(std::make_unique<Product>(std::make_unique<StoreProduct>(id, store_id, tokens)));
+void Analyser::create_product(int32_t id, int32_t store_id, tokens_t tokens, quantities_t quantities) {
+    products.push_back(std::make_unique<Product>(std::make_unique<StoreProduct>(id, store_id, tokens, quantities)));
 }
 
 void Analyser::analyse() {
@@ -53,7 +48,7 @@ void Analyser::analyse() {
     while (!merge_queue->empty()) {
         process_match();
     }
-    std::cout << "xd\n";
+    std::cout << "end\n";
 }
 
 size_t Analyser::get_product_amount() const {
@@ -73,9 +68,7 @@ void Analyser::process_match() {
     merge_queue->pop();
 
     for (auto& product : products) {  // add new products
-        // if (product->merged) continue;
-
-        auto score = matcher->match(*new_product, *product);  // .get()?
+        auto score = matcher->match(*new_product, *product);
         if (score >= threshold) {
             merge_queue->push(std::make_unique<Match>(score, *new_product, *product));
         }
