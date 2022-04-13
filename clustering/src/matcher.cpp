@@ -6,7 +6,7 @@
 #include <execution>
 
 double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) const {
-    for (auto a_qty : a.quantities) {
+    for (auto& a_qty : a.quantities) {
         auto b_qty = std::find_if(b.quantities.begin(), b.quantities.end(),
                                   [a_qty](quantity_t q) { return a_qty.second == q.second; });
         if (b_qty != b.quantities.end() && a_qty.first != b_qty->first && a_qty.second == b_qty->second) {
@@ -14,8 +14,8 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
         }
     }
 
-    double matches = std::count_if(std::execution::par_unseq, a.tokens.begin(), a.tokens.end(),
-                                   [&b](std::string i) { return b.tokens.find(i) != b.tokens.end(); });
+    auto matches = std::count_if(std::execution::par_unseq, a.tokens.begin(), a.tokens.end(),
+                                 [&b](std::string i) { return b.tokens.find(i) != b.tokens.end(); });
 
     auto sizes = std::minmax<size_t>(a.tokens.size(), b.tokens.size());
 
@@ -23,8 +23,11 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
         return 0;
     }
 
-    return matches / ((sizes.first >= 4) ? sizes.first : sizes.second);
+    double score = static_cast<double>(matches / ((sizes.first >= 4) ? sizes.first : sizes.second));
+    return score;
 }
+
+SingleLinkageMatcher::SingleLinkageMatcher() {}
 
 double SingleLinkageMatcher::match(const Product& a, const Product& b) const {
     if (a.merged || b.merged) return 0;

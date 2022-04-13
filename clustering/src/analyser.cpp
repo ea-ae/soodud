@@ -1,10 +1,6 @@
 #include "analyser.h"
 
-#include <pybind11/pybind11.h>
-
 #include <iostream>
-
-using namespace pybind11::literals;
 
 Match::Match(double score, Product& a, Product& b)
     : score(score), a(a), b(b) {}
@@ -18,7 +14,7 @@ bool compare(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b) {
 }
 
 Analyser::Analyser(std::shared_ptr<Matcher> linkage_criterion, double threshold)
-    : matcher(linkage_criterion), threshold(threshold) {}
+    : threshold(threshold), matcher(linkage_criterion) {}
 
 void Analyser::create_product(int32_t id, int32_t store_id, tokens_t tokens, quantities_t quantities) {
     products.push_back(std::make_unique<Product>(std::make_unique<StoreProduct>(id, store_id, tokens, quantities)));
@@ -27,8 +23,8 @@ void Analyser::create_product(int32_t id, int32_t store_id, tokens_t tokens, qua
 void Analyser::analyse() {
     std::vector<std::unique_ptr<Match>> initial_matches;
 
-    for (int i = 0; i < products.size(); i++) {
-        for (int j = i + 1; j < products.size(); j++) {  // process all combinations of items
+    for (size_t i = 0; i < products.size(); i++) {
+        for (size_t j = i + 1; j < products.size(); j++) {  // process all combinations of items
             auto a = products[i].get();
             auto b = products[j].get();
 
@@ -49,6 +45,16 @@ void Analyser::analyse() {
         process_match();
     }
     std::cout << "end\n";
+}
+
+std::vector<Product*> Analyser::get_clusters() {
+    std::vector<Product*> clusters;
+    for (auto& product : products) {
+        if (!product->merged) {
+            clusters.push_back(product.get());
+        }
+    }
+    return clusters;
 }
 
 size_t Analyser::get_product_amount() const {

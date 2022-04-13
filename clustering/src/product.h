@@ -21,25 +21,18 @@ class StoreProduct {
     const quantities_t quantities;
 
     StoreProduct();
+
     StoreProduct(int32_t id, int32_t store_id, tokens_t tokens = {}, quantities_t quantities = {});
 };
 
 class Product {
    public:
-    std::vector<std::unique_ptr<const StoreProduct>> items;
     bool merged = false;
+    std::vector<std::unique_ptr<StoreProduct>> items;
 
     Product();
-    Product(std::unique_ptr<const StoreProduct> singleton);  // todo: ref it, store elsewhere
-    Product(Product&& first, Product&& second);
-    std::size_t hash() const;
-};
 
-// class Store {
-//    public:
-//     std::string name;
-//     std::vector<std::unique_ptr<Product>> products;
-//
-//     Store(std::string name);
-//     // void add_product();
-// };
+    Product(std::unique_ptr<StoreProduct> singleton);  // todo: ref it, store elsewhere
+    Product(Product&& first, Product&& second);
+    std::vector<StoreProduct*> get_items();
+};

@@ -8,6 +8,11 @@
 
 class Matcher {
    public:
+    Matcher() = default;
+    virtual ~Matcher() = default;
+    Matcher(const Matcher& other) = delete;
+    Matcher& operator=(const Matcher& other) = delete;
+
     virtual double match(const Product& a, const Product& b) const = 0;
 
    protected:
@@ -16,6 +21,9 @@ class Matcher {
 
 class SingleLinkageMatcher : public Matcher {
    public:
-    // double match(std::vector<std::string> a, std::vector<std::string> b);
+    SingleLinkageMatcher();
+    SingleLinkageMatcher(const SingleLinkageMatcher& other) = delete;
+    SingleLinkageMatcher& operator=(const SingleLinkageMatcher& other) = delete;
+
     double match(const Product& a, const Product& b) const;
 };

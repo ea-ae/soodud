@@ -7,7 +7,7 @@ StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t tokens, quanti
 
 Product::Product() {}
 
-Product::Product(std::unique_ptr<const StoreProduct> singleton) {
+Product::Product(std::unique_ptr<StoreProduct> singleton) {
     items.push_back(std::move(singleton));
 }
 
@@ -19,14 +19,10 @@ Product::Product(Product&& first, Product&& second) {
         std::make_move_iterator(second.items.end()));
 }
 
-#pragma warning(push)
-#pragma warning(disable : 26451)
-// stackoverflow.com/a/27216842/4362799
-std::size_t Product::hash() const {
-    std::size_t seed = items.size();
+std::vector<StoreProduct*> Product::get_items() {
+    std::vector<StoreProduct*> raw_items;
     for (auto& item : items) {
-        seed ^= item.get()->id + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        raw_items.push_back(item.get());
     }
-    return seed;
+    return raw_items;
 }
-#pragma warning(pop)
