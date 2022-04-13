@@ -28,11 +28,11 @@ class StoreProduct {
 class Product {
    public:
     bool merged = false;
-    std::vector<std::unique_ptr<StoreProduct>> items;
+    std::vector<std::shared_ptr<StoreProduct>> items;
 
     Product();
-
-    Product(std::unique_ptr<StoreProduct> singleton);  // todo: ref it, store elsewhere
+    Product(std::shared_ptr<StoreProduct> singleton);  // todo: ref it, store elsewhere
     Product(Product&& first, Product&& second);
+
     std::vector<StoreProduct*> get_items();
 };

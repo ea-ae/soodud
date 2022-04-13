@@ -23,7 +23,7 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
         return 0;
     }
 
-    double score = static_cast<double>(matches / ((sizes.first >= 4) ? sizes.first : sizes.second));
+    auto score = static_cast<double>(matches / ((sizes.first >= 4) ? sizes.first : sizes.second));
     return score;
 }
 

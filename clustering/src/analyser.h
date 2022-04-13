@@ -37,7 +37,9 @@ class Analyser {
 
     void create_product(int32_t id, int32_t store_id, tokens_t tokens = {}, quantities_t quantities = {});
     void analyse();
+    // std::vector<Product*> get_clusters();
     std::vector<Product*> get_clusters();
+    // void get_clusters();
     size_t get_product_amount() const;
 
    private:

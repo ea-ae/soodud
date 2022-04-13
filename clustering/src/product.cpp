@@ -7,7 +7,7 @@ StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t tokens, quanti
 
 Product::Product() {}
 
-Product::Product(std::unique_ptr<StoreProduct> singleton) {
+Product::Product(std::shared_ptr<StoreProduct> singleton) {
     items.push_back(std::move(singleton));
 }
 
