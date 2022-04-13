@@ -90,6 +90,13 @@ class StoreRegistry:
             print(f'Store \'{cls.registry[i].name}\' processed ({i + 1}/{len(stores)})')
             processed_stores.append(processed_store)
 
+    @classmethod
+    def find_matches(cls, data: list[list[text_analysis.Text]]):
+        """Find matches for processed store products."""
+
+    @classmethod
+    def find_matches_old(cls, processed_stores: list[list[text_analysis.Text]]):
+        """Old Python code for finding matches."""
         for match in text_analysis.find_matches(processed_stores):
             a = models.StoreProduct.objects.only('name', 'product').get(id=match.id_a)
             b = models.StoreProduct.objects.only('name', 'product').get(id=match.id_b)

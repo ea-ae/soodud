@@ -2,9 +2,11 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <set>
 #include <string>
 
@@ -31,6 +33,17 @@ int main() {
     analyser.analyse();
     return 0;
 }
+
+// auto join = []<typename T>(T cont, std::string delimiter) -> std::string {
+auto join = [](const auto& cont, std::string delimiter = ", ") -> std::string {
+    return std::accumulate(
+        cont.begin(),
+        cont.end(),
+        std::string(""),
+        [&delimiter](std::string a, std::string b) {
+            return a + (a.length() > 0 ? delimiter : "") + b;
+        });
+};
 
 // PYBIND11_MAKE_OPAQUE(std::vector<Product*>);
 
@@ -65,20 +78,28 @@ PYBIND11_MODULE(clustering, m) {
         });
 
     py::class_<StoreProduct>(m, "StoreProduct")
-        .def(py::init<int32_t, int32_t, tokens_t>(),
-             "id"_a, "store_id"_a, "tokens"_a)
+        .def(py::init<int32_t, int32_t, tokens_t, quantities_t>(),
+             "id"_a, "store_id"_a, "tokens"_a = tokens_t{}, "quantities"_a = quantities_t{})
         .def_readonly("id", &StoreProduct::id)
         .def_readonly("store_id", &StoreProduct::store_id)
         .def_readonly("tokens", &StoreProduct::tokens)
         .def_readonly("quantities", &StoreProduct::quantities)
         .def("__repr__", [](const StoreProduct& o) {
-            return std::format("StoreProduct(id={}, store_id={})", o.id, o.store_id);
+            std::vector<std::string> quantities;
+            std::for_each(o.quantities.begin(), o.quantities.end(),
+                          [&quantities](auto& q) { quantities.push_back(std::to_string(q.first) + q.second); });
+            return std::format("StoreProduct(id={}, store_id={}, tokens=({}), quantities=({}))",
+                               o.id, o.store_id, join(o.tokens), join(quantities));
         });
 
     py::class_<Product>(m, "Product")
         .def_readonly("merged", &Product::merged)
-        .def("get_items", &Product::get_items, py::return_value_policy::reference)  // RVP unnecessary
+        .def("get_items", &Product::get_items, py::return_value_policy::reference)  // RVPs unnecessary
         .def("__repr__", [](const Product& o) {
-            return std::format("Product(merged={}, item_count={})", o.merged, o.items.size());
+            std::vector<std::string> item_ids;
+            std::for_each(o.items.begin(), o.items.end(),
+                          [&item_ids](auto& p) { item_ids.push_back(std::to_string(p->id)); });
+            return std::format("Product(merged={}, items=({}))",
+                               o.merged, join(item_ids));
         });
 }
