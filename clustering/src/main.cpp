@@ -23,13 +23,13 @@ int main() {
     auto q2 = quantities_t{q{2, "kg"}, q{55, "%"}};
 
     auto analyser = Analyser();
-    analyser.create_product(1, 1, std::set<std::string>{"a", "b", "c", "d", "e", "f"}, q1);
-    analyser.create_product(2, 10, std::set<std::string>{"a", "b", "c", "d", "e", "f"}, q2);
-    analyser.create_product(3, 2, std::set<std::string>{"a", "b", "c", "d", "1", "2"});
-    analyser.create_product(4, 2, std::set<std::string>{"a", "b", "c", "d", "e", "3"}, q1);
-    analyser.create_product(5, 3, std::set<std::string>{"a", "b", "c", "d", "4", "5"});
-    analyser.create_product(6, 1, std::set<std::string>{"x", "y", "z"});
-    analyser.create_product(7, 2, std::set<std::string>{"x", "y", "6"});
+    analyser.create_product(1, 1, std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q1);
+    analyser.create_product(2, 10, std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q2);
+    analyser.create_product(3, 2, std::vector<std::string>{"a", "b", "c", "d", "1", "2"});
+    analyser.create_product(4, 2, std::vector<std::string>{"a", "b", "c", "d", "e", "3"}, q1);
+    analyser.create_product(5, 3, std::vector<std::string>{"a", "b", "c", "d", "4", "5"});
+    analyser.create_product(6, 1, std::vector<std::string>{"x", "y", "z"});
+    analyser.create_product(7, 2, std::vector<std::string>{"x", "y", "6"});
     analyser.analyse();
     return 0;
 }

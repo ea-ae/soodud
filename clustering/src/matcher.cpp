@@ -15,7 +15,9 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
     }
 
     auto matches = std::count_if(std::execution::par_unseq, a.tokens.begin(), a.tokens.end(),
-                                 [&b](std::string i) { return b.tokens.find(i) != b.tokens.end(); });
+                                 [&b](std::string i) {
+                                     return std::find(b.tokens.begin(), b.tokens.end(), i) != b.tokens.end();
+                                 });
 
     auto sizes = std::minmax<size_t>(a.tokens.size(), b.tokens.size());
 

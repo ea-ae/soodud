@@ -2,6 +2,7 @@ from concurrent import futures
 from datetime import datetime
 from typing import Generator, Callable, NamedTuple
 
+from . import clustering  # noqa
 from data import models
 from data import text_analysis
 from . import Discount
@@ -88,11 +89,23 @@ class StoreRegistry:
         for i, store in enumerate(stores):
             processed_store = text_analysis.prepare_store(store)
             print(f'Store \'{cls.registry[i].name}\' processed ({i + 1}/{len(stores)})')
-            processed_stores.append(processed_store)
+            processed_stores.append((cls.registry[i].model.id, processed_store))
+        cls.find_matches(processed_stores)
 
     @classmethod
-    def find_matches(cls, data: list[list[text_analysis.Text]]):
+    def find_matches(cls, processed_stores: list[tuple[int, list[text_analysis.Text]]]):
         """Find matches for processed store products."""
+        analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.8)
+        for store_id, store in processed_stores:
+            for product in store:
+                analyser.create_product(product.id, store_id, product.tokens, product.quantity)
+        analyser.analyse()
+        clusters = analyser.get_clusters()
+        clusters.sort(key=lambda c: -len(c.get_items()))
+        for cluster in clusters[:40]:
+            for store_product in cluster.get_items():
+                print(' '.join(store_product.tokens), store_product.quantities)
+            print()
 
     @classmethod
     def find_matches_old(cls, processed_stores: list[list[text_analysis.Text]]):

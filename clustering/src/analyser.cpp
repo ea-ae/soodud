@@ -1,5 +1,6 @@
 #include "analyser.h"
 
+#include <format>
 #include <iostream>
 
 Match::Match(double score, Product& a, Product& b)
@@ -23,6 +24,8 @@ void Analyser::create_product(int32_t id, int32_t store_id, tokens_t tokens, qua
 void Analyser::analyse() {
     std::vector<std::unique_ptr<Match>> initial_matches;
 
+    std::cout << "Creating all initial match combinations\n";
+
     for (size_t i = 0; i < products.size(); i++) {
         for (size_t j = i + 1; j < products.size(); j++) {  // process all combinations of items
             auto a = products[i].get();
@@ -41,10 +44,19 @@ void Analyser::analyse() {
         },
         std::move(initial_matches));
 
+    std::cout << "Processing merge queue\n";
+
+    uint32_t counter = 0;
     while (!merge_queue->empty()) {
+        counter++;
+        if (counter % 1000 == 0) {
+            std::cout << std::format("At {} processed with {} remaining in queue\n",
+                                     counter, merge_queue->size());
+        }
         process_match();
     }
-    std::cout << "end\n";
+
+    std::cout << "Merge queue processed\n";
 }
 
 std::vector<Product*> Analyser::get_clusters() {

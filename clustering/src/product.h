@@ -9,8 +9,8 @@
 #include <utility>
 #include <vector>
 
-using tokens_t = std::set<std::string>;
-using quantity_t = std::pair<int32_t, std::string>;
+using tokens_t = std::vector<std::string>;
+using quantity_t = std::pair<double, std::string>;
 using quantities_t = std::set<quantity_t>;
 
 class StoreProduct {
