@@ -10,7 +10,7 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
         auto b_qty = std::find_if(b.quantities.begin(), b.quantities.end(),
                                   [a_qty](quantity_t q) { return a_qty.second == q.second; });
         if (b_qty != b.quantities.end() && a_qty.first != b_qty->first && a_qty.second == b_qty->second) {
-            return 0;  // product quantities are non-matching
+            return -1;  // product quantities are non-matching
         }
     }
 
@@ -22,7 +22,7 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
     auto sizes = std::minmax<size_t>(a.tokens.size(), b.tokens.size());
 
     if (sizes.first == 0) {  // ignore matches with zero tokens
-        return 0;
+        return -1;
     }
 
     auto score = static_cast<double>(matches / ((sizes.first >= 4) ? sizes.first : sizes.second));
@@ -40,6 +40,8 @@ double SingleLinkageMatcher::match(const Product& a, const Product& b) const {
             if (a_product->store_id == b_product->store_id) return 0;
 
             double new_match = this->match_products(*a_product, *b_product);
+            if (new_match == -1) return 0;
+
             most_similar = std::max<double>(most_similar, new_match);
         }
     }

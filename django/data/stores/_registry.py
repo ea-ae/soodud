@@ -103,6 +103,7 @@ class StoreRegistry:
         clusters = analyser.get_clusters()
         clusters.sort(key=lambda c: -len(c.get_items()))
         for cluster in clusters[:40]:
+            print(cluster)
             for store_product in cluster.get_items():
                 print(' '.join(store_product.tokens), store_product.quantities)
             print()
