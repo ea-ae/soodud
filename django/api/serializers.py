@@ -10,3 +10,9 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Product
         fields = ['name', 'quantity']
+
+
+class DetailedProductSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['name', 'quantity', 'tags']

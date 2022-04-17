@@ -11,7 +11,7 @@ class ProductTagAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    readonly_fields = ('price_list',)
+    readonly_fields = ('id', 'price_list',)
     list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price',
                     'products', 'tags_')
     search_fields = ('id', 'name',)
