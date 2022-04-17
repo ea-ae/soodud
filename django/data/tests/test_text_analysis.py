@@ -28,3 +28,13 @@ def test_quantity_parsing():
     _, actual = ta.parse_quantity(text)
     for q in expected:
         assert ta.Quantity(*q) in actual
+
+
+@pytest.mark.dependency(depends=['test_text_preparation'])
+def test_quantity_multiplication_parsing():
+    """Test quantity multiplication parsing."""
+    text = ta.prepare('token 2x5kg 10 x 10tk 10x 100ml 3x5% 1.5x2l')
+    expected = ((10_000, 'g'), (100, 'tk'), (1, 'l'), (5, '%'))
+    _, actual = ta.parse_quantity(text)
+    for q in expected:
+        assert ta.Quantity(*q) in actual

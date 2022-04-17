@@ -104,7 +104,7 @@ class StoreRegistry:
         print('Saving products to database')
 
         #  migrating existing clusters is too much unnecessary work
-        # in the future consider a smoother process where table is updated only at the end
+        # todo: wrap this in a transaction
         models.Product.objects.all().delete()
 
         for cluster in clusters:

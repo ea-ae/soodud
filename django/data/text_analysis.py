@@ -15,14 +15,14 @@ from typing import Iterable, NamedTuple, Sequence
 BLACKLIST = ('ja', 'hulgi', 'rimi', 'coop', 'selver', 'selveri pagarid', 'selveri köök', 'coop kokad')
 WHITELIST = ()
 
-QUANTITY_UNITS = ('g', 'l', 'm')
-QUANTITY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
-SI_UNITS = tuple(f'{w}{q}' for w, q in it.product(QUANTITY_WEIGHTS.keys(), QUANTITY_UNITS))
+QTY_UNITS = ('g', 'l', 'm')
+QTY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
+SI_UNITS = tuple(f'{w}{q}' for w, q in it.product(QTY_WEIGHTS.keys(), QTY_UNITS))
 SPECIAL_UNITS = ('%', 'tk')  # rl, kmpl
 UNITS = SI_UNITS + SPECIAL_UNITS
 
 
-Quantity = NamedTuple('Quantity', amount=int, unit=str)
+Quantity = NamedTuple('Quantity', amount=float, unit=str)
 Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=set[Quantity])  # original=str
 
 
@@ -100,10 +100,23 @@ def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]
     units = '|'.join(SI_UNITS + SPECIAL_UNITS)
 
     for token in tokens:
-        if (match := regex.fullmatch(f'(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)', token)) is not None:
+        pattern = f'(\\d+x)?(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)'
+        if (match := regex.fullmatch(pattern, token)) is not None:
             unit = match.group('u')
             i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''
-            amount = float(token[:i]) if unit in SPECIAL_UNITS else float(token[:i]) * QUANTITY_WEIGHTS[quantifier]
+
+            num = token[:i]
+            if 'x' in num:  # e.g. '3x5tk'
+                multiplier, multiplicand = int(num.split('x')[0]), float(num.split('x')[1])
+                if unit == '%':  # something like '3x5%' makes no sense
+                    multiplier = 1
+                amount = multiplier * multiplicand
+            else:
+                amount = float(num)
+
+            if unit not in SPECIAL_UNITS:
+                amount *= QTY_WEIGHTS[quantifier]
+
             base_unit = unit if unit in SPECIAL_UNITS else unit.replace(quantifier, '')
             quantities.add(Quantity(amount, base_unit))
         else:
