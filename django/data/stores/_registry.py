@@ -1,3 +1,4 @@
+from django.db import transaction
 from concurrent import futures
 from datetime import datetime
 from typing import Generator, Callable, NamedTuple
@@ -103,15 +104,15 @@ class StoreRegistry:
         clusters = analyser.get_clusters()
         print('Saving products to database')
 
-        #  migrating existing clusters is too much unnecessary work
-        # todo: wrap this in a transaction
-        models.Product.objects.all().delete()
-
-        for cluster in clusters:
-            cls.add_product(cluster.get_items())
+        with transaction.atomic():
+            models.Product.objects.all().delete()  # migrating existing clusters is too much unnecessary work
+            products = []
+            for cluster in clusters:
+                products.append(cls.add_product(cluster.get_items()))
+            models.Product.objects.bulk_create(products)
 
     @classmethod
-    def add_product(cls, store_products: list[clustering.StoreProduct]):
+    def add_product(cls, store_products: list[clustering.StoreProduct]) -> models.Product:
         """Save a product to database."""
         sp_models = [models.StoreProduct.objects.only('name', 'product').get(id=sp.id) for sp in store_products]
 
@@ -122,4 +123,4 @@ class StoreRegistry:
         )
 
         product.storeproduct_set.add(*sp_models)
-        product.save()
+        return product
