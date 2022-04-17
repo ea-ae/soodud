@@ -14,7 +14,6 @@ class Product(models.Model):
     name = models.CharField(max_length=250)
     image_url = models.TextField(default=None, blank=True, null=True)
     tags = models.ManyToManyField(ProductTag, related_name='tags', blank=True)
-    # quantity = models.CharField(max_length=250, default=None, blank=True, null=True)
     quantity = models.JSONField()
 
     def __str__(self):
@@ -48,7 +47,7 @@ class Price(models.Model):
     product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
 
     start = models.DateTimeField(auto_now_add=True)  # some stores may specify a manual add/end date
-    base_price = models.FloatField(default=None, blank=True, null=True)  # null on certain sales or if out of stock
+    base_price = models.FloatField(default=None, blank=True)
     sale_price = models.FloatField(default=None, blank=True, null=True)  # null if no sale
     members_only = models.BooleanField()
 
