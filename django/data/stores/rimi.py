@@ -3,11 +3,12 @@
 import requests
 import regex
 from xml.etree import ElementTree as et
-from typing import Callable, Generator, Any
-import bs4
+from bs4 import BeautifulSoup
+import itertools as it
 import soupsieve as sv
+from typing import Callable, Iterable, Generator, Any
 
-from data.stores import Discount, Product, StoreRegistry
+from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
 SITEMAPS = [
@@ -43,27 +44,70 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 
 
 @StoreRegistry('Rimi')
-def main(save: Callable):
+def main(saver: Generator[None, Product, None]):
     """Rimi entrypoint."""
-    saver = save(3)
-    next(saver)
     get_all(saver)
-    return True
 
 
-def get_all():  # saver: Generator[None, Product, None]):
+def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     for page in CACHED_URLS:
-        soup = bs4.BeautifulSoup(get_page(page, 1), 'html5lib')
-        names = sv.select('p:is(.card__name)', soup)
-        base_prices = sv.select_one('div:is(.price-tag)', soup)
-        print(base_prices)
-        for name, base_price in zip(names, base_prices):
-            print(name.text, base_price.text)
+        first_soup = BeautifulSoup(get_page(page, 1), 'html5lib')
+        last_page = sv.select('li.pagination__item:nth-last-child(2)', first_soup)
+        pages = int(last_page[0].text) if last_page is not None else 1
+        print('Rimi pages:', pages, page)
 
-        # print(name, base_price)
-        # product = Product(name, float(base_price))  # , float(price), discount)
-        # saver.send(product)
+        soup_gen = (BeautifulSoup(get_page(page, page_num), 'html5lib') for page_num in range(2, pages + 1))
+        for soup in it.chain([first_soup], soup_gen):
+            for product in parse_page(soup):
+                saver.send(product)
+
+
+def parse_page(soup: BeautifulSoup) -> Iterable[Product]:
+    """Parses a store page."""
+    for listing in sv.select('.js-product-container.card', soup):  # li.product-grid__item
+        if 'Ei ole saadaval' in listing.text:
+            continue
+
+        name = sv.select('.card__name', listing)[0].text
+        discount = Discount.NONE
+        link = sv.select('.card__url', listing)[0].attrs['href']
+        product_id = int(regex.search(r'/(\d+)$', link).group(1))
+        old_hash_value = int(str(hash(f'rimi{product_id}'))[:-15:-1])
+        hash_value = product_hash('rimi', product_id)
+        assert old_hash_value == hash_value
+
+        # main price
+        price_eur = sv.select('.price-tag.card__price > span', listing)[0].text
+        price_cents = sv.select('.price-tag.card__price > div > sup', listing)[0].text
+        price = float(f'{price_eur}.{price_cents}')
+
+        # old price in case of a regular sale
+        old_price = sv.select('.old-price-tag.card__old-price > span', listing)
+        if len(old_price) > 0:
+            old_price = float(old_price[0].text[:-1].replace(',', '.'))
+            discount = Discount.NORMAL
+
+        # member sale
+        member_price = sv.select('.card__image-wrapper .price-badge__price span', listing)
+        if len(member_price) > 0:
+            member_price = float(f'{member_price[0].text}.{member_price[1].text}')
+            discount = Discount.MEMBER
+
+        product = Product(name,
+                          old_price if discount == Discount.NORMAL else price,
+                          member_price if discount == Discount.MEMBER else price,
+                          discount, hash_value, False)
+        yield product
+
+        # pattern = r'(?P<s1>\d+,?\d*)\s+(?P<s2>\d+)\s*€/tk\s*((?P<b>\d+,?\d*)€(?=[\s\S]*€))?'
+        # groups = [match.groupdict() for match in regex.finditer(pattern, listing.text)][0]
+        # price = float(f'{groups["s1"]}.{groups["s2"]}')
+        # if groups['b'] is not None:  # there's a sale
+        #     base_price = float(groups['b'].replace(',', '.'))
+        #     print(name, '||', f'Base price: {base_price}\tSale: {price}')
+        # else:
+        #     print(name, '||', f'Base price: {price}')
 
 
 def get_page(page_url: str, page: int) -> str:

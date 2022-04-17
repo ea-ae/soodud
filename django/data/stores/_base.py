@@ -19,3 +19,10 @@ class Product:
     base_price: Optional[float]
     price: float
     discount: Discount
+    hash: int
+    has_barcode: bool
+
+
+def product_hash(store_name: str, data: int | str) -> int:
+    """Form a store-dependent random hash for the product."""
+    return int(str(hash(f'{store_name}{data}'))[:-15:-1])

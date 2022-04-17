@@ -1,12 +1,10 @@
 """Coop."""
 
 import requests
-import csv
 from time import sleep
 from typing import Generator, Callable, Any
 
-# from data.stores.products import Discount, Product
-from data.stores import Discount, Product, StoreRegistry
+from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
 PAGE_LIMIT = 100_000  # don't accidentally DOS the site
@@ -18,31 +16,26 @@ BASE_PAGE_PARAMS: dict[str, str | int] = {
 }
 
 
-@StoreRegistry('Selver')
-def main(save: Callable):
+@StoreRegistry('Coop')
+def main(saver: Generator[None, Product, None]):
     """Coop entrypoint."""
-    saver = save(1)
-    next(saver)
     get_all(saver)
-    return True
 
 
 def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     result = get_page(1)
     page_count, _ = result['metadata']['pages'], result['metadata']['count']
-    print('Pages:', page_count)
+    print('Coop pages:', page_count)
     pages = (get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1))
 
-    # writer = csv.writer(open('coop.csv', 'w', newline='', encoding='utf-8'))
-    # writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
-
     for i, page in enumerate(pages):
-        if i % 50 == 0:
-            print(f'Coop: page {i}')
+        if (i + 1) % 50 == 0:
+            print(f'Coop: page {i + 1}')
 
         for product in page['data']:
             name = product['name']
+            hash_value = int(str(product['id2'])[:-15:-1])
             discount = Discount.NONE
             base_price = product['price']
             if (price := product['price_sale_mbr']) is not None:
@@ -52,11 +45,16 @@ def get_all(saver: Generator[None, Product, None]):
             else:
                 price = base_price
 
-            # writer.writerow([name, base_price, price, str(discount)])
             # print(name, base_price, price, type(base_price), type(price))
             if base_price is None or price is None:
                 continue  # skip non-purchasable items
-            product = Product(name, float(base_price), float(price), discount)
+
+            if hash_value is None:
+                old_hash_value = int(str(hash(f'coop{product[0]["id"]}'))[:-15:-1])
+                hash_value = product_hash('coop', product[0]['id'])
+                assert old_hash_value == hash_value
+
+            product = Product(name, float(base_price), float(price), discount, hash_value, False)
             saver.send(product)
 
 

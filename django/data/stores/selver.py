@@ -1,10 +1,9 @@
 """Coop."""
 
 import requests
-import csv
 from typing import Generator, Callable, Any
 
-from data.stores import Discount, Product, StoreRegistry
+from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
 RESULTS_PER_PAGE = 1000  # too large and python crashes
@@ -17,31 +16,24 @@ PARAMS: dict[str, str | int] = {
 
 
 @StoreRegistry('Selver')
-def main(save: Callable):
+def main(saver: Generator[None, Product, None]):
     """Selver entrypoint."""
-    saver = save(2)
-    next(saver)
     get_all(saver)
-    return True
 
 
 def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
-    # writer = csv.writer(open('selver.csv', 'w', newline='', encoding='utf-8'))  # noqa
-
     for n in range(1, 100):
         page = get_page(n)['hits']['hits']
         product_count = len(page)
-        print('Products:', product_count)
-
-        # if n == 1:  # first page
-        #     writer.writerow(['Name', 'Base price', 'Discounted price', 'Discount'])
+        print(f'Selver page: {n} ({product_count})')
 
         for product in page:
             product = product['_source']
 
             name = product['name']
             prices = product['prices']
+            hash_value, has_barcode = int(str(product['product_main_ean'])[:-15:-1]), True
             discount = Discount.NORMAL if prices[0]['is_discount'] else Discount.NONE
             if discount == Discount.NORMAL:
                 base_price = prices[0]['original_price']
@@ -51,10 +43,15 @@ def get_all(saver: Generator[None, Product, None]):
                 base_price = prices[1]['original_price']
                 price = prices[1]['price']
 
-            # writer.writerow([name, base_price, price, str(discount)])
             if base_price is None or price is None:
-                continue  # skip non-purchasable items
-            product = Product(name, float(base_price), float(price), discount)
+                old_hash_value = int(str(hash(f'selver{prices[0]["id"]}'))[:-15:-1])
+                hash_value, has_barcode = product_hash('selver', prices[0]['id']), False
+                assert old_hash_value == hash_value
+
+            if hash_value is None:
+                hash_value = 0
+
+            product = Product(name, float(base_price), float(price), discount, hash_value, has_barcode)
             saver.send(product)
 
         if product_count < RESULTS_PER_PAGE:

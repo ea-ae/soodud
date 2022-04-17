@@ -9,14 +9,20 @@ psycopg2 = "*"
 djangorestframework = "*"
 markdown = "*"
 requests = "*"
-scrapy = "*"
 regex = "*"
 unidecode = "*"
 bs4 = "*"
 soupsieve = "*"
+django-extensions = "*"
+html5lib = "*"
 
 [dev-packages]
 pre-commit = "*"
+pytest = "*"
+pytest-django = "*"
+pytest-xdist = "*"
+line-profiler-pycharm = "*"
+pytest-dependency = "*"
 
 [requires]
 python_version = "3.10"
