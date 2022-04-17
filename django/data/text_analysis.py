@@ -118,7 +118,7 @@ def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]
             if unit not in SPECIAL_UNITS:
                 amount *= QTY_WEIGHTS[quantifier]
 
-            base_unit = unit if unit in SPECIAL_UNITS else unit.replace(quantifier, '')
+            base_unit = unit if unit in SPECIAL_UNITS else unit.replace(quantifier, '', 1)
             quantities.add(Quantity(amount, base_unit))
         else:
             processed_tokens.append(token)

@@ -118,7 +118,7 @@ class StoreRegistry:
             sp_model = models.StoreProduct.objects.only('name', 'product').get(id=sp.id)
             sp_models.append(sp_model)
             for quantity in sp.quantities:
-                quantity = (round(quantity[0], 2), quantity[1])
+                quantity = (quantity[0], quantity[1])
                 quantities.add(quantity)
 
         longest_name = sorted((sp.name for sp in sp_models), key=lambda x: len(x))[-1]

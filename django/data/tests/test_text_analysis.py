@@ -23,8 +23,8 @@ def test_empty_text_preparation():
 @pytest.mark.dependency(depends=['test_text_preparation'])
 def test_quantity_parsing():
     """Test quantity parsing."""
-    text = ta.prepare('token 3 kg 5,5% 1.234%vol 2 %vol 5l!')
-    expected = ((3000, 'g'), (5.5, '%'), (1.234, '%'), (2, '%'), (5, 'l'))
+    text = ta.prepare('token 3 kg 245mm 5,5% 1.234%vol 2 %vol 5l!')
+    expected = ((3000, 'g'), (0.245, 'm'), (5.5, '%'), (1.234, '%'), (2, '%'), (5, 'l'))
     _, actual = ta.parse_quantity(text)
     for q in expected:
         assert ta.Quantity(*q) in actual
