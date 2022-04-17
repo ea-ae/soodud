@@ -33,7 +33,7 @@ def prepare_store(store: dict) -> list[Text]:
     """Prepare all products of a store."""
     results: list[Text] = []
     # counter, tokens_total = Counter(), 0
-    for product in store[:750]:
+    for product in store:
         tokens = prepare(product['name'])
         if len(tokens) == 0:
             continue
@@ -67,6 +67,7 @@ def prepare(text: str) -> list[str]:
     # todo: hyphenated words, e.g. 'singi-juustupirukas'; do we separate, add, keep, multiple?
     text = regex.sub(r'(\d+\s*),(\s*\d+)', r'\1.\2', text)  # normalize commas
     text = regex.sub(r'(\d+)\s*(?:\*|x)\s*(\d+)(?=\s*+\D)', r'\1x\2', text)  # 3 * 5 kg -> 3x5 kg
+    text = text.replace('%vol', '% vol')  # 3.5%vol -> 3.5% vol
 
     for blacklist_item in BLACKLIST:  # get rid of junk words
         for whitelist_item in WHITELIST:  # unless they are part of a brand name, etc
