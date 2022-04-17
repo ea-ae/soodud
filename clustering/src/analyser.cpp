@@ -101,5 +101,3 @@ void Analyser::process_match() {
 
     products.push_back(std::move(new_product));
 }
-
-void Analyser::update_queue() {}

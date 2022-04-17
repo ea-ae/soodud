@@ -10,8 +10,6 @@ class Matcher {
    public:
     Matcher() = default;
     virtual ~Matcher() = default;
-    Matcher(const Matcher& other) = delete;
-    Matcher& operator=(const Matcher& other) = delete;
 
     virtual double match(const Product& a, const Product& b) const = 0;
 
@@ -21,9 +19,7 @@ class Matcher {
 
 class SingleLinkageMatcher : public Matcher {
    public:
-    SingleLinkageMatcher();
-    SingleLinkageMatcher(const SingleLinkageMatcher& other) = delete;
-    SingleLinkageMatcher& operator=(const SingleLinkageMatcher& other) = delete;
+    SingleLinkageMatcher() = default;
 
     double match(const Product& a, const Product& b) const;
 };

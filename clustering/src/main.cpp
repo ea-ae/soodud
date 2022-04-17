@@ -20,7 +20,7 @@ using namespace py::literals;
 int main() {
     using q = std::pair<int32_t, std::string>;
     auto q1 = quantities_t{q{3, "kg"}, q{2, "tk"}};
-    auto q2 = quantities_t{q{2, "kg"}, q{55, "%"}};
+    auto q2 = quantities_t{q{3, "kg"}, q{55, "%"}};
 
     auto analyser = Analyser();
     analyser.create_product(1, 1, std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q1);
@@ -34,7 +34,6 @@ int main() {
     return 0;
 }
 
-// auto join = []<typename T>(T cont, std::string delimiter) -> std::string {
 auto join = [](const auto& cont, std::string delimiter = ", ") -> std::string {
     return std::accumulate(
         cont.begin(),
@@ -46,7 +45,6 @@ auto join = [](const auto& cont, std::string delimiter = ", ") -> std::string {
 };
 
 // PYBIND11_MAKE_OPAQUE(std::vector<Product*>);
-
 PYBIND11_MODULE(clustering, m) {
     m.doc() = "Cluster analysis algorithm.";
 

@@ -106,10 +106,8 @@ class StoreRegistry:
 
         with transaction.atomic():
             models.Product.objects.all().delete()  # migrating existing clusters is too much unnecessary work
-            products = []
             for cluster in clusters:
-                products.append(cls.add_product(cluster.get_items()))
-            models.Product.objects.bulk_create(products)
+                cls.add_product(cluster.get_items())  # bulk creation is not viable
 
     @classmethod
     def add_product(cls, store_products: list[clustering.StoreProduct]) -> models.Product:
@@ -121,6 +119,6 @@ class StoreRegistry:
             name=longest_name,  # todo: erase quantity data and place it separately
             quantity='todo'
         )
-
         product.storeproduct_set.add(*sp_models)
+        product.save()
         return product
