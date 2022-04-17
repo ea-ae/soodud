@@ -33,7 +33,7 @@ def prepare_store(store: dict) -> list[Text]:
     """Prepare all products of a store."""
     results: list[Text] = []
     # counter, tokens_total = Counter(), 0
-    for product in store:
+    for product in store[:750]:
         tokens = prepare(product['name'])
         if len(tokens) == 0:
             continue

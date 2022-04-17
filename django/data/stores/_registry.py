@@ -112,12 +112,19 @@ class StoreRegistry:
     @classmethod
     def add_product(cls, store_products: list[clustering.StoreProduct]) -> models.Product:
         """Save a product to database."""
-        sp_models = [models.StoreProduct.objects.only('name', 'product').get(id=sp.id) for sp in store_products]
+        sp_models = []
+        quantities = set()
+        for sp in store_products:
+            sp_model = models.StoreProduct.objects.only('name', 'product').get(id=sp.id)
+            sp_models.append(sp_model)
+            for quantity in sp.quantities:
+                quantity = (round(quantity[0], 2), quantity[1])
+                quantities.add(quantity)
 
         longest_name = sorted((sp.name for sp in sp_models), key=lambda x: len(x))[-1]
         product = models.Product.objects.create(
             name=longest_name,  # todo: erase quantity data and place it separately
-            quantity='todo'
+            quantity=list(quantities)
         )
         product.storeproduct_set.add(*sp_models)
         product.save()
