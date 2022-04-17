@@ -1,5 +1,6 @@
 #include "analyser.h"
 
+#include <chrono>
 #include <format>
 #include <iostream>
 
@@ -25,6 +26,7 @@ void Analyser::analyse() {
     std::vector<std::unique_ptr<Match>> initial_matches;
 
     std::cout << "Creating all initial match combinations\n";
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 
     for (size_t i = 0; i < products.size(); i++) {
         for (size_t j = i + 1; j < products.size(); j++) {  // process all combinations of items
@@ -38,13 +40,18 @@ void Analyser::analyse() {
         }
     }
 
+    auto initial_count = initial_matches.size();
+
     merge_queue = std::make_unique<match_queue_t>(
         [](const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b) -> bool {
             return a->score < b->score;
         },
         std::move(initial_matches));
 
-    std::cout << "Processing merge queue\n";
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+    std::cout << std::format("Created {} initial match combinations in {}s, processing merge queue\n",
+                             initial_count, delta);
 
     uint32_t counter = 0;
     while (!merge_queue->empty()) {

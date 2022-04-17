@@ -101,12 +101,28 @@ class StoreRegistry:
                 analyser.create_product(product.id, store_id, product.tokens, product.quantity)
         analyser.analyse()
         clusters = analyser.get_clusters()
-        clusters.sort(key=lambda c: -len(c.get_items()))
-        for cluster in clusters[:40]:
-            print(cluster)
-            for store_product in cluster.get_items():
-                print(' '.join(store_product.tokens), store_product.quantities)
-            print()
+        print('Saving products to database')
+
+        #  migrating existing clusters is too much unnecessary work
+        # in the future consider a smoother process where table is updated only at the end
+        models.Product.objects.all().delete()
+
+        for cluster in clusters:
+            cls.add_product(cluster.get_items())
+
+    @classmethod
+    def add_product(cls, store_products: list[clustering.StoreProduct]):
+        """Save a product to database."""
+        sp_models = [models.StoreProduct.objects.only('name', 'product').get(id=sp.id) for sp in store_products]
+
+        longest_name = sorted((sp.name for sp in sp_models), key=lambda x: len(x))[-1]
+        product = models.Product.objects.create(
+            name=longest_name,  # todo: erase quantity data and place it separately
+            quantity='todo'
+        )
+
+        product.storeproduct_set.add(*sp_models)
+        product.save()
 
     @classmethod
     def find_matches_old(cls, processed_stores: list[list[text_analysis.Text]]):

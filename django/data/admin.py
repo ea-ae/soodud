@@ -13,7 +13,7 @@ class ProductTagAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('price_list',)
     list_display = ('id', 'name', 'cheapest_store_name', 'cheapest_store_price',
-                    'certainty', 'products', 'tags_')
+                    'products', 'tags_')
     search_fields = ('id', 'name',)
 
     @staticmethod
@@ -44,6 +44,12 @@ class ProductAdmin(admin.ModelAdmin):
     @admin.display()
     def tags_(self, obj: Product):
         return ', '.join(tag.producttag.name for tag in obj.tags.through.objects.filter(product=obj))
+
+    def get_readonly_fields(self, request, obj=None):
+        """Prevent price list tag when creating new products."""
+        if obj:
+            return self.readonly_fields
+        return ()
 
 
 @admin.register(Store)
