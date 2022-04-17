@@ -10,6 +10,9 @@ class Discount(Enum):
     NORMAL = auto()
     MEMBER = auto()
 
+    def __str__(self):
+        return self.name
+
 
 @dataclass
 class Product:
