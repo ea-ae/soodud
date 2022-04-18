@@ -3,7 +3,7 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
-from data.models import ProductTag, Price, StoreProduct, Product
+from data.models import Price, StoreProduct, Product
 
 
 class TagListField(serializers.SlugRelatedField):

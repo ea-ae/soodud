@@ -15,6 +15,7 @@ bs4 = "*"
 soupsieve = "*"
 django-extensions = "*"
 html5lib = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 pre-commit = "*"

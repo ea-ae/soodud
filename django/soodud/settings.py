@@ -10,10 +10,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5bhaj-%a7h*@8tupfpwptuuxn)nh+9!^*+!_-hm+(#rtq017#4'
 DEBUG = True
 
-ALLOWED_HOSTS: list[str] = []
+ALLOWED_HOSTS: list[str] = ['*']
 ROOT_URLCONF = 'soodud.urls'
 WSGI_APPLICATION = 'soodud.wsgi.application'
 STATIC_URL = 'static/'
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8001',
+    'http://localhost:8002',
+    'http://127.0.0.1:8001',
+    'http://127.0.0.1:8002',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,6 +33,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_extensions',
+    'corsheaders',
 
     'data.apps.DataConfig',
     'api.apps.ApiConfig',
@@ -34,7 +43,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -57,9 +67,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '300/minute',
-        'product': '60/minute',
-        'search': '300/minute',
+        'anon': '30000/minute',
+        'product': '6000/minute',
+        'search': '30000/minute',
     },
 }
 

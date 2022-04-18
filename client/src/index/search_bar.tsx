@@ -13,7 +13,7 @@ const SearchBar = () => {
 
 const SearchInput = () => {
     return (
-        <input type="text" autoComplete="off" name="search" placeholder="Search..."
+        <input type="text" autoComplete="off" name="search" placeholder="Otsi tooteid..." tabIndex={1}
                className="flex-grow appearance-none h-12 px-4 py-2 focus:outline-none border-0
                           bg-stone-50 text-base text-stone-800"></input>
     );
