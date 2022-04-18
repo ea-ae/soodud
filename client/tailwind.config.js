@@ -7,7 +7,11 @@
         }
     },
     theme: {
-        extend: {},
+        extend: {
+            screens: {
+                'sm': '520px', // was 480
+            },
+        },
         fontFamily: {
             'main': 'Nunito, sans-serif',
         },
