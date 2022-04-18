@@ -15,6 +15,7 @@ class ProductPagination(pagination.LimitOffsetPagination):
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Product.objects.all()
+    throttle_scope = 'product'
     pagination_class = ProductPagination
     permission_classes = [permissions.AllowAny]
 
