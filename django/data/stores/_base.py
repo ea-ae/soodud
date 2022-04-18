@@ -1,3 +1,4 @@
+import hashlib
 from enum import Enum, auto
 from dataclasses import dataclass
 from typing import Optional
@@ -28,4 +29,4 @@ class Product:
 
 def product_hash(store_name: str, data: int | str) -> int:
     """Form a store-dependent random hash for the product."""
-    return int(str(hash(f'{store_name}{data}'))[:-15:-1])
+    return int(str(int(hashlib.sha256(str.encode(f'{store_name}{data}')).hexdigest(), 16))[:-15:-1])

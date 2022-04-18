@@ -50,9 +50,7 @@ def get_all(saver: Generator[None, Product, None]):
                 continue  # skip non-purchasable items
 
             if hash_value is None:
-                old_hash_value = int(str(hash(f'coop{product[0]["id"]}'))[:-15:-1])
                 hash_value = product_hash('coop', product[0]['id'])
-                assert old_hash_value == hash_value
 
             product = Product(name, float(base_price), float(price), discount, hash_value, False)
             saver.send(product)

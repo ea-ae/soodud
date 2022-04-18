@@ -72,10 +72,9 @@ def parse_page(soup: BeautifulSoup) -> Iterable[Product]:
         name = sv.select('.card__name', listing)[0].text
         discount = Discount.NONE
         link = sv.select('.card__url', listing)[0].attrs['href']
-        product_id = int(regex.search(r'/(\d+)$', link).group(1))
-        old_hash_value = int(str(hash(f'rimi{product_id}'))[:-15:-1])
+        # product_id = int(regex.search(r'/(\d+)$', link).group(1))
+        product_id = int(link.split('/p/')[1])
         hash_value = product_hash('rimi', product_id)
-        assert old_hash_value == hash_value
 
         # main price
         price_eur = sv.select('.price-tag.card__price > span', listing)[0].text
