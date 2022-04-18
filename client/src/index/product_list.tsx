@@ -77,10 +77,10 @@ const ProductList = () => {
 
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
     const status_style = 'mt-10 mb-5 text-center tracking-wider text-lg'
-
+    // <!-- py-2 px-1 --> vv
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
-        <div className="shadow-sm cursor-default py-2 px-1 lg:px-5 bg-stone-50 text-sm lg:text-base">
+        <div className="shadow-sm cursor-default  lg:px-5 bg-stone-50 text-sm lg:text-base">
             <ProductListHeader stores={stores} />
             {isLoaded ? (items as ProductListJSON).results?.map(p => {
                 let product = new Product(p)
@@ -94,10 +94,18 @@ const ProductList = () => {
 
 const ProductListHeader = (props: {stores: string[]}) => {
     return (
+        <>
         <div className="group flex justify-center md:justify-end items-center justify-items-center
-                        flex-wrap md:flex-nowrap px-2 text-stone-600">
+                        sticky top-0 flex-wrap md:flex-nowrap px-3 py-2 bg-stone-50 text-stone-600">
+            <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1">
+                <span className="mr-3 text-xs">Legend:</span>
+                <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
+                <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
+                <span className="mr-3 text-amber-500 text-xs">Soodustus kliendikaardiga</span>
+            </div>
             {props.stores.sort().map(store => <ProductListHeaderStore key={store} storeName={store} />)}
         </div>
+        </>
     );
 }
 
