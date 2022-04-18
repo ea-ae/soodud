@@ -102,7 +102,7 @@ def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]
     units = '|'.join(SI_UNITS + SPECIAL_UNITS)
 
     for token in tokens:
-        pattern = f'(\\d+x)?(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)'
+        pattern = f'(\\d+x)?((?<=x|\\b)\\d+\\.)?\\d+(?P<u>{units})($|\\s)'
         if (match := regex.fullmatch(pattern, token)) is not None:
             unit = match.group('u')
             i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''

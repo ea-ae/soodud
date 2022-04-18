@@ -66,7 +66,7 @@ const ProductList = () => {
     const [items, setItems] = useState<ProductListJSON | []>([]);
 
     useEffect(() => {
-        fetch(`${location.protocol}//${location.hostname}:8001/api/v1/products/?limit=100&offset=27500`,
+        fetch(`${location.protocol}//${location.hostname}:8001/api/v1/products/?limit=100&offset=27580`,
               {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
             .then(
@@ -149,10 +149,10 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
 }
 
 const ProductName = (props: {name: string}) => {
-    return (
+    return ( /* transition-colors transition-100 */
         <div className="flex-grow basis-full md:basis-auto cursor-pointer inline-block mr-6
                         text-center md:text-right text-xs lg:text-sm
-                        group-hover:text-blue-500 transition-colors font-semibold">
+                        group-hover:text-blue-500 font-semibold">
             {props.name}
         </div>
     );
@@ -167,6 +167,9 @@ const ProductPrice = (props: {price: Price, cheapest: boolean}) => {
     }
 
     switch (props.price.discount) {
+        case Discount.None:
+            color = 'bg-stone-100'
+            break;
         case Discount.Normal:
             color = 'bg-yellow-400';
             break;
