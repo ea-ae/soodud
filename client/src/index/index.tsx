@@ -10,8 +10,10 @@ import './index.css';
 const App = () => {
     return (
         <>
-        <Banner />
-        <SearchBar />
+        {/* <div className="row-span-2 sticky top-3"> */}
+            <Banner />
+            <SearchBar />
+        {/* </div> */}
         <ProductList />
         </>
     );
