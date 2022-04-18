@@ -76,25 +76,7 @@ const ProductList = () => {
     }, []);
 
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
-    // const product: Product = {
-    //     name: 'Sample product',
-    //     prices: {
-    //         rimi: {actualPrice: 14.99, discount: Discount.None},
-    //         maxima: {actualPrice: 3.99, discount: Discount.Normal},
-    //         prisma: {actualPrice: 5.99, discount: Discount.None},
-    //         coop: {actualPrice: 4.99, discount: Discount.Member},
-    //     }
-    // };
-    // const product2: Product = {
-    //     name: 'Sample product #2 but this one has like a realllllllllyyyy long name no kidding and in all fairness it could only keep going',
-    //     prices: {
-    //         coop: {actualPrice: 11.99, discount: Discount.None},
-    //         selver: {actualPrice: 11.99, discount: Discount.Member},
-    //         prisma: {actualPrice: 14.49, discount: Discount.Normal},
-    //     }
-    // };
-
-    console.log(items);
+    const status_style = 'mt-10 mb-5 text-center tracking-wider text-lg'
 
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
@@ -103,8 +85,8 @@ const ProductList = () => {
             {isLoaded ? (items as ProductListJSON).results?.map(p => {
                 let product = new Product(p)
                 return <ProductRow key={product.id} stores={stores} product={product} />;
-            }) : <p>Loading...</p>}
-            {error ? <p>Error! {(error as {message: string}).message}</p> : <></>}
+            }) : <div className={`${status_style}`}>Loading...</div>}
+            {error ? <div className={`${status_style}`}>Error! {(error as {message: string}).message}</div> : <></>}
         </div>
     </div>
     );
@@ -138,9 +120,6 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
                 props.stores.sort().map(store => {
                     let storeName = store.toLowerCase();
                     let price = props.product.prices[storeName];
-                    console.log('price');
-                    console.log(price);
-                    console.log(props.product);
                     return <ProductPrice key={storeName} price={price} cheapest={price?.actualPrice == cheapest} />;
                 })
             }

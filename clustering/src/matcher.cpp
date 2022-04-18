@@ -32,7 +32,7 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
     }
 
     auto token_score = matches / ((sizes.first >= 4) ? sizes.first : sizes.second);
-    return 0.95 * token_score + 0.05 * quantity_score;  // todo: reserve 0.01 for 100% product code matches
+    return 0.9 * token_score + 0.1 * quantity_score;  // todo: reserve 0.01 for 100% product code matches
 }
 
 double SingleLinkageMatcher::match(const Product& a, const Product& b) const {

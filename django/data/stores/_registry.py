@@ -96,7 +96,7 @@ class StoreRegistry:
     @classmethod
     def find_matches(cls, processed_stores: list[tuple[int, list[text_analysis.Text]]]):
         """Find matches for processed store products."""
-        analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.7)
+        analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.75)
         for store_id, store in processed_stores:
             for product in store:
                 analyser.create_product(product.id, store_id, product.tokens, product.quantity)
