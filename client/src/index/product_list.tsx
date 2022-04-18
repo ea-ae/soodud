@@ -33,8 +33,6 @@ class Product {
         this.name = json.name;
         this.prices = {};
         json.store_products.forEach(sp => {
-            console.log('sp name');
-            console.log(sp);
             this.prices[sp.store_name.toLowerCase()] = {
                 basePrice: sp.price.base_price,
                 actualPrice: sp.price.price,
@@ -77,10 +75,9 @@ const ProductList = () => {
 
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
     const status_style = 'mt-10 mb-5 text-center tracking-wider text-lg'
-    // <!-- py-2 px-1 --> vv
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
-        <div className="shadow-sm cursor-default  lg:px-5 bg-stone-50 text-sm lg:text-base">
+        <div className="shadow-sm cursor-default lg:px-5 bg-stone-50 text-sm lg:text-base">
             <ProductListHeader stores={stores} />
             {isLoaded ? (items as ProductListJSON).results?.map(p => {
                 let product = new Product(p)
@@ -98,11 +95,11 @@ const ProductListHeader = (props: {stores: string[]}) => {
         <div className="group flex justify-center md:justify-end items-center justify-items-center
                         sticky top-0 flex-wrap md:flex-nowrap px-3 py-2 bg-stone-50 text-stone-600">
             <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1">
-                <span className="mr-3 text-xs">Legend:</span>
                 <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
                 <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
-                <span className="mr-3 text-amber-500 text-xs">Soodustus kliendikaardiga</span>
+                <span className="mr-6 text-amber-500 text-xs">Kliendikaardiga</span>
             </div>
+            <div className="basis-full md:basis-0 md:hidden"></div>
             {props.stores.sort().map(store => <ProductListHeaderStore key={store} storeName={store} />)}
         </div>
         </>
@@ -111,7 +108,7 @@ const ProductListHeader = (props: {stores: string[]}) => {
 
 const ProductListHeaderStore = (props: {storeName: string}) => {
     return (
-        <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1 text-center">
+        <div className="inline-block min-w-[5em] mt-1 ml-1 md:mt-0 text-center">
             <span className="text-xs lg:text-sm">{props.storeName}</span>
         </div>
     );
@@ -122,7 +119,7 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
 
     return (
         <div className="group flex justify-center md:justify-end
-                        items-center justify-items-center flex-wrap md:flex-nowrap px-2 py-1">
+                        items-center justify-items-center flex-wrap md:flex-nowrap px-3 py-0.5">
             <ProductName name={props.product.name} />
             {
                 props.stores.sort().map(store => {
@@ -147,7 +144,7 @@ const ProductName = (props: {name: string}) => {
 
 const ProductPrice = (props: {price: Price, cheapest: boolean}) => {
     let color = 'transparent';
-    const style = 'inline-block min-w-[5em] w-[5em] mt-1 md:mt-0 ml-1 py-[1em] lg:py-[0.5em] text-center '
+    const style = 'inline-block min-w-[5em] w-[5em] mt-1 ml-1 md:mt-0 py-[1em] lg:py-[0.5em] text-center '
 
     if (props.price == null) { // store doesn't contain product
         return <div className={style + color}>-</div>;

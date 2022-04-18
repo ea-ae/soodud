@@ -4,7 +4,7 @@ import React from 'react';
 const SearchBar = () => {
     return (
         <div className="flex sm:col-start-2 md:col-start-3 xl:col-start-1 row-start-2
-                        col-span-10 sm:col-span-8 md:col-span-6 xl:col-span-3 shadow sticky top-3">
+                        col-span-10 sm:col-span-8 md:col-span-6 xl:col-span-3 shadow xl:sticky top-3">
             <SearchInput />
             <SearchButton />
         </div>
