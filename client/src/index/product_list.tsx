@@ -74,18 +74,18 @@ const ProductList = () => {
     }, []);
 
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
-    const status_style = 'mt-10 mb-5 text-center tracking-wider text-lg'
+    const status_style = 'py-5 text-center tracking-wider text-base'
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
-        <div className="shadow-sm cursor-default lg:px-5 bg-stone-50 text-sm lg:text-base">
-            <ProductListHeader stores={stores} />
-            {isLoaded ? (items as ProductListJSON).results?.map(p => {
-                let product = new Product(p)
-                return <ProductRow key={product.id} stores={stores} product={product} />;
-            }) : <div className={`${status_style}`}>Loading...</div>}
-            {error ? <div className={`${status_style}`}>Error! {(error as {message: string}).message}</div> : <></>}
+            <div className="shadow-sm cursor-default lg:px-5 bg-stone-50 text-sm lg:text-base">
+                <ProductListHeader stores={stores} />
+                {isLoaded ? (items as ProductListJSON).results?.map(p => {
+                    let product = new Product(p)
+                    return <ProductRow key={product.id} stores={stores} product={product} />;
+                }) : <div className={`${status_style}`}>Laeme...</div>}
+                {error ? <div className={`${status_style}`}>Error! {(error as {message: string}).message}</div> : <></>}
+            </div>
         </div>
-    </div>
     );
 }
 
@@ -93,7 +93,7 @@ const ProductListHeader = (props: {stores: string[]}) => {
     return (
         <>
         <div className="group flex justify-center md:justify-end items-center justify-items-center
-                        sticky top-0 flex-wrap md:flex-nowrap px-3 py-2 bg-stone-50 text-stone-600">
+                        sticky top-0 flex-wrap md:flex-nowrap px-1.5 sm:px-3 py-2 bg-stone-50 text-stone-600">
             <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1">
                 <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
                 <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
@@ -119,7 +119,7 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
 
     return (
         <div className="group flex justify-center md:justify-end
-                        items-center justify-items-center flex-wrap md:flex-nowrap mb-3 md:mb-0 px-3 py-0.5">
+                        items-center justify-items-center flex-wrap md:flex-nowrap mb-3 md:mb-0 px-1.5 sm:px-3 py-0.5">
             <ProductName name={props.product.name} />
             {
                 props.stores.sort().map(store => {
@@ -134,7 +134,7 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
 
 const ProductName = (props: {name: string}) => {
     return ( /* transition-colors transition-100 */
-        <div className="flex-grow basis-full md:basis-auto cursor-pointer inline-block mr-6
+        <div className="flex-grow basis-full md:basis-auto cursor-pointer inline-block md:mr-6
                         text-center md:text-right text-xs lg:text-sm
                         group-hover:text-blue-500 font-semibold">
             {props.name}
