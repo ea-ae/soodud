@@ -108,7 +108,7 @@ const ProductListHeader = (props: {stores: string[]}) => {
 
 const ProductListHeaderStore = (props: {storeName: string}) => {
     return (
-        <div className="inline-block min-w-[5em] mt-1 ml-1 md:mt-0 text-center">
+        <div className="inline-block min-w-[3.4em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center">
             <span className="text-xs lg:text-sm">{props.storeName}</span>
         </div>
     );
@@ -119,7 +119,7 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
 
     return (
         <div className="group flex justify-center md:justify-end
-                        items-center justify-items-center flex-wrap md:flex-nowrap px-3 py-0.5">
+                        items-center justify-items-center flex-wrap md:flex-nowrap mb-3 md:mb-0 px-3 py-0.5">
             <ProductName name={props.product.name} />
             {
                 props.stores.sort().map(store => {
@@ -144,7 +144,7 @@ const ProductName = (props: {name: string}) => {
 
 const ProductPrice = (props: {price: Price, cheapest: boolean}) => {
     let color = 'transparent';
-    const style = 'inline-block min-w-[5em] w-[5em] mt-1 ml-1 md:mt-0 py-[1em] lg:py-[0.5em] text-center '
+    const style = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 py-[1em] lg:py-[0.5em] text-center '
 
     if (props.price == null) { // store doesn't contain product
         return <div className={style + color}>-</div>;

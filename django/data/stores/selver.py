@@ -33,7 +33,7 @@ def get_all(saver: Generator[None, Product, None]):
 
             name = product['name']
             prices = product['prices']
-            hash_value, has_barcode = int(str(product['product_main_ean'])[:-15:-1]), True
+            hash_value, has_barcode = int(str(product['product_main_ean'])), True
             discount = Discount.NORMAL if prices[0]['is_discount'] else Discount.NONE
             if discount == Discount.NORMAL:
                 base_price = prices[0]['original_price']
