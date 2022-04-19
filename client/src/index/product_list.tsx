@@ -74,14 +74,17 @@ const ProductList = () => {
     }, []);
 
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
-    const status_style = 'py-5 text-center tracking-wider text-base'
+    const status_style = 'py-5 text-center tracking-wider text-base';
+    // shared item layout between header and product rows
+    const item_layout = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center';
+
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
             <div className="shadow-sm cursor-default lg:px-5 bg-stone-50 text-sm lg:text-base">
-                <ProductListHeader stores={stores} />
+                <ProductHeader stores={stores} item_layout={item_layout} />
                 {isLoaded ? (items as ProductListJSON).results?.map(p => {
                     let product = new Product(p)
-                    return <ProductRow key={product.id} stores={stores} product={product} />;
+                    return <ProductRow key={product.id} stores={stores} product={product} item_layout={item_layout} />;
                 }) : <div className={`${status_style}`}>Laeme...</div>}
                 {error ? <div className={`${status_style}`}>Error! {(error as {message: string}).message}</div> : <></>}
             </div>
@@ -89,7 +92,7 @@ const ProductList = () => {
     );
 }
 
-const ProductListHeader = (props: {stores: string[]}) => {
+const ProductHeader = (props: {stores: string[], item_layout: string}) => {
     return (
         <>
         <div className="group flex justify-center md:justify-end items-center justify-items-center
@@ -100,22 +103,23 @@ const ProductListHeader = (props: {stores: string[]}) => {
                 <span className="mr-6 text-amber-500 text-xs">Kliendikaardiga</span>
             </div>
             <div className="basis-full md:basis-0 md:hidden"></div>
-            {props.stores.sort().map(store => <ProductListHeaderStore key={store} storeName={store} />)}
+            {props.stores.sort().map(
+                store => <ProductHeaderColumn key={store} storeName={store} item_layout={props.item_layout} />)}
         </div>
         </>
     );
 }
 
-const ProductListHeaderStore = (props: {storeName: string}) => {
+const ProductHeaderColumn = (props: {storeName: string, item_layout: string}) => {
     return (
-        <div className="inline-block min-w-[3.4em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center">
+        <div className={props.item_layout}>
             <span className="text-xs lg:text-sm">{props.storeName}</span>
         </div>
     );
 }
 
-const ProductRow = (props: {stores: string[], product: Product}) => {
-    let cheapest = Math.min(...props.stores.map(store => props.product.prices[store.toLowerCase()]?.actualPrice ?? Infinity));
+const ProductRow = (props: {stores: string[], product: Product, item_layout: string}) => {
+    const cheapest = Math.min(...props.stores.map(store => props.product.prices[store.toLowerCase()]?.actualPrice ?? Infinity));
 
     return (
         <div className="group flex justify-center md:justify-end
@@ -125,7 +129,8 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
                 props.stores.sort().map(store => {
                     let storeName = store.toLowerCase();
                     let price = props.product.prices[storeName];
-                    return <ProductPrice key={storeName} price={price} cheapest={price?.actualPrice == cheapest} />;
+                    let is_cheapest = price?.actualPrice == cheapest;
+                    return <ProductPrice key={storeName} price={price} cheapest={is_cheapest} item_layout={props.item_layout} />;
                 })
             }
         </div>
@@ -133,7 +138,7 @@ const ProductRow = (props: {stores: string[], product: Product}) => {
 }
 
 const ProductName = (props: {name: string}) => {
-    return ( /* transition-colors transition-100 */
+    return (
         <div className="flex-grow basis-full md:basis-auto cursor-pointer inline-block md:mr-6
                         text-center md:text-right text-xs lg:text-sm
                         group-hover:text-blue-500 font-semibold">
@@ -142,12 +147,12 @@ const ProductName = (props: {name: string}) => {
     );
 }
 
-const ProductPrice = (props: {price: Price, cheapest: boolean}) => {
+const ProductPrice = (props: {price: Price, cheapest: boolean, item_layout: string}) => {
     let color = 'transparent';
-    const style = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 py-[1em] lg:py-[0.5em] text-center '
+    const price_style = ['py-[1em] lg:py-[0.5em]', props.item_layout].join(' ');
 
     if (props.price == null) { // store doesn't contain product
-        return <div className={style + color}>-</div>;
+        return <div className={[price_style, props.item_layout, color].join(' ')}>-</div>;
     }
 
     switch (props.price.discount) {
@@ -160,7 +165,11 @@ const ProductPrice = (props: {price: Price, cheapest: boolean}) => {
         case Discount.Member:
             color = 'bg-orange-400';
     }
-    return <div className={style + color + (props.cheapest ? ' font-bold' : '')}>{props.price.actualPrice}</div>;
+    return (
+        <div className={[price_style, color, props.cheapest ? 'font-bold' : ''].join(' ')}>
+            {props.price.actualPrice}
+        </div>
+    );
 }
 
 export default ProductList;
