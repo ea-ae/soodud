@@ -75,7 +75,7 @@ const ProductList = () => {
 
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
     const status_style = 'py-5 text-center tracking-wider text-base';
-    // shared item layout between header and product rows
+    // shared layout between header and product rows
     const item_layout = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center';
 
     return (
@@ -94,19 +94,17 @@ const ProductList = () => {
 
 const ProductHeader = (props: {stores: string[], item_layout: string}) => {
     return (
-        <>
         <div className="group flex justify-center md:justify-end items-center justify-items-center
                         sticky top-0 flex-wrap md:flex-nowrap px-1.5 sm:px-3 py-2 bg-stone-50 text-stone-600">
             <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1">
                 <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
                 <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
-                <span className="mr-6 text-amber-500 text-xs">Kliendikaardiga</span>
+                <span className="md:mr-6 text-amber-500 text-xs">Kliendikaardiga</span>
             </div>
             <div className="basis-full md:basis-0 md:hidden"></div>
             {props.stores.sort().map(
                 store => <ProductHeaderColumn key={store} storeName={store} item_layout={props.item_layout} />)}
         </div>
-        </>
     );
 }
 
