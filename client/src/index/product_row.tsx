@@ -8,7 +8,9 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
 
     return (
         <div className="group flex justify-center md:justify-end
-                        items-center justify-items-center flex-wrap md:flex-nowrap mb-3 md:mb-0 px-1.5 lg:px-5 sm:px-3 py-0.5">
+                        items-center justify-items-center flex-wrap md:flex-nowrap
+                        mx-1.5 sm:mx-3 lg:mx-5 mb-2 md:mb-1 py-0.5 pb-2 md:pb-1
+                        border-0 border-b-[1px] border-neutral-200">
             <ProductName name={props.product.name} />
             {
                 props.stores.sort().map(store => {
@@ -34,10 +36,10 @@ const ProductName = (props: {name: string}) => {
 
 const ProductPrice = (props: {price: Price, cheapest: boolean, item_layout: string}) => {
     let color = 'transparent';
-    const price_style = ['py-[1em] lg:py-[0.5em]', props.item_layout].join(' ');
+    const priceStyle = ['py-2', props.item_layout].join(' ');
 
     if (props.price == null) { // store doesn't contain product
-        return <div className={[price_style, props.item_layout, color].join(' ')}>-</div>;
+        return <div className={[priceStyle, props.item_layout, color].join(' ')}>-</div>;
     }
 
     switch (props.price.discount) {
@@ -51,7 +53,7 @@ const ProductPrice = (props: {price: Price, cheapest: boolean, item_layout: stri
             color = 'bg-orange-400';
     }
     return (
-        <div className={[price_style, color, props.cheapest ? 'font-bold' : ''].join(' ')}>
+        <div className={[priceStyle, color, props.cheapest ? 'font-bold' : ''].join(' ')}>
             {props.price.actualPrice}
         </div>
     );
