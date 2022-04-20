@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEventHandler, useState } from 'react';
 
 
 const SearchBar = () => {
@@ -12,10 +12,13 @@ const SearchBar = () => {
 }
 
 const SearchInput = () => {
+    let [searchText, setSearchText] = useState<string>('');
+
     return (
-        <input type="text" autoComplete="off" name="search" placeholder="Otsi tooteid..." tabIndex={1}
+        <input type="text" autoComplete="off" name="search" tabIndex={1}
+               onChange={e => setSearchText(e.target.value)} value={searchText} placeholder="Otsi tooteid..."
                className="flex-grow appearance-none h-12 px-4 py-2 focus:outline-none border-0
-                          bg-stone-50 text-base text-stone-800"></input>
+                          bg-stone-50 text-base text-stone-800" />
     );
 }
 

@@ -23,7 +23,7 @@ module.exports = merge(common, {
         port: 8002,
         hot: true,
         magicHtml: true,
-        static: { directory: path.join(__dirname, 'public') },
+        static: { directory: path.join(__dirname, '/') }, // 'public'
         client: { progress: true },
         compress: true,
         watchFiles: {paths: ['./src/**/*']},
