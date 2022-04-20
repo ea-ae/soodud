@@ -96,7 +96,7 @@ class StoreRegistry:
     @classmethod
     def find_matches(cls, processed_stores: list[tuple[int, list[text_analysis.Text]]]):
         """Find matches for processed store products."""
-        analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.7)
+        analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.75)
         for store_id, store in processed_stores:
             for product in store:
                 analyser.create_product(product.id, store_id, product.tokens, product.quantity)
@@ -118,7 +118,7 @@ class StoreRegistry:
             sp_model = models.StoreProduct.objects.only('name', 'product').get(id=sp.id)
             sp_models.append(sp_model)
             for quantity in sp.quantities:
-                quantity = (round(quantity[0], 2), quantity[1])
+                quantity = (quantity[0], quantity[1])
                 quantities.add(quantity)
 
         longest_name = sorted((sp.name for sp in sp_models), key=lambda x: len(x))[-1]

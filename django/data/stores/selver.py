@@ -6,7 +6,7 @@ from typing import Generator, Callable, Any
 from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
-RESULTS_PER_PAGE = 1000  # too large and python crashes
+RESULTS_PER_PAGE = 500  # too large and python/network crashes; 1000 used to work
 BASE_URL = 'https://www.selver.ee/api/catalog/vue_storefront_catalog_et/product/_search'
 PARAMS: dict[str, str | int] = {
     # 'from': 11000,  # start from result n
@@ -33,7 +33,7 @@ def get_all(saver: Generator[None, Product, None]):
 
             name = product['name']
             prices = product['prices']
-            hash_value, has_barcode = int(str(product['product_main_ean'])[:-15:-1]), True
+            hash_value, has_barcode = int(str(product['product_main_ean'])), True
             discount = Discount.NORMAL if prices[0]['is_discount'] else Discount.NONE
             if discount == Discount.NORMAL:
                 base_price = prices[0]['original_price']
@@ -44,9 +44,7 @@ def get_all(saver: Generator[None, Product, None]):
                 price = prices[1]['price']
 
             if base_price is None or price is None:
-                old_hash_value = int(str(hash(f'selver{prices[0]["id"]}'))[:-15:-1])
                 hash_value, has_barcode = product_hash('selver', prices[0]['id']), False
-                assert old_hash_value == hash_value
 
             if hash_value is None:
                 hash_value = 0

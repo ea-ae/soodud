@@ -1,5 +1,6 @@
  module.exports = {
-    //content: ["./src/**/*.{html,js}"],
+    // content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
+    important: true,
     purge: {
         content: ['./src/**/*.{html,js,jsx,ts,tsx}'], // /dist/
         options: {
@@ -7,9 +8,13 @@
         }
     },
     theme: {
-        extend: {},
+        extend: {
+            screens: {
+                'sm': '520px', // was 480
+            },
+        },
         fontFamily: {
-            'roboto': 'Roboto, sans-serif',
+            'main': 'Nunito, sans-serif',
         },
     },
     plugins: [],

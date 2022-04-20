@@ -20,16 +20,24 @@ module.exports = merge(common, {
         }),
     ],
     devServer: {
-        port: 8080,
+        port: 8002,
         hot: true,
         magicHtml: true,
-        static: { directory: path.join(__dirname, 'public') },
+        static: { directory: path.join(__dirname, 'public/favicons/') },
         client: { progress: true },
         compress: true,
-        port: 8001,
         watchFiles: {paths: ['./src/**/*']},
         historyApiFallback: {
             index: '/',
         },
+        proxy: {
+            '/api/v1': {
+                target: {
+                    host: '127.0.0.1',
+                    protocol: 'http:',
+                    port: 8001
+                }
+            }
+        }
     },
 });

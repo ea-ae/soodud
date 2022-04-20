@@ -68,6 +68,7 @@ def prepare(text: str) -> list[str]:
     text = regex.sub(r'(\d+\s*),(\s*\d+)', r'\1.\2', text)  # normalize commas
     text = regex.sub(r'(\d+)\s*(?:\*|x)\s*(\d+)(?=\s*+\D)', r'\1x\2', text)  # 3 * 5 kg -> 3x5 kg
     text = text.replace('%vol', '% vol')  # 3.5%vol -> 3.5% vol
+    text = text.replace('/', ' ')
 
     for blacklist_item in BLACKLIST:  # get rid of junk words
         for whitelist_item in WHITELIST:  # unless they are part of a brand name, etc
@@ -79,7 +80,7 @@ def prepare(text: str) -> list[str]:
     # tokenize the string
     tokens = []
     for token in text.split():
-        token = regex.sub(r'(?:-|,|!|\.|/)$', '', token)  # remove junk characters
+        token = regex.sub(r'(?:-|,|!|\.)$', '', token)  # remove junk characters
         token = token.strip()
 
         if token in UNITS:
@@ -101,7 +102,7 @@ def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]
     units = '|'.join(SI_UNITS + SPECIAL_UNITS)
 
     for token in tokens:
-        pattern = f'(\\d+x)?(\\b\\d+\\.)?\\d+(?P<u>{units})($|\\s)'
+        pattern = f'(\\d+x)?((?<=x|\\b)\\d+\\.)?\\d+(?P<u>{units})($|\\s)'
         if (match := regex.fullmatch(pattern, token)) is not None:
             unit = match.group('u')
             i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''
@@ -118,7 +119,7 @@ def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]
             if unit not in SPECIAL_UNITS:
                 amount *= QTY_WEIGHTS[quantifier]
 
-            base_unit = unit if unit in SPECIAL_UNITS else unit.replace(quantifier, '')
+            base_unit = unit if unit in SPECIAL_UNITS else unit.replace(quantifier, '', 1)
             quantities.add(Quantity(amount, base_unit))
         else:
             processed_tokens.append(token)
