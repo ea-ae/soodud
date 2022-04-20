@@ -83,7 +83,7 @@ export const ProductList = () => {
 
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
-            <div className="shadow-sm cursor-default lg:px-5 bg-stone-50 text-sm lg:text-base">
+            <div className="shadow-sm cursor-default pb-2 bg-stone-50 text-sm lg:text-base">
                 <ProductHeader stores={stores} item_layout={item_layout} />
                 {isLoaded ? (items as ProductListJSON).results?.map(p => {
                     let product = new Product(p)

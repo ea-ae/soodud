@@ -8,7 +8,7 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
 
     return (
         <div className="group flex justify-center md:justify-end
-                        items-center justify-items-center flex-wrap md:flex-nowrap mb-3 md:mb-0 px-1.5 sm:px-3 py-0.5">
+                        items-center justify-items-center flex-wrap md:flex-nowrap mb-3 md:mb-0 px-1.5 lg:px-5 sm:px-3 py-0.5">
             <ProductName name={props.product.name} />
             {
                 props.stores.sort().map(store => {

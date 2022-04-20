@@ -5,6 +5,7 @@ const ProductHeader = (props: {stores: string[], item_layout: string}) => {
     return (
         <div className="group flex justify-center md:justify-end items-center justify-items-center
                         sticky top-0 flex-wrap md:flex-nowrap px-1.5 sm:px-3 py-2 bg-stone-50 text-stone-600">
+            <MenuButton />
             <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1">
                 <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
                 <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
@@ -13,6 +14,15 @@ const ProductHeader = (props: {stores: string[], item_layout: string}) => {
             <div className="basis-full md:basis-0 md:hidden"></div>
             {props.stores.sort().map(
                 store => <ProductHeaderColumn key={store} storeName={store} item_layout={props.item_layout} />)}
+        </div>
+    );
+}
+
+const MenuButton = () => {
+    return (
+        <div className="flex-grow">
+             <span className="material-icons material-icon  text-left text-neutral-900 text-2xl leading-none"
+                   onClick={e => console.log('menu')}>menu</span>
         </div>
     );
 }

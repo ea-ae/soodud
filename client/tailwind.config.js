@@ -1,5 +1,6 @@
  module.exports = {
     // content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
+    important: true,
     purge: {
         content: ['./src/**/*.{html,js,jsx,ts,tsx}'], // /dist/
         options: {
