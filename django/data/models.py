@@ -12,9 +12,12 @@ class ProductTag(models.Model):
 class Product(models.Model):
     """Platonic product that all individual store instances point to."""
     name = models.CharField(max_length=250)
-    image_url = models.TextField(default=None, blank=True, null=True)
     tags = models.ManyToManyField(ProductTag, related_name='tags', blank=True)
     quantity = models.JSONField()
+
+    @property
+    def name_len(self):
+        return len(self.name)
 
     def __str__(self):
         return self.name
@@ -34,7 +37,7 @@ class StoreProduct(models.Model):
     current_price = models.ForeignKey('Price', on_delete=models.SET_NULL, blank=True, null=True)
 
     name = models.CharField(max_length=250)
-    hash = models.PositiveIntegerField()
+    hash = models.CharField(max_length=100)
     has_barcode = models.BooleanField(default=False)
     last_checked = models.DateTimeField(auto_now=True)
 

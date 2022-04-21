@@ -10,6 +10,13 @@ ROOT_URLCONF = 'soodud.urls'
 WSGI_APPLICATION = 'soodud.wsgi.application'
 STATIC_URL = 'static/'
 
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -18,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     'rest_framework',
     'django_extensions',
@@ -26,6 +34,7 @@ INSTALLED_APPS = [
     'data.apps.DataConfig',
     'api.apps.ApiConfig',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -37,6 +46,22 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+        'TEST': {
+            'NAME': 'django_test_' + config('DB_NAME'),
+        }
+    }
+}
+
 
 BASE_REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -54,35 +79,6 @@ BASE_REST_FRAMEWORK = {
     ],
 }
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
 
 BASE_LOGGING = {
     'version': 1,
@@ -108,16 +104,16 @@ BASE_LOGGING = {
             'filters': ['require_debug_true'],
             'formatter': 'normal',
         },
-        'client_info': {
+        'general_info': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/client_log.log',
+            'filename': 'logs/general_log.log',
             'formatter': 'normal',
         },
-        'client_errors': {
+        'general_errors': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': 'logs/client_errors.log',
+            'filename': 'logs/general_errors.log',
             'formatter': 'verbose',
         },
         'server_info': {
@@ -144,15 +140,33 @@ BASE_LOGGING = {
         },
         'data': {
             'level': 'INFO',
-            'handlers': ['console', 'client_info', 'client_errors'],
+            'handlers': ['console', 'general_info', 'general_errors'],
             'propagate': True
         },
     }
 }
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]

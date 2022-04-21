@@ -15,6 +15,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 REST_FRAMEWORK = BASE_REST_FRAMEWORK | {
+    'MAX_LIMIT': 5000,
     'DEFAULT_THROTTLE_RATES': {
         'anon': '30000/minute',
         'product': '6000/minute',

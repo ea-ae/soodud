@@ -51,10 +51,15 @@ class DetailedStoreProductSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     store_products = StoreProductSerializer(source='storeproduct_set', many=True)
+    price_count = serializers.SerializerMethodField()  # required=False source='storeproduct_set__count',
+
+    @staticmethod
+    def get_price_count(obj: Product):
+        return obj.storeproduct_set.count()
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'store_products')
+        fields = ('id', 'name', 'store_products', 'price_count')
 
 
 class DetailedProductSerializer(serializers.ModelSerializer):

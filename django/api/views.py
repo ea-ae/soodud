@@ -1,11 +1,12 @@
 """Views."""
 
-from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import pagination
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework import filters
+from rest_framework.authentication import SessionAuthentication
 
+from soodud.settings import REST_FRAMEWORK
 from . import serializers
 from data.models import Product
 
@@ -17,7 +18,7 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 
 
 class ProductPagination(pagination.LimitOffsetPagination):
-    max_limit = 100
+    max_limit = REST_FRAMEWORK['MAX_LIMIT']
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
@@ -25,7 +26,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     throttle_scope = 'product'
     pagination_class = ProductPagination
     permission_classes = [permissions.AllowAny]
-    # authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['id']
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

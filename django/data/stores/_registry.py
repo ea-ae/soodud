@@ -1,4 +1,5 @@
 from django.db import transaction
+import logging
 from concurrent import futures
 from datetime import datetime
 from typing import Generator, Callable, NamedTuple
@@ -8,6 +9,9 @@ from data import models
 from data import text_analysis
 from . import Discount
 from . import Product
+
+
+logger = logging.getLogger(__name__)
 
 
 class StoreRegistry:
@@ -69,8 +73,10 @@ class StoreRegistry:
 
                 if price_created:  # price has changed, update
                     if not product_created:  # price update
-                        print(f'{store_product.name} {store_product.current_price.price} -> {price.price} '
-                              f'({store_product.current_price.discount} -> {price.discount})')
+                        update = (f'{store_product.name} {store_product.current_price.price} -> {price.price} '
+                                  f'({store_product.current_price.discount} -> {price.discount})')
+                        print(update)  # temp
+                        logger.info(update)
                     price.save()
                     store_product.current_price = price
                 else:  # should be redundant, somewhy isn't

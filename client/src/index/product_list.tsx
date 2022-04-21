@@ -62,12 +62,18 @@ export enum Discount {
 }
 
 export const ProductList = () => {
+    const list_offset = 100;
+    const list_length = 100;
+    const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
+    const status_style = 'py-5 text-center tracking-wider text-base';
+    const item_layout = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center';
+
     const [error, setError] = useState<{message: string} | null>(null);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [items, setItems] = useState<ProductListJSON | []>([]);
 
     useEffect(() => {
-        fetch(`${location.protocol}//${location.hostname}:8001/api/v1/products/?limit=100&offset=27580`,
+        fetch(`${location.protocol}//${location.hostname}:8001/api/v1/products/?limit=${list_length}&offset=${list_offset}&ordering=-id`,
               {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
             .then(
@@ -75,11 +81,6 @@ export const ProductList = () => {
                 (error) => { setIsLoaded(true); setError(error); }
             )
     }, []);
-
-    const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
-    const status_style = 'py-5 text-center tracking-wider text-base';
-    // shared layout between header and product rows
-    const item_layout = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center';
 
     return (
         <div className="row-start-3 xl:row-start-auto xl:row-span-3 col-span-10 xl:col-span-7 bg-transparent text-stone-800">
