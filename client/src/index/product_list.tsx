@@ -4,7 +4,7 @@ import { ProductListJSON, Product } from './index';
 import ProductHeader from './product_header';
 import ProductRow from './product_row';
 
-export const ProductList = (props: {isLoaded: boolean, error: any, products: ProductListJSON | []}) => {
+export const ProductList = (props: {isLoaded: boolean, products: ProductListJSON | [], error?: string}) => {
     const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
     const status_style = 'py-5 text-center tracking-wider text-base';
     const item_layout = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center';
@@ -14,10 +14,10 @@ export const ProductList = (props: {isLoaded: boolean, error: any, products: Pro
             <div className="shadow-sm cursor-default pb-2 bg-stone-50 text-sm lg:text-base">
                 <ProductHeader stores={stores} item_layout={item_layout} />
                 {props.isLoaded ? (props.products as ProductListJSON).results?.map(p => {
-                    let product = new Product(p)
+                    let product = new Product(p);
                     return <ProductRow key={product.id} stores={stores} product={product} item_layout={item_layout} />;
                 }) : <div className={`${status_style}`}>Laeme...</div>}
-                {props.error ? <div className={`${status_style}`}>Error! {props.error.message}</div> : <></>}
+                {props.error ? <div className={`${status_style}`}>Error! {props.error}</div> : <></>}
             </div>
         </div>
     );

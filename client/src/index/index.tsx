@@ -77,7 +77,7 @@ export enum Discount {
 
 const App = () => {
     const list_offset = 0; // set to 100 for demo
-    const list_length = 100;
+    const list_length = 20; // 100 max
     const reverse_order = true;
 
     const [error, setError] = useState<{message: string} | null>(null);
@@ -86,34 +86,35 @@ const App = () => {
 
     const fetchProducts = (events: QueryEvents, query: ProductAPIQuery) => {
         const base_url = `${location.protocol}//${location.hostname}:8001/api/v1/products/?`;
-        const params = `limit=${length}&offset=${query.offset}&reverse=${query.reverse}`;
+        let params = `limit=${query.length}&offset=${query.offset}&reverse=${query.reverse}`;
+        if (query.search !== undefined) params += `&search=${query.search}`;
+
         fetch(base_url + params, {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
-            .then(
-                events.onSuccess, events.onError
-                // (result) => { events.setItems(result); events.setIsLoaded(true); },
-                // (error) => { events.setError(error); events.setIsLoaded(true); }
-            )
+            .then(events.onSuccess, events.onError)
     }
 
+    const sendProductQuery = (search?: string) => fetchProducts(
+        {
+            onSuccess: res => { setItems(res); console.log('s'); setIsLoaded(true); },
+            onError: err => { setError(err); console.log('e'); setIsLoaded(true); }
+        },
+        {offset: list_offset, length: list_length, reverse: reverse_order, search: search}
+    );
+
     const onSearch = (searchQuery: string) => {
-        console.log(searchQuery);
+        console.log(`sending ${searchQuery}`);
+        setIsLoaded(false);
+        sendProductQuery(searchQuery);
     };
 
-    const defaultProductQuery = (search?: string) => fetchProducts(
-        {
-            onSuccess: res => { setItems(res); setIsLoaded(true); },
-            onError: err => { setError(err); setIsLoaded(true); }
-        },
-        {offset: list_offset, length: list_length, reverse: reverse_order}
-    );
-    useEffect(defaultProductQuery, []);
+    useEffect(sendProductQuery, []);
 
     return (
         <>
         <Banner />
         <SearchBar onSearch={onSearch} />
-        <ProductList isLoaded={isLoaded} error={error} products={items} />
+        <ProductList isLoaded={isLoaded} products={items} error={error?.message} />
         </>
     );
 }
