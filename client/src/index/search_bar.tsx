@@ -1,19 +1,29 @@
 import React, { ChangeEventHandler, useState } from 'react';
+import { Search } from 'react-router';
 
 
 const SearchBar = (props: {onSearch: (searchQuery: string) => void}) => {
     let [searchText, setSearchText] = useState<string>('');
 
+    const search = () => props.onSearch(searchText);
+
     return (
-        <div className="flex sm:col-start-2 md:col-start-3 xl:col-start-1 row-start-2
-                        col-span-10 sm:col-span-8 md:col-span-6 xl:col-span-3 shadow xl:sticky top-3">
+        <form onSubmit={e => { e.preventDefault(); search(); }}
+              className="flex sm:col-start-2 md:col-start-3 xl:col-start-1 row-start-2
+                         col-span-10 sm:col-span-8 md:col-span-6 xl:col-span-3 shadow xl:sticky top-3">
             <SearchInput text={searchText} onChange={e => setSearchText(e.target.value)} />
-            <SearchButton onClick={() => props.onSearch(searchText)} />
-        </div>
+            <SearchButton onClick={search} />
+        </form>
     );
 }
 
-const SearchInput = (props: {text: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void}) => {
+type SearchInputProps = {
+    text: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    // onEnter: (e: React.KeyboardEvent) => void;
+}
+
+const SearchInput = (props: SearchInputProps) => {
     return (
         <input type="text" autoComplete="off" name="search" tabIndex={1}
                onChange={props.onChange} value={props.text} placeholder="Otsi tooteid..."

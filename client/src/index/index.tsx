@@ -77,7 +77,7 @@ export enum Discount {
 
 const App = () => {
     const list_offset = 0; // set to 100 for demo
-    const list_length = 20; // 100 max
+    const list_length = 100; // 100 max
     const reverse_order = true;
 
     const [error, setError] = useState<{message: string} | null>(null);
