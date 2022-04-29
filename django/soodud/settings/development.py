@@ -6,7 +6,7 @@ from .base import BASE_REST_FRAMEWORK
 DEBUG = True
 ALLOWED_HOSTS: list[str] = []
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8001',
     'http://localhost:8002',
