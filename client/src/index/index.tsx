@@ -96,7 +96,7 @@ const App = () => {
 
     const sendProductQuery = (search?: string) => fetchProducts(
         {
-            onSuccess: res => { setItems(res); console.log('s'); setIsLoaded(true); },
+            onSuccess: res => { setItems(res); setError(null); console.log('s'); setIsLoaded(true); },
             onError: err => { setError(err); console.log('e'); setIsLoaded(true); }
         },
         {offset: list_offset, length: list_length, reverse: reverse_order, search: search}

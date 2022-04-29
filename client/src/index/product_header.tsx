@@ -2,11 +2,11 @@ import React from 'react';
 
 
 const ProductHeader = (props: {stores: string[], item_layout: string}) => {
-    return (
+    return ( // removed: px-1.5 sm:px-3
         <>
         <MenuButton />
         <div className="group flex justify-center md:justify-end items-center justify-items-center
-                        sticky top-0 flex-wrap md:flex-nowrap px-1.5 sm:px-3 py-2 bg-stone-50 text-stone-600">
+                        sticky top-0 flex-wrap md:flex-nowrap mx-1.5 sm:mx-3 lg:mx-5 py-2 bg-stone-50 text-stone-600">
             <div className="flex justify-center md:justify-end flex-grow min-w-[5em] mt-1 md:mt-0 ml-1">
                 <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
                 <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
