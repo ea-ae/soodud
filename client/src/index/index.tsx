@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import Banner from './banner';
@@ -6,15 +7,113 @@ import SearchBar from './search_bar';
 import ProductList from './product_list';
 import './index.css';
 
+export interface QueryEvents {
+    onSuccess: (result: any) => void;
+    onError: (error: any) => void;
+}
+
+export interface ProductAPIQuery {
+    offset: number;
+    length: number;
+    reverse: boolean;
+    search?: string;
+}
+
+export interface ProductListJSON {
+    results: ProductJSON[];
+}
+
+interface ProductJSON {
+    id: number;
+    name: string;
+    store_products: StoreProduct[];
+}
+
+interface StoreProduct {
+    store_name: string;
+    last_checked: string;
+    price: {
+        start: string;
+        base_price: number;
+        price: number;
+        type: string;
+    }
+}
+
+export class Product {
+    id: number;
+    name: string;
+    prices: Prices;
+
+    constructor(json: ProductJSON) {
+        this.id = json.id;
+        this.name = json.name;
+        this.prices = {};
+        json.store_products.forEach(sp => {
+            this.prices[sp.store_name.toLowerCase()] = {
+                basePrice: sp.price.base_price,
+                actualPrice: sp.price.price,
+                discount: sp.price.type as Discount
+            };
+        });
+    }
+}
+
+interface Prices {
+    [key: string]: Price;
+}
+
+export interface Price {
+    basePrice?: number;
+    actualPrice: number;
+    discount: Discount;
+}
+
+export enum Discount {
+    None = 'NONE',
+    Normal = 'NORMAL',
+    Member = 'MEMBER'
+}
 
 const App = () => {
+    const list_offset = 0; // set to 100 for demo
+    const list_length = 100;
+    const reverse_order = true;
+
+    const [error, setError] = useState<{message: string} | null>(null);
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
+    const [items, setItems] = useState<ProductListJSON | []>([]);
+
+    const fetchProducts = (events: QueryEvents, query: ProductAPIQuery) => {
+        const base_url = `${location.protocol}//${location.hostname}:8001/api/v1/products/?`;
+        const params = `limit=${length}&offset=${query.offset}&reverse=${query.reverse}`;
+        fetch(base_url + params, {method: 'GET', headers: {'Content-Type': 'text/plain'}})
+            .then(res => res.json())
+            .then(
+                events.onSuccess, events.onError
+                // (result) => { events.setItems(result); events.setIsLoaded(true); },
+                // (error) => { events.setError(error); events.setIsLoaded(true); }
+            )
+    }
+
+    const onSearch = (searchQuery: string) => {
+        console.log(searchQuery);
+    };
+
+    const defaultProductQuery = (search?: string) => fetchProducts(
+        {
+            onSuccess: res => { setItems(res); setIsLoaded(true); },
+            onError: err => { setError(err); setIsLoaded(true); }
+        },
+        {offset: list_offset, length: list_length, reverse: reverse_order}
+    );
+    useEffect(defaultProductQuery, []);
+
     return (
         <>
-        {/* <div className="row-span-2 sticky top-3"> */}
-            <Banner />
-            <SearchBar />
-        {/* </div> */}
-        <ProductList />
+        <Banner />
+        <SearchBar onSearch={onSearch} />
+        <ProductList isLoaded={isLoaded} error={error} products={items} />
         </>
     );
 }

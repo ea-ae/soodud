@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Product, Price, Discount } from './product_list';
+import { Product, Price, Discount } from './index';
 
 
 const ProductRow = (props: {stores: string[], product: Product, item_layout: string}) => {
