@@ -111,17 +111,14 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                     results.append((score, product.id))
             print(f'Data search took {(timer() - start2) * 1000}ms with "{search}"')
             results.sort(key=lambda x: -x[0])
-            print(results[:10])
 
             # https://stackoverflow.com/a/25480488/4362799
             ids = [id_ for score, id_ in results[:100]]
-            clauses = ' '.join(['WHEN id=%s THEN %s' % (pk, i) for i, pk in enumerate(ids)])
+            clauses = ' '.join(['WHEN id=%s THEN %s' % (pk, i) for i, pk in enumerate(ids)])  # make queryset ordered
             ordering = 'CASE %s END' % clauses
             qs = Product.objects.filter(id__in=ids).extra(
                 select={'ordering': ordering}, order_by=('ordering',))
 
-            # print(results[:100])
-            # x = list(qs)
             print(f'New search query took {(timer() - start) * 1000}ms with "{search}"')
             return qs
 

@@ -4,8 +4,13 @@ import { Search } from 'react-router';
 
 const SearchBar = (props: {onSearch: (searchQuery: string) => void}) => {
     let [searchText, setSearchText] = useState<string>('');
+    let [lastSearchedText, setLastSearchedText] = useState<string>('');
 
-    const search = () => props.onSearch(searchText);
+    const search = () => {
+        if (lastSearchedText == '' || searchText != lastSearchedText)
+            props.onSearch(searchText);
+        setLastSearchedText(searchText);
+    }
 
     return (
         <form onSubmit={e => { e.preventDefault(); search(); }}

@@ -1,4 +1,5 @@
 import React from 'react';
+import Popup from 'reactjs-popup';
 
 
 const ProductHeader = (props: {stores: string[], item_layout: string}) => {
@@ -21,11 +22,19 @@ const ProductHeader = (props: {stores: string[], item_layout: string}) => {
 }
 
 const MenuButton = () => { // basis-full
+    const menuButton = <span className="material-icons material-icon absolute top-0 left-0 m-1.5 sm:m-3
+                                        text-left text-neutral-900 text-2xl leading-none">menu</span>
+
     return (
         <div className="z-10 relative h-0 w-0">
-             <span className="material-icons material-icon absolute top-0 left-0 m-1.5 sm:m-3
-                              text-left text-neutral-900 text-2xl leading-none"
-                   onClick={e => console.log('menu')}>menu</span>
+             <Popup trigger={menuButton} modal>
+                {() => (
+                    <div className="flex justify-center items-center shadow-xl p-10
+                                    border bg-stone-50 font-main text-neutral-800">
+                        <p className="align-middle">Kontakt: soodudee, gmail.</p>
+                    </div>
+                )}
+             </Popup>
         </div>
     );
 }

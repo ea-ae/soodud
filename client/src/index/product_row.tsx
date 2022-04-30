@@ -1,4 +1,5 @@
 import React from 'react';
+import Popup from 'reactjs-popup';
 
 import { Product, Price, Discount } from './index';
 
@@ -6,7 +7,7 @@ import { Product, Price, Discount } from './index';
 const ProductRow = (props: {stores: string[], product: Product, item_layout: string}) => {
     const cheapest = Math.min(...props.stores.map(store => props.product.prices[store.toLowerCase()]?.actualPrice ?? Infinity));
 
-    return (
+    const row = (
         <div className="group flex justify-center md:justify-end
                         items-center justify-items-center flex-wrap md:flex-nowrap
                         mx-1.5 sm:mx-3 lg:mx-5 mb-2 md:mb-1 py-0.5 pb-2 md:pb-1
@@ -20,6 +21,30 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
                     return <ProductPrice key={storeName} price={price} cheapest={is_cheapest} item_layout={props.item_layout} />;
                 })
             }
+        </div>
+    );
+
+    return (
+        <Popup trigger={row} modal>
+            {(onClose: () => void) => (
+                <ProductDetail onClose={onClose} product={props.product} />
+            )}
+        </Popup>
+    );
+}
+
+const ProductDetail = (props: {onClose: () => void, product: Product}) => {
+    return (
+        <div className="shadow-xl border m-10 bg-stone-50 font-main text-neutral-800">
+            <div className="flex justify-between items-center">
+                <span className="material-icons material-icon m-1.5 text-left text-neutral-600 text-3xl leading-none">close</span>
+                <span className="flex-grow text-center pl-10 pr-5 py-3 font-semibold">{props.product.name}</span>
+            </div>
+
+            <div className="flex flex-col justify-center items-center px-10 py-5">
+                <p>{props.product.id}</p>
+                <p>{'text '.repeat(100)}</p>
+            </div>
         </div>
     );
 }
