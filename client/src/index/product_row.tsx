@@ -57,7 +57,6 @@ const ProductDetail = (props: {onClose: () => void, product: Product}) => { // m
     );
 
     useEffect(() => {
-        console.log('fetching details...');
         getProduct(props.product.id);
     }, [props.product]);
 
@@ -66,7 +65,7 @@ const ProductDetail = (props: {onClose: () => void, product: Product}) => { // m
         // details = <p>{(data as DetailedProduct).name}</p>;
         details = <PriceHistoryChart productName={data!.name} />;
     } else {
-        details = <p>Loading...</p>;
+        details = <p>Laeme...</p>;
     }
 
     return (
@@ -102,7 +101,11 @@ const PriceHistoryChart = (props: {productName: string}) => {
     let [date, data] = getData();
     let [date2, data2] = getData();
 
-    const options = {
+    const generateData = () => {
+
+    }
+
+    let options = {
         grid: { top: 8, right: 8, bottom: 70, left: 36 },
         toolbox: {
             feature: {

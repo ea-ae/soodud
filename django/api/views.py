@@ -28,7 +28,7 @@ class ProductPagination(pagination.LimitOffsetPagination):
     max_limit = REST_FRAMEWORK['MAX_LIMIT']
 
 
-CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], text=str)
+CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=list[str])
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,7 +46,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             i += 1
             if i % 1000 == 0:
                 print(i)
-            text = ' '.join(' '.join(ta.prepare(x)) for x in product.storeproduct_set.values_list('name', flat=True))
+            text = list(set(it.chain.from_iterable(
+                ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True))))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
             cls.products.append(CachedProduct(product.id, quantities, text))
 
@@ -83,15 +84,14 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
         # exact score
         exact_score = 0
-        product_tokens = product.text.split()
-        matches = sum(product_token in tokens for product_token in product_tokens)
-        exact_score = (matches / max(len(tokens), len(product_tokens))) * 100
+        matches = len([p_token for p_token in product.tokens if p_token in tokens])
+        exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
 
         # fuzzy score
-        text_score = 100
+        text_score = 0
         if fuzzy:
             # text_score = fuzz.partial_ratio(' '.join(tokens), product.text)
-            text_score = fuzz.partial_token_sort_ratio(' '.join(tokens), product.text, force_ascii=False)
+            text_score = fuzz.partial_token_sort_ratio(' '.join(tokens), ' '.join(product.tokens), force_ascii=False)
 
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
