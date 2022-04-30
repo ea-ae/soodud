@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ProductListJSON, Product } from './index';
+import { ProductListJSON, Product } from './api';
 import ProductHeader from './product_header';
 import ProductRow from './product_row';
 
