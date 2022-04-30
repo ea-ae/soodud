@@ -1,6 +1,8 @@
 import React from 'react';
 import Popup from 'reactjs-popup';
 
+import CloseButton from './buttons';
+
 
 const ProductHeader = (props: {stores: string[], item_layout: string}) => {
     return ( // removed: px-1.5 sm:px-3
@@ -28,10 +30,12 @@ const MenuButton = () => { // basis-full
     return (
         <div className="z-10 relative h-0 w-0">
              <Popup trigger={menuButton} modal>
-                {() => (
-                    <div className="flex justify-center items-center shadow-xl p-10
-                                    border bg-stone-50 font-main text-neutral-800">
-                        <p className="align-middle">Kontakt: soodudee, gmail.</p>
+                {(onClose: () => void) => (
+                    <div className="shadow-xl border bg-stone-50 font-main text-neutral-800">
+                        <CloseButton onClose={onClose} />
+                        <div className="flex flex-col justify-center items-center">
+                            <p className="px-12 py-16 align-middle">Kontakt: soodudee, gmail.</p>
+                        </div>
                     </div>
                 )}
              </Popup>

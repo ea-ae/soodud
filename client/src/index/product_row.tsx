@@ -2,6 +2,7 @@ import React from 'react';
 import Popup from 'reactjs-popup';
 
 import { Product, Price, Discount } from './index';
+import CloseButton from './buttons';
 
 
 const ProductRow = (props: {stores: string[], product: Product, item_layout: string}) => {
@@ -35,13 +36,10 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
 
 const ProductDetail = (props: {onClose: () => void, product: Product}) => {
     return (
-        <div className="shadow-xl border m-10 bg-stone-50 font-main text-neutral-800">
-            <div className="flex justify-between items-center">
-                <span className="material-icons material-icon m-1.5 text-left text-neutral-600 text-3xl leading-none">close</span>
-                <span className="flex-grow text-center pl-10 pr-5 py-3 font-semibold">{props.product.name}</span>
-            </div>
-
-            <div className="flex flex-col justify-center items-center px-10 py-5">
+        <div className="shadow-xl border mx-1.5 my-10 sm:m-6 md:m-12 lg:m-20 xl:m-32 bg-stone-50 font-main text-neutral-800">
+            <CloseButton onClose={props.onClose} />
+            <div className="flex flex-col justify-center items-center p-5">
+                <p className="flex-grow mt-4 lg:mt-0 text-center font-semibold">{props.product.name}</p>
                 <p>{props.product.id}</p>
                 <p>{'text '.repeat(100)}</p>
             </div>
