@@ -96,7 +96,7 @@ def prepare(text: str) -> list[str]:
     return tokens
 
 
-def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]:
+def parse_quantity(tokens: Sequence[str], *, force_extraction=False) -> tuple[Sequence[str], set[Quantity]]:
     """Parses quantities from tokens and deletes quantity tokens."""
     quantities, processed_tokens = set(), []
     units = '|'.join(SI_UNITS + SPECIAL_UNITS)
@@ -124,6 +124,8 @@ def parse_quantity(tokens: Sequence[str]) -> tuple[Sequence[str], set[Quantity]]
         else:
             processed_tokens.append(token)
 
+    if force_extraction:  # Extract quantities even if it results in no remaining tokens
+        return processed_tokens, quantities
     return (processed_tokens, quantities) if len(processed_tokens) > 0 else (tokens, set())
 
 

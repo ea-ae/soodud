@@ -67,6 +67,9 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     @classmethod
     def match(cls, tokens: list[str], quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=False) -> int:
         """Matches a loaded product with the search query."""
+        if len(tokens) == 0:
+            return 0
+
         # quantity score
         qty_score = 0
         q_matches = 0
@@ -99,14 +102,16 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         if (search := self.request.query_params.get('search')) and len(search) <= 130:
             results: list[tuple[int, int]] = []
             search_tokens = ta.prepare(search)
-            search_tokens, search_quantities = ta.parse_quantity(search_tokens)
+            search_tokens, search_quantities = ta.parse_quantity(search_tokens, force_extraction=True)
+            print(search_tokens, search_quantities)
             start2 = timer()
             for product in self.products:
                 score = self.match(list(search_tokens), search_quantities, product)
-                # if score >= 10:
-                results.append((score, product.id))
+                if score >= 5:
+                    results.append((score, product.id))
             print(f'Data search took {(timer() - start2) * 1000}ms with "{search}"')
             results.sort(key=lambda x: -x[0])
+            print(results[:10])
 
             # https://stackoverflow.com/a/25480488/4362799
             ids = [id_ for score, id_ in results[:100]]
