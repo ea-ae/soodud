@@ -70,9 +70,9 @@ const ProductDetail = (props: {onClose: () => void, product: Product}) => { // m
     }
 
     return (
-        <div className="shadow-xl border w-[50vw] max-w-[90vw] md:max-w-[80vw] xl:max-w-[70vw] bg-stone-50 font-main text-neutral-800">
+        <div className="shadow-xl border w-[90vw] md:w-[80vw] xl:w-[60vw] bg-stone-50 font-main text-neutral-800">
             <CloseButton onClose={props.onClose} />
-            <div className="flex flex-col justify-center items-center p-5 pt-10">
+            <div className="flex flex-col justify-center items-center p-1.5 sm:p-5 pt-10">
                 <p className="flex-grow text-center font-semibold">{props.product.name}</p>
                 <p>{props.product.id}</p>
                 {details}
@@ -84,59 +84,74 @@ const ProductDetail = (props: {onClose: () => void, product: Product}) => { // m
 const PriceHistoryChart = (props: {productName: string}) => {
     let base = +new Date(2021, 1, 1);
     let oneDay = 24 * 3600 * 1000;
-    let date = [];
-    let data = [];
-    let last_data = 10;
-    for (let i = 1; i < 600; i++) {
-        var now = new Date((base += oneDay));
-        date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
-        let new_data = last_data + (Math.random() * 2.35 - 1.15);
-        last_data = new_data;
-        data.push(new_data);
+
+    const getData = () => {
+        let date = [];
+        let data = [];
+        let last_data = 10;
+        for (let i = 1; i < 600; i++) {
+            var now = new Date((base += oneDay));
+            date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
+            let new_data = last_data + (Math.random() * 1.9 - 0.9);
+            last_data = new_data;
+            data.push(Number(new_data).toFixed(2));
+        }
+        return [date, data];
     }
+
+    let [date, data] = getData();
+    let [date2, data2] = getData();
 
     const options = {
         grid: { top: 8, right: 8, bottom: 70, left: 36 },
         toolbox: {
             feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
+                // dataZoom: { yAxisIndex: 'none' },
+                restore: {},
+                saveAsImage: {},
+            },
+        },
           xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: date
+            data: date,
           },
           yAxis: {
             name: '€',
             type: 'value',
             scale: true,
-            boundaryGap: [0, '100%']
+            boundaryGap: [0, '100%'],
           },
           dataZoom: [
             {
               type: 'inside',
               start: 0,
-              end: 100
+              end: 100,
             },
             {
               start: 0,
-              end: 100
-            }
+              end: 100,
+            },
           ],
+          tooltip: {
+              trigger: 'axis',
+          },
           series: [
             {
-              name: 'Fake Data',
-              data: data,
-              type: 'line',
-              symbol: 'none',
-              sampling: 'lttb',
-            }
-          ]
+                name: 'Coop',
+                data: data,
+                type: 'line',
+                symbol: 'none',
+                sampling: 'lttb',
+            },
+            {
+                name: 'Selver',
+                data: data2,
+                type: 'line',
+                symbol: 'none',
+                sampling: 'lttb',
+            },
+          ],
     };
 
     return <ECharts

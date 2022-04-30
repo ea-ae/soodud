@@ -33,11 +33,11 @@ module.exports = merge(common, {
         proxy: {
             '/api/v1': {
                 target: {
-                    host: '127.0.0.1',
+                    host: '0.0.0.0', // 127.0.0.1
                     protocol: 'http:',
                     port: 8001
                 }
-            }
+            },
         }
     },
 });
