@@ -28,11 +28,11 @@ class ProductPagination(pagination.LimitOffsetPagination):
     max_limit = REST_FRAMEWORK['MAX_LIMIT']
 
 
-SearchableProduct = NamedTuple('SearchableProduct', id=int, quantities=tuple[ta.Quantity, ...], text=str)
+CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], text=str)
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    products: list[SearchableProduct] = []
+    products: list[CachedProduct] = []
     throttle_scope = 'product'
     pagination_class = ProductPagination
     permission_classes = [permissions.AllowAny]
@@ -48,7 +48,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 print(i)
             text = ' '.join(' '.join(ta.prepare(x)) for x in product.storeproduct_set.values_list('name', flat=True))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
-            cls.products.append(SearchableProduct(product.id, quantities, text))
+            cls.products.append(CachedProduct(product.id, quantities, text))
 
     @classmethod
     def load_data(cls):
@@ -65,14 +65,14 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 print('Product cache loaded')
 
     @classmethod
-    def match_product(cls, tokens: list[str], quantities: set[ta.Quantity], product: SearchableProduct) -> int:
+    def match(cls, tokens: list[str], quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=False) -> int:
         """Matches a loaded product with the search query."""
         # quantity score
         qty_score = 0
         q_matches = 0
         for product_qty, search_qty in it.product(product.quantities, quantities):
             if search_qty.unit == product_qty.unit:
-                if search_qty.quantity != product_qty.amount:
+                if search_qty.amount != product_qty.amount:
                     return 0
                 q_matches += 1
         qty_count = len(product.quantities)
@@ -86,8 +86,9 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
         # fuzzy score
         text_score = 100
-        # text_score = fuzz.partial_ratio(' '.join(tokens), product.text)
-        text_score = fuzz.partial_token_sort_ratio(' '.join(tokens), product.text, force_ascii=False)
+        if fuzzy:
+            # text_score = fuzz.partial_ratio(' '.join(tokens), product.text)
+            text_score = fuzz.partial_token_sort_ratio(' '.join(tokens), product.text, force_ascii=False)
 
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
@@ -98,10 +99,10 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         if (search := self.request.query_params.get('search')) and len(search) <= 130:
             results: list[tuple[int, int]] = []
             search_tokens = ta.prepare(search)
-            search_quantities = ta.parse_quantity(search_tokens)[1]
+            search_tokens, search_quantities = ta.parse_quantity(search_tokens)
             start2 = timer()
             for product in self.products:
-                score = self.match_product(search_tokens, search_quantities, product)
+                score = self.match(list(search_tokens), search_quantities, product)
                 # if score >= 10:
                 results.append((score, product.id))
             print(f'Data search took {(timer() - start2) * 1000}ms with "{search}"')
