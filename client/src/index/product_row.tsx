@@ -34,9 +34,9 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
     );
 }
 
-const ProductDetail = (props: {onClose: () => void, product: Product}) => {
+const ProductDetail = (props: {onClose: () => void, product: Product}) => { // mx-1.5 my-10 sm:m-6 md:m-12 lg:m-20 xl:m-32
     return (
-        <div className="shadow-xl border mx-1.5 my-10 sm:m-6 md:m-12 lg:m-20 xl:m-32 bg-stone-50 font-main text-neutral-800">
+        <div className="shadow-xl border max-w-[90vw] md:max-w-[80vw] xl:max-w-[60vw] bg-stone-50 font-main text-neutral-800">
             <CloseButton onClose={props.onClose} />
             <div className="flex flex-col justify-center items-center p-5">
                 <p className="flex-grow mt-4 lg:mt-0 text-center font-semibold">{props.product.name}</p>
