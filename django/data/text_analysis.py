@@ -18,12 +18,12 @@ WHITELIST = ()
 QTY_UNITS = ('g', 'l', 'm')
 QTY_WEIGHTS = {'m': 1 / 1000, 'c': 1 / 100, 'd': 1 / 10, 'k': 1000, '': 1}  # '' must be last for regex!
 SI_UNITS = tuple(f'{w}{q}' for w, q in it.product(QTY_WEIGHTS.keys(), QTY_UNITS))
-SPECIAL_UNITS = ('%', 'tk')  # rl, kmpl
+SPECIAL_UNITS = ('%', 'tk', 'gr')  # gr->g alias, rl, kmpl
 UNITS = SI_UNITS + SPECIAL_UNITS
 
 
 Quantity = NamedTuple('Quantity', amount=float, unit=str)
-Text = NamedTuple('Text', id=int, tokens=Sequence[str], quantity=set[Quantity])  # original=str
+Text = NamedTuple('Text', id=int, barcode=str, tokens=Sequence[str], quantity=set[Quantity])  # original=str
 
 
 # ratios = {}
@@ -42,7 +42,8 @@ def prepare_store(store: dict) -> list[Text]:
         # counter.update(tokens)
         # tokens_total += len(tokens)
 
-        text_record = Text(product['id'], tokens, quantities)
+        barcode = product['hash'] if product['has_barcode'] else ''
+        text_record = Text(product['id'], barcode, tokens, quantities)
         results.append(text_record)
 
     # for k, v in counter.items():
@@ -70,24 +71,20 @@ def prepare(text: str) -> list[str]:
     text = text.replace('%vol', '% vol')  # 3.5%vol -> 3.5% vol
     text = text.replace('/', ' ')
 
-    for blacklist_item in BLACKLIST:  # get rid of junk words
-        for whitelist_item in WHITELIST:  # unless they are part of a brand name, etc
-            if blacklist_item in whitelist_item:
-                break
-        else:
-            text = (' ' + text + ' ').replace(blacklist_item, '')
-
     # tokenize the string
     tokens = []
     for token in text.split():
         token = regex.sub(r'(?:-|,|!|\.)$', '', token)  # remove junk characters
         token = token.strip()
 
+        if token in BLACKLIST:
+            continue
+
         if token in UNITS:
             if len(tokens) > 0 and tokens[-1].replace('.', '').isdigit():
                 tokens[-1] = tokens[-1] + token  # 3 tk -> 3tk
                 continue
-            elif token not in SPECIAL_UNITS:
+            elif token not in SPECIAL_UNITS or token == 'gr':
                 token = '1' + token  # kg -> 1kg
 
         if len(token) >= 2 or token.isdigit():  # remove 1-letter tokens
@@ -106,6 +103,8 @@ def parse_quantity(tokens: Sequence[str], *, force_extraction=False) -> tuple[Se
         if (match := regex.fullmatch(pattern, token)) is not None:
             unit = match.group('u')
             i, quantifier = -len(unit), unit[0] if len(unit) == 2 else ''
+            if unit == 'gr':  # alias
+                quantifier, unit = '', 'g'
 
             num = token[:i]
             if 'x' in num:  # e.g. '3x5tk'

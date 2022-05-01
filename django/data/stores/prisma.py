@@ -46,9 +46,19 @@ def get_all(saver: Generator[None, Product, None]):
 def parse_page(soup: BeautifulSoup) -> Iterable[Product]:
     """Parse a page of products."""
     for listing in sv.select('.shelf li', soup):
-        name = sv.select('.info > .name', listing)[0].text
         ean = int(listing.attrs['data-ean'])
         discount = Discount.NONE
+
+        name = sv.select('.info > .name', listing)[0].text
+        producer = sv.select('.info > .subname', listing)
+        if len(producer) > 0:
+            if ',' in producer[0].text:
+                name += ' ' + producer[0].text[::-1].split(',', 1)[1][::-1]
+                if producer[0].text.count(',') > 1:
+                    print(producer[0].text, 'overone')
+                    print(producer[0].text[::-1].split(',', 1)[1][::-1])
+            else:
+                name += ' ' + producer[0].text
 
         price_eur = int(sv.select('.js-info-price .whole-number', listing)[0].text)
         price_cents = int(sv.select('.js-info-price .decimal', listing)[0].text)

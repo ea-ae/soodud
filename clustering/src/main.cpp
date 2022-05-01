@@ -23,13 +23,13 @@ int main() {
     auto q2 = quantities_t{q{3, "kg"}, q{55, "%"}};
 
     auto analyser = Analyser();
-    analyser.create_product(1, 1, std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q1);
-    analyser.create_product(2, 10, std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q2);
-    analyser.create_product(3, 2, std::vector<std::string>{"a", "b", "c", "d", "1", "2"});
-    analyser.create_product(4, 2, std::vector<std::string>{"a", "b", "c", "d", "e", "3"}, q1);
-    analyser.create_product(5, 3, std::vector<std::string>{"a", "b", "c", "d", "4", "5"});
-    analyser.create_product(6, 1, std::vector<std::string>{"x", "y", "z"});
-    analyser.create_product(7, 2, std::vector<std::string>{"x", "y", "6"});
+    analyser.create_product(1, 1, "", std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q1);
+    analyser.create_product(2, 10, "", std::vector<std::string>{"a", "b", "c", "d", "e", "f"}, q2);
+    analyser.create_product(3, 2, "", std::vector<std::string>{"a", "b", "c", "d", "1", "2"});
+    analyser.create_product(4, 2, "", std::vector<std::string>{"a", "b", "c", "d", "e", "3"}, q1);
+    analyser.create_product(5, 3, "", std::vector<std::string>{"a", "b", "c", "d", "4", "5"});
+    analyser.create_product(6, 1, "", std::vector<std::string>{"x", "y", "z"});
+    analyser.create_product(7, 2, "", std::vector<std::string>{"x", "y", "6"});
     analyser.analyse();
     return 0;
 }
@@ -68,7 +68,7 @@ PYBIND11_MODULE(clustering, m) {
              "matcher"_a = std::make_shared<SingleLinkageMatcher>(),
              "threshold"_a = 0.8)
         .def("create_product", &Analyser::create_product,
-             "id"_a, "store_id"_a, "tokens"_a, "quantities"_a)
+             "id"_a, "store_id"_a, "barcode"_a, "tokens"_a, "quantities"_a)
         .def("analyse", &Analyser::analyse)
         .def("get_clusters", &Analyser::get_clusters, py::return_value_policy::reference)
         .def("__repr__", [](const Analyser& o) {
@@ -76,8 +76,8 @@ PYBIND11_MODULE(clustering, m) {
         });
 
     py::class_<StoreProduct>(m, "StoreProduct")
-        .def(py::init<int32_t, int32_t, tokens_t, quantities_t>(),
-             "id"_a, "store_id"_a, "tokens"_a = tokens_t{}, "quantities"_a = quantities_t{})
+        .def(py::init<int32_t, int32_t, std::string, tokens_t, quantities_t>(),
+             "id"_a, "store_id"_a, "barcode"_a = "", "tokens"_a = tokens_t{}, "quantities"_a = quantities_t{})
         .def_readonly("id", &StoreProduct::id)
         .def_readonly("store_id", &StoreProduct::store_id)
         .def_readonly("tokens", &StoreProduct::tokens)

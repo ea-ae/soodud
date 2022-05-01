@@ -90,7 +90,7 @@ class StoreRegistry:
     @classmethod
     def match_stores(cls):
         """Find and update all store matches."""
-        stores = [models.StoreProduct.objects.filter(store=store.model.id).values('id', 'name')
+        stores = [models.StoreProduct.objects.filter(store=store.model.id).values('id', 'name', 'hash', 'has_barcode')
                   for store in cls.registry]
         processed_stores = []
         for i, store in enumerate(stores):
@@ -105,7 +105,8 @@ class StoreRegistry:
         analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.75)
         for store_id, store in processed_stores:
             for product in store:
-                analyser.create_product(product.id, store_id, product.tokens, product.quantity)
+                # barcode = product.
+                analyser.create_product(product.id, store_id, product.barcode, product.tokens, product.quantity)
         analyser.analyse()
         clusters = analyser.get_clusters()
         print('Saving products to database')

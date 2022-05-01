@@ -16,3 +16,7 @@ def match():
     """Match products together."""
     from .stores import coop, selver, rimi, prisma
     StoreRegistry.match_stores()
+
+
+def purge():
+    """Purge Products with no associated StoreProducts, clear cache, etc."""

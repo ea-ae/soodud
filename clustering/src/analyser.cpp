@@ -18,8 +18,10 @@ bool compare(const std::unique_ptr<Match>& a, const std::unique_ptr<Match>& b) {
 Analyser::Analyser(std::shared_ptr<Matcher> linkage_criterion, double threshold)
     : threshold(threshold), matcher(linkage_criterion) {}
 
-void Analyser::create_product(int32_t id, int32_t store_id, tokens_t tokens, quantities_t quantities) {
-    products.push_back(std::make_unique<Product>(std::make_unique<StoreProduct>(id, store_id, tokens, quantities)));
+void Analyser::create_product(int32_t id, int32_t store_id, std::string barcode,
+                              tokens_t tokens, quantities_t quantities) {
+    products.push_back(std::make_unique<Product>(
+        std::make_unique<StoreProduct>(id, store_id, barcode, tokens, quantities)));
 }
 
 void Analyser::analyse() {
