@@ -74,14 +74,14 @@ export interface DetailedProduct {
     store_products: DetailedStoreProduct[];
 }
 
-interface DetailedStoreProduct {
+export interface DetailedStoreProduct {
     store_name: string;
     name: string;
     last_checked: string;
     prices: DetailedPrice[];
 }
 
-interface DetailedPrice {
+export interface DetailedPrice {
     start: string;
     base_price: number;
     price: number;

@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import ECharts from 'echarts-for-react';
 
-import { QueryEvents, DetailedProduct, Product } from './api';
+import { QueryEvents, DetailedProduct, DetailedStoreProduct, DetailedPrice, Product } from './api';
 import CloseButton from './buttons';
 
 
@@ -32,21 +32,25 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
 
     let details = <></>;
     if (isLoaded && !error) {
-        let title: string;
-        let names: string[] = [];
+        let title = '';
+        let names: JSX.Element[] = [];
         data!.store_products.map(sp => {
-            if (sp.name == props.product.name)
+            if (sp.name == props.product.name) {
                 title = `${props.product.name} (${sp.store_name})`;
-            else
-                names.push(`${sp.name} (${sp.store_name})`);
+            } else {
+                const name = `${sp.name} (${sp.store_name})`;
+
+                names.push(
+                    <p key={name} className="text-neutral-600 text-center text-xs md:text-sm leading-4">{name}</p>
+                );
+            }
         });
 
         details = (
             <>
             <p className="flex-grow mt-2 text-center font-semibold">{title}</p>
-            {names.map(name =>
-                <p key={name} className="text-neutral-600 text-center text-xs md:text-sm leading-4">{name}</p>)}
-            <PriceHistoryChart productName={data!.name} />
+            {names}
+            <PriceHistoryChart products={data!.store_products} />
             </>
         );
     } else {
@@ -68,40 +72,76 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
     );
 }
 
-const PriceHistoryChart = (props: {productName: string}) => {
-    let base = +new Date(2022, 1, 1);
-    let oneDay = 24 * 3600 * 1000;
+const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
+    const getPriceDate = (startTime: string) => {
+        let date = new Date(startTime);
+        date.setHours(0, 0, 0, 0);
+        return +date;
+    }
 
-    const getData = () => {
-        let date = [];
-        let data = [];
-        let last_data = 10;
-        for (let i = 1; i < 90; i++) {
-            var now = new Date((base += oneDay));
-            date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
-            let new_data = last_data + (Math.random() * 0.6 - 0.2);
-            last_data = new_data;
-            data.push(Number(new_data).toFixed(2));
+    let dates: number[] = [];
+    props.products.forEach(product => { // create x axis of dates
+        product.prices.forEach(price => {
+            dates.push(getPriceDate(price.start));
+        });
+    });
+
+    dates = [...Array.from(new Set(dates))]; // remove duplicate dates and sort
+    dates.sort();
+
+    let dateAxis = dates.map(dateNumber => {
+        let date = new Date(dateNumber);
+        return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('/');
+    });
+
+    let storePrices = props.products.map(product => {
+        let priceHistory: (number | null)[] = []
+        let priceIndex = 0;
+        let lastPrice = null;
+
+        for (let dateIndex = 0; dateIndex < dates.length; dateIndex++) {
+            let outOfPrices = priceIndex >= product.prices.length;
+            if (!outOfPrices && getPriceDate(product.prices[priceIndex].start) == dates[dateIndex]) {
+                let price = product.prices[priceIndex].price;
+                priceHistory.push(price);
+                lastPrice = price;
+                priceIndex++; // price has been assigned, move onto next one
+                dateIndex--; // if next price is at the same date, overwrite
+            } else {
+                priceHistory.push(lastPrice);
+            }
         }
-        return [date, data];
-    }
 
-    let [date, data] = getData();
-    let [date2, data2] = getData();
-    let [date3, data3] = getData();
-    let [date4, data4] = getData();
+        return {
+            storeName: product.store_name,
+            priceHistory: priceHistory,
+        };
+    });
 
-    const generateData = () => {
+    console.log('datessss');
+    console.log(dates);
 
-    }
+    let series = storePrices.map(storePrice => {
+        return {
+            name: storePrice.storeName,
+            data: storePrice.priceHistory,
+            type: 'line',
+            // smooth: true,
+            // step: true,
+            // z index (z) .... todo
+            symbol: 'emptyCircle', // none
+            animationDuration: 600,
+            sampling: 'lttb',
+        }
+    });
 
     let options = {
         grid: { top: 8, right: 8, bottom: 70, left: 40 },
         toolbox: { feature: { restore: {} } },
         xAxis: {
             type: 'category',
-            boundaryGap: false,
-            data: date,
+            boundaryGap: true,
+            data: dateAxis,
         },
         yAxis: {
             type: 'value',
@@ -123,44 +163,45 @@ const PriceHistoryChart = (props: {productName: string}) => {
         tooltip: {
             trigger: 'axis',
         },
-        series: [
-            {
-                data: data,
-                name: 'Coop',
-                type: 'line',
-                lineStyle: {color: '#0070cc'},
-                itemStyle: {color: '#0070cc'},
-                symbol: 'none',
-                sampling: 'lttb',
-            },
-            {
-                data: data2,
-                name: 'Prisma',
-                type: 'line',
-                lineStyle: {color: '#088c44'},
-                itemStyle: {color: '#088c44'},
-                symbol: 'none',
-                sampling: 'lttb',
-            },
-            {
-                data: data3,
-                name: 'Rimi',
-                type: 'line',
-                lineStyle: {color: '#d72323'},
-                itemStyle: {color: '#d72323'},
-                symbol: 'none',
-                sampling: 'lttb',
-            },
-            {
-                data: data4,
-                name: 'Selver',
-                type: 'line',
-                lineStyle: {color: '#e8ce07'},
-                itemStyle: {color: '#e8ce07'},
-                symbol: 'none',
-                sampling: 'lttb',
-            },
-        ],
+        series: series
+        // series: [
+        //     {
+        //         data: data,
+        //         name: 'Coop',
+        //         type: 'line',
+        //         lineStyle: {color: '#0070cc'},
+        //         itemStyle: {color: '#0070cc'},
+        //         symbol: 'none',
+        //         sampling: 'lttb',
+        //     },
+        //     {
+        //         data: data2,
+        //         name: 'Prisma',
+        //         type: 'line',
+        //         lineStyle: {color: '#088c44'},
+        //         itemStyle: {color: '#088c44'},
+        //         symbol: 'none',
+        //         sampling: 'lttb',
+        //     },
+        //     {
+        //         data: data3,
+        //         name: 'Rimi',
+        //         type: 'line',
+        //         lineStyle: {color: '#d72323'},
+        //         itemStyle: {color: '#d72323'},
+        //         symbol: 'none',
+        //         sampling: 'lttb',
+        //     },
+        //     {
+        //         data: data4,
+        //         name: 'Selver',
+        //         type: 'line',
+        //         lineStyle: {color: '#e8ce07'},
+        //         itemStyle: {color: '#e8ce07'},
+        //         symbol: 'none',
+        //         sampling: 'lttb',
+        //     },
+        // ],
     };
 
     return <ECharts option={options} style={{width: '100%'}} />
