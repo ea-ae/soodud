@@ -25,7 +25,7 @@ const ProductHeader = (props: {stores: string[], item_layout: string}) => {
 
 const MenuButton = () => { // basis-full
     const menuButton = <span className="material-icons material-icon absolute top-0 left-0 m-1.5 sm:m-3
-                                        text-left text-neutral-900 text-2xl leading-none">menu</span>
+                                        text-left text-neutral-600 hover:text-black text-2xl leading-none">menu</span>
 
     return (
         <div className="z-10 relative h-0 w-0">

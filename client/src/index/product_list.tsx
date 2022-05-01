@@ -5,7 +5,7 @@ import ProductHeader from './product_header';
 import ProductRow from './product_row';
 
 export const ProductList = (props: {isLoaded: boolean, products: ProductListJSON | [], error?: string}) => {
-    const stores = ['Coop', 'Maxima', 'Prisma', 'Rimi', 'Selver'];
+    const stores = ['Coop', 'Prisma', 'Rimi', 'Selver'];
     const status_style = 'py-5 text-center tracking-wider text-base';
     const item_layout = 'inline-block min-w-[3.5em] sm:min-w-[5em] sm:w-[5em] mt-1 ml-1 md:mt-0 text-center';
     const isEmpty = ((props.products as ProductListJSON).results ?? [1]).length == 0;
