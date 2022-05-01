@@ -122,13 +122,15 @@ class StoreRegistry:
         sp_models = []
         quantities = set()
         for sp in store_products:
-            sp_model = models.StoreProduct.objects.only('name', 'product').get(id=sp.id)
+            sp_model = models.StoreProduct.objects.only('name', 'product', 'store_id').get(id=sp.id)
             sp_models.append(sp_model)
             for quantity in sp.quantities:
                 quantity = (quantity[0], quantity[1])
                 quantities.add(quantity)
 
-        longest_name = sorted((sp.name for sp in sp_models), key=lambda x: len(x))[-1]
+        # choose product with longest name, but deprioritize prisma (4) products due to name shortening issues
+        longest_name = sorted((sp.name if sp.store_id != 4 else sp.name + ('_' * 100) for sp in sp_models),
+                              key=lambda x: len(x))[-1]
         product = models.Product.objects.create(
             name=longest_name,  # todo: erase quantity data and place it separately
             quantity=list(quantities)
