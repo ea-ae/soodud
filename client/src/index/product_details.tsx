@@ -91,7 +91,7 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
 
     let dateAxis = dates.map(dateNumber => {
         let date = new Date(dateNumber);
-        return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('/');
+        return [date.getDate(), date.getMonth() + 1, date.getFullYear() % 100].join('/');
     });
 
     let storePrices = props.products.map(product => {
@@ -118,9 +118,6 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
             lastChecked: product.last_checked,
         };
     });
-
-    console.log('datessss');
-    console.log(dates);
 
     let series = storePrices.map(storePrice => {
         let color;
@@ -190,44 +187,6 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
             trigger: 'axis',
         },
         series: series
-        // series: [
-        //     {
-        //         data: data,
-        //         name: 'Coop',
-        //         type: 'line',
-        //         lineStyle: {color: '#0070cc'},
-        //         itemStyle: {color: '#0070cc'},
-        //         symbol: 'none',
-        //         sampling: 'lttb',
-        //     },
-        //     {
-        //         data: data2,
-        //         name: 'Prisma',
-        //         type: 'line',
-        //         lineStyle: {color: '#088c44'},
-        //         itemStyle: {color: '#088c44'},
-        //         symbol: 'none',
-        //         sampling: 'lttb',
-        //     },
-        //     {
-        //         data: data3,
-        //         name: 'Rimi',
-        //         type: 'line',
-        //         lineStyle: {color: '#d72323'},
-        //         itemStyle: {color: '#d72323'},
-        //         symbol: 'none',
-        //         sampling: 'lttb',
-        //     },
-        //     {
-        //         data: data4,
-        //         name: 'Selver',
-        //         type: 'line',
-        //         lineStyle: {color: '#e8ce07'},
-        //         itemStyle: {color: '#e8ce07'},
-        //         symbol: 'none',
-        //         sampling: 'lttb',
-        //     },
-        // ],
     };
 
     return <ECharts option={options} style={{width: '100%'}} />

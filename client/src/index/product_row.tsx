@@ -27,9 +27,14 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
 
     return (
         <Popup trigger={row} modal>
-            {(onClose: () => void) => (
-                <ProductDetails onClose={onClose} product={props.product} />
-            )}
+            {(onClose: () => void) => {
+                if (window.getSelection()!.toString().length === 0) {
+                    return <ProductDetails onClose={onClose} product={props.product} />;
+                } else {
+                    onClose();
+                    return <></>;
+                }
+            }}
         </Popup>
     );
 }
