@@ -11,6 +11,8 @@ services:
       context: django/
     depends_on:
       - db
+    env_file:
+      - .env
     networks:
       - main
   db:
@@ -48,9 +50,9 @@ services:
     volumes:
       - acmechallenge:/var/www/certbot
       - letsencrypt:/etc/letsencrypt
-    command: certonly --register-unsafely-without-email --agree-tos --webroot -w /var/www/certbot/ -d soodud.ee
+    # command: certonly --register-unsafely-without-email --agree-tos --webroot -w /var/www/certbot/ -d soodud.ee
     # command: certonly -d soodud.ee --dry-run
-    # command: renew
+    command: renew
 
 volumes:
   static:
