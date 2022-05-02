@@ -115,6 +115,7 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
         return {
             storeName: product.store_name,
             priceHistory: priceHistory,
+            lastChecked: product.last_checked,
         };
     });
 
@@ -122,13 +123,38 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
     console.log(dates);
 
     let series = storePrices.map(storePrice => {
+        let color;
+        let zIndex;
+        switch (storePrice.storeName) {
+            case 'Coop':
+                color = '#0070cc';
+                zIndex = 5;
+                break;
+            case 'Prisma':
+                color = '#088c44';
+                zIndex = 4;
+                break;
+            case 'Rimi':
+                color = '#d72323';
+                zIndex = 3;
+                break;
+            case 'Selver':
+                color = '#e8ce07';
+                zIndex = 2;
+                break;
+            default:
+                throw 'Unknown store name!';
+        }
+
         return {
             name: storePrice.storeName,
             data: storePrice.priceHistory,
             type: 'line',
+            z: zIndex,
+            lineStyle: {color: color},
+            itemStyle: {color: color},
             // smooth: true,
             // step: true,
-            // z index (z) .... todo
             symbol: 'emptyCircle', // none
             animationDuration: 600,
             sampling: 'lttb',
