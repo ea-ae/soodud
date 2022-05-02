@@ -3,6 +3,8 @@ services:
   client:
     build:
       context: client/
+    volumes:
+      - static:/app/dist
   django:
     restart: unless-stopped
     build:
@@ -39,16 +41,16 @@ services:
       - static:/static:ro
       - acmechallenge:/var/www/certbot:ro
       - letsencrypt:/etc/letsencrypt:ro
-  # certbot:
-  #   image: certbot/certbot
-  #   depends_on:
-  #     - nginx
-  #   volumes:
-  #     - acmechallenge:/var/www/certbot
-  #     - letsencrypt:/etc/letsencrypt
-  #   command: certonly --register-unsafely-without-email --agree-tos --webroot -w /var/www/certbot/ -d soodud.ee
-  #   # command: certonly -d soodud.ee --dry-run
-  #   # command: renew
+  certbot:
+    image: certbot/certbot
+    depends_on:
+      - nginx
+    volumes:
+      - acmechallenge:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+    command: certonly --register-unsafely-without-email --agree-tos --webroot -w /var/www/certbot/ -d soodud.ee
+    # command: certonly -d soodud.ee --dry-run
+    # command: renew
 
 volumes:
   static:
