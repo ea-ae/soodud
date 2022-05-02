@@ -19,7 +19,7 @@ const App = () => {
     const [items, setItems] = useState<ProductListJSON | []>([]);
 
     const fetchProducts = (events: QueryEvents, query: ProductListAPIQuery) => {
-        const base_url = `${location.protocol}//${location.hostname}:8001/api/v1/products/?`;
+        const base_url = `${location.protocol}//${location.hostname}/api/v1/products/?`;
         let params = `limit=${query.length}&offset=${query.offset}&reverse=${query.reverse}`;
         if (query.search !== undefined) params += `&search=${query.search}`;
 

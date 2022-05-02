@@ -35,7 +35,7 @@ module.exports = merge(common, {
                 target: {
                     host: '0.0.0.0', // 127.0.0.1
                     protocol: 'http:',
-                    port: 8001
+                    port: 80
                 }
             },
         }
