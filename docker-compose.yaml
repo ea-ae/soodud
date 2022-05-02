@@ -5,10 +5,16 @@ services:
       context: client/
     volumes:
       - static:/app/dist
+  # clustering:
+  #   build:
+  #     context: clustering/
+  #   volumes:
+  #     - clustering:/app/out
   django:
     restart: unless-stopped
     build:
-      context: django/
+      context: ./
+      dockerfile: django/Dockerfile
     depends_on:
       - db
     env_file:
@@ -59,6 +65,8 @@ volumes:
     external: false
   data:
     external: false
+  # clustering:
+  #   external: false
   acmechallenge:
     external: false
   letsencrypt:

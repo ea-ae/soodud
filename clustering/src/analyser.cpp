@@ -1,7 +1,7 @@
 #include "analyser.h"
 
 #include <chrono>
-#include <format>
+//#include <format>
 #include <iostream>
 
 Match::Match(double score, Product& a, Product& b)
@@ -52,16 +52,17 @@ void Analyser::analyse() {
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     auto delta = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-    std::cout << std::format("Created {} initial match combinations in {}s, processing merge queue\n",
-                             initial_count, delta);
+    /*std::cout << std::format("Created {} initial match combinations in {}s, processing merge queue\n",
+                             initial_count, delta);*/
+    std::cout << "Created " << initial_count << " initial match combinations in " << delta << "s, processing merge queue\n";
 
     uint32_t counter = 0;
     while (!merge_queue->empty()) {
-        counter++;
+        /*counter++;
         if (counter % 1000 == 0) {
             std::cout << std::format("At {} processed with {} remaining in queue\n",
                                      counter, merge_queue->size());
-        }
+        }*/
         process_match();
     }
 
