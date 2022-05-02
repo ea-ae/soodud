@@ -11,6 +11,5 @@ RUN pip install pipenv
 COPY Pipfile* ./
 RUN pipenv install
 COPY . ./
-RUN pipenv run python manage.py migrate
 # temp dev server
-CMD pipenv run python manage.py runserver 0.0.0.0:8001
+CMD pipenv run python manage.py migrate && pipenv run python manage.py runserver 0.0.0.0:8001

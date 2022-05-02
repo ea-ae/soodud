@@ -12,7 +12,7 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
     const [data, setData] = useState<DetailedProduct | null>(null);
 
     const fetchProductDetails = (events: QueryEvents, productId: number) => {
-        const url = `${location.protocol}//${location.hostname}:8001/api/v1/products/${productId}/`;
+        const url = `${location.protocol}//${location.hostname}/api/v1/products/${productId}/`;
         fetch(url, {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
             .then(events.onSuccess, events.onError)
