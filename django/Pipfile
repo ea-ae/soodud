@@ -16,6 +16,9 @@ soupsieve = "*"
 django-extensions = "*"
 html5lib = "*"
 django-cors-headers = "*"
+python-decouple = "*"
+thefuzz = "*"
+python-levenshtein = "*"
 
 [dev-packages]
 pre-commit = "*"

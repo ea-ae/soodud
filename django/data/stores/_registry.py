@@ -1,4 +1,5 @@
 from django.db import transaction
+import logging
 from concurrent import futures
 from datetime import datetime
 from typing import Generator, Callable, NamedTuple
@@ -8,6 +9,9 @@ from data import models
 from data import text_analysis
 from . import Discount
 from . import Product
+
+
+logger = logging.getLogger(__name__)
 
 
 class StoreRegistry:
@@ -69,8 +73,10 @@ class StoreRegistry:
 
                 if price_created:  # price has changed, update
                     if not product_created:  # price update
-                        print(f'{store_product.name} {store_product.current_price.price} -> {price.price} '
-                              f'({store_product.current_price.discount} -> {price.discount})')
+                        update = (f'{store_product.name} {store_product.current_price.price} -> {price.price} '
+                                  f'({store_product.current_price.discount} -> {price.discount})')
+                        print(update)  # temp
+                        logger.info(update)
                     price.save()
                     store_product.current_price = price
                 else:  # should be redundant, somewhy isn't
@@ -84,7 +90,7 @@ class StoreRegistry:
     @classmethod
     def match_stores(cls):
         """Find and update all store matches."""
-        stores = [models.StoreProduct.objects.filter(store=store.model.id).values('id', 'name')
+        stores = [models.StoreProduct.objects.filter(store=store.model.id).values('id', 'name', 'hash', 'has_barcode')
                   for store in cls.registry]
         processed_stores = []
         for i, store in enumerate(stores):
@@ -99,7 +105,7 @@ class StoreRegistry:
         analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.75)
         for store_id, store in processed_stores:
             for product in store:
-                analyser.create_product(product.id, store_id, product.tokens, product.quantity)
+                analyser.create_product(product.id, store_id, product.barcode, product.tokens, product.quantity)
         analyser.analyse()
         clusters = analyser.get_clusters()
         print('Saving products to database')
@@ -115,13 +121,15 @@ class StoreRegistry:
         sp_models = []
         quantities = set()
         for sp in store_products:
-            sp_model = models.StoreProduct.objects.only('name', 'product').get(id=sp.id)
+            sp_model = models.StoreProduct.objects.only('name', 'product', 'store__name').get(id=sp.id)
             sp_models.append(sp_model)
             for quantity in sp.quantities:
                 quantity = (quantity[0], quantity[1])
                 quantities.add(quantity)
 
-        longest_name = sorted((sp.name for sp in sp_models), key=lambda x: len(x))[-1]
+        # choose product with longest name, but deprioritize prisma (4) products due to truncation issues
+        longest_name = sorted(sp_models, key=lambda x: len(x.name) if x.store.name != 'Prisma' else 0)[-1].name
+
         product = models.Product.objects.create(
             name=longest_name,  # todo: erase quantity data and place it separately
             quantity=list(quantities)

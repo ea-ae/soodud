@@ -1,12 +1,16 @@
 import React from 'react';
+import Popup from 'reactjs-popup';
+
+import CloseButton from './buttons';
 
 
 const ProductHeader = (props: {stores: string[], item_layout: string}) => {
-    return (
+    return ( // removed: px-1.5 sm:px-3
+        <>
+        <MenuButton />
         <div className="group flex justify-center md:justify-end items-center justify-items-center
-                        sticky top-0 flex-wrap md:flex-nowrap px-1.5 sm:px-3 py-2 bg-stone-50 text-stone-600">
-            <MenuButton />
-            <div className="inline-block min-w-[5em] mt-1 md:mt-0 ml-1">
+                        sticky top-0 flex-wrap md:flex-nowrap mx-1.5 sm:mx-3 lg:mx-5 py-2 bg-stone-50 text-stone-600">
+            <div className="flex justify-center md:justify-end flex-grow min-w-[5em] mt-1 md:mt-0 ml-1">
                 <span className="mr-3 text-stone-900 text-xs">Tavahind</span>
                 <span className="mr-3 text-yellow-400 text-xs">Soodustus</span>
                 <span className="md:mr-6 text-amber-500 text-xs">Kliendikaardiga</span>
@@ -15,14 +19,26 @@ const ProductHeader = (props: {stores: string[], item_layout: string}) => {
             {props.stores.sort().map(
                 store => <ProductHeaderColumn key={store} storeName={store} item_layout={props.item_layout} />)}
         </div>
+        </>
     );
 }
 
-const MenuButton = () => {
+const MenuButton = () => { // basis-full
+    const menuButton = <span className="material-icons material-icon absolute top-0 left-0 m-1.5 sm:m-3
+                                        text-left text-neutral-600 hover:text-black text-2xl leading-none">menu</span>
+
     return (
-        <div className="flex-grow">
-             <span className="material-icons material-icon  text-left text-neutral-900 text-2xl leading-none"
-                   onClick={e => console.log('menu')}>menu</span>
+        <div className="z-10 relative h-0 w-0">
+             <Popup trigger={menuButton} modal>
+                {(onClose: () => void) => (
+                    <div className="shadow-xl border bg-stone-50 font-main text-neutral-800">
+                        <CloseButton onClose={onClose} />
+                        <div className="flex flex-col justify-center items-center">
+                            <p className="px-12 py-16 align-middle">Kontakt: soodudee, gmail.</p>
+                        </div>
+                    </div>
+                )}
+             </Popup>
         </div>
     );
 }

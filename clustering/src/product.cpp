@@ -1,8 +1,8 @@
 #include "product.h"
 
-StoreProduct::StoreProduct() : StoreProduct(0, 0) {}
+StoreProduct::StoreProduct() : StoreProduct(0, 0, "") {}
 
-StoreProduct::StoreProduct(int32_t id, int32_t store_id, tokens_t tokens, quantities_t quantities)
+StoreProduct::StoreProduct(int32_t id, int32_t store_id, std::string barcode, tokens_t tokens, quantities_t quantities)
     : id(id), store_id(store_id), tokens(tokens), quantities(quantities) {}
 
 Product::Product() {}

@@ -1,12 +1,14 @@
 import React from 'react';
+import Popup from 'reactjs-popup';
 
-import { Product, Price, Discount } from './product_list';
+import { Product, Price, Discount } from './api';
+import ProductDetails from './product_details'
 
 
 const ProductRow = (props: {stores: string[], product: Product, item_layout: string}) => {
     const cheapest = Math.min(...props.stores.map(store => props.product.prices[store.toLowerCase()]?.actualPrice ?? Infinity));
 
-    return (
+    const row = (
         <div className="group flex justify-center md:justify-end
                         items-center justify-items-center flex-wrap md:flex-nowrap
                         mx-1.5 sm:mx-3 lg:mx-5 mb-2 md:mb-1 py-0.5 pb-2 md:pb-1
@@ -21,6 +23,19 @@ const ProductRow = (props: {stores: string[], product: Product, item_layout: str
                 })
             }
         </div>
+    );
+
+    return (
+        <Popup trigger={row} modal>
+            {(onClose: () => void) => {
+                if (window.getSelection()!.toString().length === 0) {
+                    return <ProductDetails onClose={onClose} product={props.product} />;
+                } else {
+                    onClose();
+                    return <></>;
+                }
+            }}
+        </Popup>
     );
 }
 

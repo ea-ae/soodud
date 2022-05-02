@@ -35,7 +35,7 @@ def get_all(saver: Generator[None, Product, None]):
 
         for product in page['data']:
             name = product['name']
-            hash_value = int(str(product['id2'])[:-15:-1])
+            hash_value = int(str(product['id2'])[:-30:-1])
             discount = Discount.NONE
             base_price = product['price']
             if (price := product['price_sale_mbr']) is not None:

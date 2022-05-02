@@ -23,10 +23,10 @@ class Product:
     base_price: Optional[float]
     price: float
     discount: Discount
-    hash: int
+    hash: str
     has_barcode: bool
 
 
-def product_hash(store_name: str, data: int | str) -> int:
+def product_hash(store_name: str, data: int | str):
     """Form a store-dependent random hash for the product."""
-    return int(str(int(hashlib.sha256(str.encode(f'{store_name}{data}')).hexdigest(), 16))[:-15:-1])
+    return str(int(hashlib.sha256(str.encode(f'{store_name}{data}')).hexdigest(), 16))[:-30:-1]

@@ -32,7 +32,7 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
     }
 
     auto token_score = matches / ((sizes.first >= 4) ? sizes.first : sizes.second);
-    return 0.9 * token_score + 0.1 * quantity_score;  // todo: reserve 0.01 for 100% product code matches
+    return 0.8 * token_score + 0.2 * quantity_score;  // todo: reserve 0.01 for 100% product code matches
 }
 
 double SingleLinkageMatcher::match(const Product& a, const Product& b) const {
@@ -42,6 +42,9 @@ double SingleLinkageMatcher::match(const Product& a, const Product& b) const {
     for (const auto& a_product : a.items) {
         for (const auto& b_product : b.items) {
             if (a_product->store_id == b_product->store_id) return 0;
+            if (a_product->barcode != "" && b_product->barcode != "") {  // proceed with EAN match
+                return a_product->barcode == b_product->barcode ? 999 : 0;
+            }
 
             double new_match = this->match_products(*a_product, *b_product);
             if (new_match == -1) return 0;
