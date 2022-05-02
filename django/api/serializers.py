@@ -43,6 +43,16 @@ class StoreProductSerializer(serializers.ModelSerializer):
 class DetailedStoreProductSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(source='store.name')
     prices = DetailedPriceSerializer(source='price_set', many=True)
+    # url = serializers.SerializerMethodField()
+    # @staticmethod
+    # def get_url(obj: StoreProduct):
+    #     match obj.store.name:
+    #         case 'Coop':
+    #             pass
+    #         case 'Prisma':
+    #             return f'https://www.prismamarket.ee/entry/{obj.hash}'
+    #         case _:
+    #             raise ValueError('Unknown store name')
 
     class Meta:
         model = StoreProduct

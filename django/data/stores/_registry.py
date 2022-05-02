@@ -105,7 +105,6 @@ class StoreRegistry:
         analyser = clustering.Analyser(clustering.SingleLinkageMatcher(), 0.75)
         for store_id, store in processed_stores:
             for product in store:
-                # barcode = product.
                 analyser.create_product(product.id, store_id, product.barcode, product.tokens, product.quantity)
         analyser.analyse()
         clusters = analyser.get_clusters()
@@ -122,15 +121,15 @@ class StoreRegistry:
         sp_models = []
         quantities = set()
         for sp in store_products:
-            sp_model = models.StoreProduct.objects.only('name', 'product', 'store_id').get(id=sp.id)
+            sp_model = models.StoreProduct.objects.only('name', 'product', 'store__name').get(id=sp.id)
             sp_models.append(sp_model)
             for quantity in sp.quantities:
                 quantity = (quantity[0], quantity[1])
                 quantities.add(quantity)
 
-        # choose product with longest name, but deprioritize prisma (4) products due to name shortening issues
-        longest_name = sorted((sp.name if sp.store_id != 4 else sp.name + ('_' * 100) for sp in sp_models),
-                              key=lambda x: len(x))[-1]
+        # choose product with longest name, but deprioritize prisma (4) products due to truncation issues
+        longest_name = sorted(sp_models, key=lambda x: len(x.name) if x.store.name != 'Prisma' else 0)[-1].name
+
         product = models.Product.objects.create(
             name=longest_name,  # todo: erase quantity data and place it separately
             quantity=list(quantities)

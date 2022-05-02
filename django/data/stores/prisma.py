@@ -26,9 +26,9 @@ def main(saver: Generator[None, Product, None]):
 def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    path = os.path.dirname(__file__) + '/prisma_sites.txt'
-    categories = [page.rstrip() for page in open(path, 'r').readlines()]
+    # categories = [page.rstrip() for page in open(path, 'r').readlines()]
     # categories = parse_sitemaps()
+    categories = get_category_urls()
     for category in categories:
         first_soup = BeautifulSoup(get_page(category, 1), 'html5lib')
         product_count = sv.select('.products-shelf .category-items > b', first_soup)
@@ -50,6 +50,10 @@ def parse_page(soup: BeautifulSoup) -> Iterable[Product]:
         discount = Discount.NONE
 
         name = sv.select('.info > .name', listing)[0].text
+        if name.endswith('...'):  # name truncated, use URL instead
+            url_name = sv.select('a.js-link-item', listing)[0].attrs['href']
+            name = url_name.split('/')[-2].replace('--', ', ').replace('-', ' ').capitalize()
+
         producer = sv.select('.info > .subname', listing)
         if len(producer) > 0:
             if ',' in producer[0].text:
@@ -87,10 +91,22 @@ def get_page(page_url: str, page: int) -> str:
             if attempts >= 3:
                 raise e
             attempts += 1
-            print(f'Connect timeout. Retrying ({attempts}/3)...')
+            print(f'\nConnect timeout. Retrying ({attempts}/3)...')
         else:
             break
     return response.text
+
+
+def get_category_urls() -> list[str]:
+    """Get category URLs by parsing the category list."""
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:77.0) Gecko/20190101 Firefox/77.0'}
+    site = requests.get('https://www.prismamarket.ee/products/selection', headers=headers, verify=False).text
+    soup = BeautifulSoup(site, 'html5lib')
+    categories = []
+    for category in sv.select('.category-shelf-item .categories-list .js-category-item', soup):
+        if category.text != 'Kuva rohkem...':
+            categories.append('https://prismamarket.ee' + category.attrs['href'])
+    return categories
 
 
 def parse_sitemaps() -> list[str]:

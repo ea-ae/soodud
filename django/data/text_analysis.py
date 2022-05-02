@@ -70,6 +70,7 @@ def prepare(text: str) -> list[str]:
     text = regex.sub(r'(\d+)\s*(?:\*|x)\s*(\d+)(?=\s*+\D)', r'\1x\2', text)  # 3 * 5 kg -> 3x5 kg
     text = text.replace('%vol', '% vol')  # 3.5%vol -> 3.5% vol
     text = text.replace('/', ' ')
+    text = text.replace('-', ' ')
 
     # tokenize the string
     tokens = []
