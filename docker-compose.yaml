@@ -3,8 +3,6 @@ services:
   client:
     build:
       context: client/
-    depends_on:
-      - dopami
   django:
     restart: unless-stopped
     build:
@@ -45,7 +43,7 @@ services:
   #     - acmechallenge:/var/www/certbot
   #     - letsencrypt:/etc/letsencrypt
   #   command: certonly --register-unsafely-without-email --agree-tos --webroot -w /var/www/certbot/ -d soodud.ee
-  #   # command: certonly -d dopami.me --dry-run
+  #   # command: certonly -d soodud.ee --dry-run
   #   # command: renew
 
 volumes:
