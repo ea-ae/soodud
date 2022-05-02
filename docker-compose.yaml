@@ -15,9 +15,13 @@ services:
     image: postgres:14.1-alpine
     restart: unless-stopped
     environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
       - main
+    volumes:
+      - data:/var/lib/postgresql/data/
   nginx:
     restart: unless-stopped
     build:
@@ -48,6 +52,8 @@ services:
 
 volumes:
   static:
+    external: false
+  data:
     external: false
   acmechallenge:
     external: false
