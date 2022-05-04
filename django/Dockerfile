@@ -18,5 +18,5 @@ RUN g++ -O2 -Wall -shared -std=c++20 -lstdc++ --verbose -fPIC $(python -m pybind
 ./clustering/src/*.cpp -o data/stores/clustering.so
 
 # temp dev server
-# RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 CMD python manage.py migrate && python manage.py runserver 0.0.0.0:8001
