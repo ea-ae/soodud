@@ -17,8 +17,7 @@ RUN pipenv install --system --deploy --ignore-pipfile
 RUN g++ -O2 -Wall -shared -std=c++20 -lstdc++ --verbose -fPIC $(python -m pybind11 --includes) \
 ./clustering/src/*.cpp -o data/stores/clustering.so
 
-# temp dev server
 CMD python manage.py collectstatic --noinput && \
 # python manage.py createsuperuser --noinput && \  # error if user already exists, can't put it above bc no .env
 python manage.py migrate && \
-python manage.py runserver 0.0.0.0:8001
+gunicorn -b 0.0.0.0:8001 -w 3 soodud.wsgi
