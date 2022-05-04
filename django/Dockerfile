@@ -20,4 +20,4 @@ RUN g++ -O2 -Wall -shared -std=c++20 -lstdc++ --verbose -fPIC $(python -m pybind
 CMD python manage.py collectstatic --noinput && \
 # python manage.py createsuperuser --noinput && \  # error if user already exists, can't put it above bc no .env
 python manage.py migrate && \
-gunicorn -b 0.0.0.0:8001 -w 3 soodud.wsgi
+gunicorn -b 0.0.0.0:8001 -w 3 --timeout 70 soodud.wsgi

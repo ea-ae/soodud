@@ -37,7 +37,6 @@ const App = () => {
     );
 
     const onSearch = (searchQuery: string) => {
-        console.log(`sending ${searchQuery}`);
         setIsLoaded(false);
         sendProductQuery(searchQuery);
     };
