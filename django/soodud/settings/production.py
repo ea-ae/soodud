@@ -6,7 +6,10 @@ from .base import DATABASES, BASE_REST_FRAMEWORK
 
 
 DEBUG = False
-ALLOWED_HOSTS: list[str] = ['django']
+
+DOMAIN = config('DOMAIN')
+ALLOWED_HOSTS: list[str] = ['django', f'https://{DOMAIN}']
+CSRF_TRUSTED_ORIGINS = [f'https://{DOMAIN}']
 CORS_ORIGIN_ALLOW_ALL = True
 
 
