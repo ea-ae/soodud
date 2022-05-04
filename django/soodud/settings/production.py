@@ -10,6 +10,10 @@ ALLOWED_HOSTS: list[str] = ['django']
 CORS_ORIGIN_ALLOW_ALL = True
 
 
+STATIC_ROOT = '/static/django'  # noqa
+STATIC_URL = 'static/django/'
+
+
 DB_HOST = config('DB_HOST')
 DATABASES['default']['HOST'] = 'db' if DB_HOST == 'default' else DB_HOST
 
