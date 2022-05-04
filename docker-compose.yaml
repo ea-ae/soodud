@@ -5,16 +5,10 @@ services:
       context: client/
     volumes:
       - static:/app/dist
-  # clustering:
-  #   build:
-  #     context: clustering/
-  #   volumes:
-  #     - clustering:/app/out
   django:
     restart: unless-stopped
     build:
-      context: ./
-      dockerfile: django/Dockerfile
+      context: django/
     depends_on:
       - db
     env_file:
