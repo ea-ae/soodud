@@ -10,10 +10,13 @@ DEBUG = False
 DOMAIN = config('DOMAIN')
 ALLOWED_HOSTS: list[str] = ['django', f'https://{DOMAIN}']
 CSRF_TRUSTED_ORIGINS = [f'https://{DOMAIN}']
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [f'https://{DOMAIN}']
+CORS_ORIGIN_ALLOW_ALL = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 
-STATIC_ROOT = '/static/django'  # noqa
+STATIC_ROOT = '/static'  # noqa
 STATIC_URL = 'django/'
 
 

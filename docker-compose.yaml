@@ -4,20 +4,19 @@ services:
     build:
       context: client/
     volumes:
-      - static:/app/dist
+      - clientstatic:/app/dist
   django:
     restart: unless-stopped
     build:
       context: django/
     depends_on:
-      - client
       - db
     env_file:
       - .env
     networks:
       - main
     volumes:
-      - static:/static
+      - djangostatic:/static
   db:
     image: postgres:14.1-alpine
     restart: unless-stopped
@@ -43,7 +42,8 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - static:/static:ro
+      - clientstatic:/static
+      - djangostatic:/static/django:ro
       - acmechallenge:/var/www/certbot:ro
       - letsencrypt:/etc/letsencrypt:ro
   certbot:
@@ -58,7 +58,9 @@ services:
     command: renew
 
 volumes:
-  static:
+  clientstatic:
+    external: false
+  djangostatic:
     external: false
   data:
     external: false
