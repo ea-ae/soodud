@@ -10,6 +10,7 @@ services:
     build:
       context: django/
     depends_on:
+      - client
       - db
     env_file:
       - .env

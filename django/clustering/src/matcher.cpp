@@ -21,17 +21,24 @@ double Matcher::match_products(const StoreProduct& a, const StoreProduct& b) con
     auto higher_quantity = std::max<size_t>(a.quantities.size(), b.quantities.size());
     auto quantity_score = higher_quantity == 0 ? 1.0 : quantity_matches / higher_quantity;
 
-    double matches = std::count_if(std::execution::par_unseq, a.tokens.begin(), a.tokens.end(),
-                                   [&b](std::string i) {
-                                       return std::find(b.tokens.begin(), b.tokens.end(), i) != b.tokens.end();
-                                   });
+    auto matches = std::count_if(std::execution::par_unseq, a.tokens.begin(), a.tokens.end(),
+                                 [&b](std::string i) {
+                                     return std::find(b.tokens.begin(), b.tokens.end(), i) != b.tokens.end();
+                                 });
 
-    auto sizes = std::minmax<size_t>(a.tokens.size(), b.tokens.size());
-    if (sizes.first == 0) {  // ignore matches with zero tokens
-        return -1;
-    }
+    // auto sizes = std::minmax<size_t>(a.tokens.size(), b.tokens.size());
+    // if (sizes.first == 0) {  // ignore matches with zero tokens
+    //     return -1;
+    // }
+    // auto token_score = matches / ((sizes.first >= 4) ? sizes.first : sizes.second);
+    auto a_size = a.tokens.size();
+    auto b_size = b.tokens.size();
+    auto smaller = a_size < b_size ? a_size : b_size;
+    auto larger = a_size < b_size ? b_size : a_size;
+    if (smaller == 0) return -1;
+    // also cast to double here v
+    double token_score = static_cast<double>(matches) / ((smaller >= 4) ? smaller : larger);
 
-    auto token_score = matches / ((sizes.first >= 4) ? sizes.first : sizes.second);
     return 0.8 * token_score + 0.2 * quantity_score;  // todo: reserve 0.01 for 100% product code matches
 }
 
