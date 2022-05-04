@@ -7,8 +7,7 @@ from .stores import StoreRegistry
 
 def launch():
     """Update stores, for use by task schedulers and interactive shells."""
-    from .stores import coop, selver, rimi
-    # from .stores import prisma
+    from .stores import coop, selver, rimi, prisma
     StoreRegistry.update_stores()
 
 

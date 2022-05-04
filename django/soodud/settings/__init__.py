@@ -5,7 +5,9 @@ from decouple import config
 from .base import *
 
 
-if config('PRODUCTION', cast=bool):
+PRODUCTION = config('PRODUCTION', cast=bool)
+
+if PRODUCTION:
     from .production import *
 else:
     from .development import *

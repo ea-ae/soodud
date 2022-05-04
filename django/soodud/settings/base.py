@@ -54,7 +54,7 @@ DATABASES = {
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
+        # 'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
         'TEST': {
             'NAME': 'django_test_' + config('DB_NAME'),
@@ -78,6 +78,11 @@ BASE_REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
 }
+
+
+SHELL_PLUS_IMPORTS = (
+    'from data import services as s',
+)
 
 
 BASE_LOGGING = {
