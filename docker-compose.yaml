@@ -16,7 +16,7 @@ services:
     networks:
       - main
     volumes:
-      -static:/static
+      - static:/static
   db:
     image: postgres:14.1-alpine
     restart: unless-stopped

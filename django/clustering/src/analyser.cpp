@@ -56,7 +56,7 @@ void Analyser::analyse() {
                              initial_count, delta);*/
     std::cout << "Created " << initial_count << " initial match combinations in " << delta << "s, processing merge queue\n";
 
-    uint32_t counter = 0;
+    // uint32_t counter = 0;
     while (!merge_queue->empty()) {
         /*counter++;
         if (counter % 1000 == 0) {

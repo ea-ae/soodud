@@ -11,7 +11,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 
 STATIC_ROOT = '/static/django'  # noqa
-STATIC_URL = 'static/django/'
+STATIC_URL = 'django/'
 
 
 DB_HOST = config('DB_HOST')
