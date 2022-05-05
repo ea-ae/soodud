@@ -103,21 +103,23 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
     def get_queryset(self):
-        start = timer()
-        path = os.path.dirname(__file__) + '/productcache.pickle'  # throw if doesn't exist
-        self.products = pickle.load(open(path, 'rb'))
+        # start = timer()
+        # path = os.path.dirname(__file__) + '/productcache.pickle'  # throw if doesn't exist
+        # try:
+        #     self.products = pickle.load(open(path, 'rb'))
+        # except OSError:
+        if len(self.products) == 0:
+            # raise RuntimeError('Product cache missing!')
+            self.load_data()
 
         if (search := self.request.query_params.get('search')) and len(search) <= 130:
             results: list[tuple[int, int]] = []
             search_tokens = ta.prepare(search)
             search_tokens, search_quantities = ta.parse_quantity(search_tokens, force_extraction=True)
-            print(search_tokens, search_quantities)
-            start2 = timer()
             for product in self.products:
                 score = self.match(list(search_tokens), search_quantities, product)
                 if score >= 5:
                     results.append((score, product.id))
-            print(f'Data search took {(timer() - start2) * 1000}ms with "{search}"')
             results.sort(key=lambda x: -x[0])
 
             # https://stackoverflow.com/a/25480488/4362799
@@ -126,18 +128,9 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             ordering = 'CASE %s END' % clauses
             qs = Product.objects.filter(id__in=ids).extra(
                 select={'ordering': ordering}, order_by=('ordering',))
-
-            print(f'New search query took {(timer() - start) * 1000}ms with "{search}"')
             return qs
 
         qs = Product.objects.all()
-
-        if (search := self.request.query_params.get('oldsearch')) and len(search) <= 130:
-            # start = timer()
-            # qs = qs.filter(storeproduct__name__search=search)  # ~170-250ms
-            qs = qs.filter(name__search=search)  # about the same??
-            # x = list(qs[:100])
-            # print(f'Search query took {(timer() - start) * 1000}ms with "{search}"')
 
         if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
             qs = qs.order_by('-id')
