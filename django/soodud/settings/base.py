@@ -81,7 +81,7 @@ BASE_REST_FRAMEWORK = {
 
 
 SHELL_PLUS_IMPORTS = (
-    'from data import services as s',
+    'from soodud import services as s',
 )
 
 

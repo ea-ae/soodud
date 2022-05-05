@@ -98,7 +98,7 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
     });
 
     let storePrices = props.products.map(product => {
-        let priceHistory: (number | null)[] = []
+        let priceHistory: (number | null)[] = new Array(dates.length);
         let priceIndex = 0;
         let lastPrice = null;
 
@@ -106,12 +106,14 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
             let outOfPrices = priceIndex >= product.prices.length;
             if (!outOfPrices && getPriceDate(product.prices[priceIndex].start) == dates[dateIndex]) {
                 let price = product.prices[priceIndex].price;
-                priceHistory.push(price);
+                // priceHistory.push(price);
+                priceHistory[dateIndex] = price;
                 lastPrice = price;
                 priceIndex++; // price has been assigned, move onto next one
                 dateIndex--; // if next price is at the same date, overwrite
             } else {
-                priceHistory.push(lastPrice);
+                // priceHistory.push(lastPrice);
+                priceHistory[dateIndex] = lastPrice;
             }
         }
 
