@@ -91,7 +91,7 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
 
     let dateAxis = dates.map(dateNumber => {
         let date = new Date(dateNumber);
-        let day = (date.getDate() + 1).toString().padStart(2, '0');
+        let day = date.getDate().toString().padStart(2, '0');
         let month = (date.getMonth() + 1).toString().padStart(2, '0');
         let year = date.getFullYear(); // % 100 => 2022 -> 22
         return [day, month, year].join('/');

@@ -58,18 +58,11 @@ services:
     command: renew
 
 volumes:
-  clientstatic:
-    external: false
-  djangostatic:
-    external: false
   data:
-    external: false
-  # clustering:
-  #   external: false
+  clientstatic:
+  djangostatic:
   acmechallenge:
-    external: false
   letsencrypt:
-    external: false
 
 networks:
   main:
