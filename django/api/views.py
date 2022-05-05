@@ -42,14 +42,16 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         """Prepares product data for performant fuzzy searches and stores it in RAM."""
         cls.products = []
         i = 0
+        product_count = Product.objects.all().count()
         for product in Product.objects.all().only('id', 'quantity'):  # quantities don't need to be in the db
             i += 1
             if i % 1000 == 0:
-                print(i)
+                print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded\r', end='')
             text = list(set(it.chain.from_iterable(
                 ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True))))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
             cls.products.append(CachedProduct(product.id, quantities, text))
+        print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded')
 
     @classmethod
     def load_data(cls):
@@ -58,12 +60,17 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             try:
                 cls.products = pickle.load(open(path, 'rb'))
             except OSError:
-                print('Creating product cache...')
-                cls.prepare_data()
-                pickle.dump(cls.products, open(path, 'wb'))
-                print('Product cache created')
-            else:
-                print('Product cache loaded')
+                cls.create_cache()
+            print('Product cache loaded')
+
+    @classmethod
+    def create_cache(cls):
+        path = os.path.dirname(__file__) + '/productcache.pickle'
+
+        print('Creating product cache...')
+        cls.prepare_data()
+        pickle.dump(cls.products, open(path, 'wb'))
+        print('Product cache created')
 
     @classmethod
     def match(cls, tokens: list[str], quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=False) -> int:
@@ -97,7 +104,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         start = timer()
-        self.load_data()
+        path = os.path.dirname(__file__) + '/productcache.pickle'  # throw if doesn't exist
+        self.products = pickle.load(open(path, 'rb'))
 
         if (search := self.request.query_params.get('search')) and len(search) <= 130:
             results: list[tuple[int, int]] = []
