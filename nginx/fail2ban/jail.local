@@ -1,0 +1,42 @@
+[nginx-badbots]
+enabled  = true
+filter = apache-badbots
+logpath = /var/log/nginx*/*access*.log
+maxretry = 1
+bantime = 86400 # 1 day
+
+[nginx-noscript]
+enabled = true
+filter = nginx-noscript
+logpath = /var/log/nginx*/*access*.log
+maxretry = 6
+bantime  = 86400 # 1 day
+
+[nginx-noproxy]
+enabled  = true
+filter   = nginx-noproxy
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 2
+bantime  = 3600 # 1 hour
+
+[nginx-noagent]
+enabled  = true
+filter   = nginx-noagent
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 3
+bantime  = 86400 # 1 day
+findtime = 86400 # 1 day
+
+[noscanners]
+enabled = true
+filter = nginx-noscanners
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 4
+bantime = 3600 # 1 hour
+
+[phpmyadmin]
+enabled = false
+filter = phpmyadmin
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 1
+bantime = 3600 # 1 hour
