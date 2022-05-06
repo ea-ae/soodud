@@ -7,15 +7,7 @@ from .base import DATABASES, BASE_REST_FRAMEWORK
 
 DEBUG = True
 ALLOWED_HOSTS: list[str] = []
-
-
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8001',
-    'http://localhost:8002',
-    'http://127.0.0.1:8001',
-    'http://127.0.0.1:8002',
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 DB_HOST = config('DB_HOST')

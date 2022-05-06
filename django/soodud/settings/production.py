@@ -11,7 +11,6 @@ DOMAIN = config('DOMAIN')
 ALLOWED_HOSTS: list[str] = ['django', f'https://{DOMAIN}']
 CSRF_TRUSTED_ORIGINS = [f'https://{DOMAIN}']
 CORS_ALLOWED_ORIGINS = [f'https://{DOMAIN}']
-CORS_ORIGIN_ALLOW_ALL = False
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 

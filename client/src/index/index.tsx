@@ -9,6 +9,9 @@ import ProductList from './product_list';
 import './index.css';
 
 
+declare var __PRODUCTION__: string;
+
+
 const App = () => {
     const list_offset = 0; // set to 100 for demo
     const list_length = 100; // 100 max
@@ -19,7 +22,8 @@ const App = () => {
     const [items, setItems] = useState<ProductListJSON | []>([]);
 
     const fetchProducts = (events: QueryEvents, query: ProductListAPIQuery) => {
-        const base_url = `${location.protocol}//${location.hostname}/api/v1/products/?`;
+        const port = __PRODUCTION__ ? '' : ':8001';
+        const base_url = `${location.protocol}//${location.hostname}${port}/api/v1/products/?`;
         let params = `limit=${query.length}&offset=${query.offset}&reverse=${query.reverse}`;
         if (query.search !== undefined) params += `&search=${query.search}`;
 

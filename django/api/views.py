@@ -4,7 +4,7 @@ import os
 import pickle
 import logging
 import itertools as it
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 # from django.contrib.postgres.search import SearchQuery
 from django.db.models import QuerySet
 from rest_framework import viewsets
@@ -30,7 +30,6 @@ CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     products: list[CachedProduct] = []
-    cached_qs: Optional[QuerySet[Product]] = None
     throttle_scope = 'product'
     pagination_class = ProductPagination
     permission_classes = [permissions.AllowAny]
@@ -99,7 +98,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
     def get_queryset(self):
-        logger.error('no worke')
         if len(self.products) == 0:  # product cache not loaded
             self.load_data()
 
@@ -123,13 +121,11 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 select={'ordering': ordering}, order_by=('ordering',))
             return qs
 
-        # temporary (cached) calls to database for limit/offset API queries
-        if self.cached_qs is None:
-            qs = Product.objects.all()
-            if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
-                qs = qs.order_by('-id')[:110]
-                self.cached_qs = qs
-        return self.cached_qs
+        # temporary calls to database for limit/offset API queries
+        qs = Product.objects.all()
+        if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
+            qs = qs.order_by('-id')[:110]
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
