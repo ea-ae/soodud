@@ -1,9 +1,13 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import ECharts from 'echarts-for-react';
+import loadable from '@loadable/component';
+// import ECharts from 'echarts-for-react';
 
 import { QueryEvents, DetailedProduct, DetailedStoreProduct, DetailedPrice, Product } from './api';
 import CloseButton from './buttons';
+
+
+const ECharts = loadable(props => import('echarts-for-react'))
 
 
 declare var __PRODUCTION__: string;
@@ -33,6 +37,8 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
     useEffect(() => {
         getProduct(props.product.id);
     }, [props.product]);
+
+    useEffect(() => console.log('initialize productdetails'), []);
 
     let details = <></>;
     if (isLoaded && !error) {
