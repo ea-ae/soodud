@@ -3,7 +3,6 @@
 from pathlib import Path
 from decouple import config
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # BASE_DIR / 'subdir'
 SECRET_KEY = config('SECRET_KEY')
 ROOT_URLCONF = 'soodud.urls'
@@ -16,7 +15,6 @@ USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,7 +33,6 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
 ]
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -46,7 +43,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 DATABASES = {
     'default': {
@@ -61,7 +57,6 @@ DATABASES = {
         }
     }
 }
-
 
 BASE_REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -79,29 +74,18 @@ BASE_REST_FRAMEWORK = {
     ],
 }
 
-
 SHELL_PLUS_IMPORTS = (
     'from soodud import services as s',
 )
 
-
 BASE_LOGGING = {
     'version': 1,
+    'disable_existing_loggers': False,
     'formatters': {
-        'normal': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
+        'normal': {'format': '{levelname} {message}', 'style': '{'},
+        'verbose': {'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}', 'style': '{'},
     },
-    'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
-    },
+    'filters': {'require_debug_true': {'()': 'django.utils.log.RequireDebugTrue'}},
     'handlers': {
         'console': {
             'level': 'DEBUG',
@@ -109,28 +93,28 @@ BASE_LOGGING = {
             'filters': ['require_debug_true'],
             'formatter': 'normal',
         },
-        'general_info': {
+        'info': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/general_log.log',
+            'filename': 'user_log.log',
             'formatter': 'normal',
         },
-        'general_errors': {
+        'errors': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': 'logs/general_errors.log',
+            'filename': 'user_errors.log',
             'formatter': 'verbose',
         },
         'server_info': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/server_info.log',
+            'filename': 'server_info.log',
             'formatter': 'normal',
         },
         'server_errors': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': 'logs/server_errors.log',
+            'filename': 'server_errors.log',
             'formatter': 'verbose',
         },
     },
@@ -141,16 +125,14 @@ BASE_LOGGING = {
         },
         'django.request': {
             'level': 'ERROR',
-            'handlers': ['server_errors'],
+            'handlers': ['console', 'server_errors'],
         },
-        'data': {
+        '': {
             'level': 'INFO',
-            'handlers': ['console', 'general_info', 'general_errors'],
-            'propagate': True
+            'handlers': ['console', 'info', 'errors'],
         },
     }
 }
-
 
 TEMPLATES = [
     {
@@ -167,7 +149,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

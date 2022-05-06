@@ -1,15 +1,15 @@
 """Views."""
 
-from django.contrib.postgres.search import SearchQuery
+import os
+import pickle
+import logging
+import itertools as it
+from typing import NamedTuple, Optional
+# from django.contrib.postgres.search import SearchQuery
+from django.db.models import QuerySet
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import pagination
-from rest_framework.authentication import SessionAuthentication
-import pickle
-import os
-from timeit import default_timer as timer
-import itertools as it
-from typing import NamedTuple
 from thefuzz import fuzz
 
 from soodud.settings import REST_FRAMEWORK
@@ -18,10 +18,7 @@ from . import serializers
 from data.models import Product
 
 
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-
-    def enforce_csrf(self, request):
-        return  # To not perform the csrf check previously happening
+logger = logging.getLogger('app')
 
 
 class ProductPagination(pagination.LimitOffsetPagination):
@@ -33,6 +30,7 @@ CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     products: list[CachedProduct] = []
+    cached_qs: Optional[QuerySet[Product]] = None
     throttle_scope = 'product'
     pagination_class = ProductPagination
     permission_classes = [permissions.AllowAny]
@@ -79,7 +77,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             return 0
 
         # quantity score
-        qty_score = 0
         q_matches = 0
         for product_qty, search_qty in it.product(product.quantities, quantities):
             if search_qty.unit == product_qty.unit:
@@ -90,7 +87,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
         # exact score
-        exact_score = 0
         matches = len([p_token for p_token in product.tokens if p_token in tokens])
         exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
 
@@ -103,16 +99,13 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
     def get_queryset(self):
-        # start = timer()
-        # path = os.path.dirname(__file__) + '/productcache.pickle'  # throw if doesn't exist
-        # try:
-        #     self.products = pickle.load(open(path, 'rb'))
-        # except OSError:
-        if len(self.products) == 0:
-            # raise RuntimeError('Product cache missing!')
+        logger.error('no worke')
+        if len(self.products) == 0:  # product cache not loaded
             self.load_data()
 
         if (search := self.request.query_params.get('search')) and len(search) <= 130:
+            logger.info(f'Search query: {search}')
+
             results: list[tuple[int, int]] = []
             search_tokens = ta.prepare(search)
             search_tokens, search_quantities = ta.parse_quantity(search_tokens, force_extraction=True)
@@ -130,12 +123,13 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 select={'ordering': ordering}, order_by=('ordering',))
             return qs
 
-        qs = Product.objects.all()
-
-        if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
-            qs = qs.order_by('-id')
-
-        return qs
+        # temporary (cached) calls to database for limit/offset API queries
+        if self.cached_qs is None:
+            qs = Product.objects.all()
+            if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
+                qs = qs.order_by('-id')[:110]
+                self.cached_qs = qs
+        return self.cached_qs
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
