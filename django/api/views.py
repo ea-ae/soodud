@@ -25,7 +25,7 @@ class ProductPagination(pagination.LimitOffsetPagination):
     max_limit = REST_FRAMEWORK['MAX_LIMIT']
 
 
-CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=list[str])
+CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=set[str])
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
@@ -44,8 +44,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             i += 1
             if i % 1000 == 0:
                 print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded\r', end='')
-            text = list(set(it.chain.from_iterable(
-                ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True))))
+            text = set(it.chain.from_iterable(
+                ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True)))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
             cls.products.append(CachedProduct(product.id, quantities, text))
         print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded')
@@ -70,10 +70,12 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         print('Product cache created')
 
     @classmethod
-    def match(cls, tokens: list[str], quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=False) -> int:
+    def match(cls, search_text: str, tokens: set[str],
+              quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=True) -> int:
         """Matches a loaded product with the search query."""
-        if len(tokens) == 0:
-            return 0
+        # exact score
+        matches = len(tokens & product.tokens)
+        exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
 
         # quantity score
         q_matches = 0
@@ -85,15 +87,26 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_count = len(product.quantities)
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
-        # exact score
-        matches = len([p_token for p_token in product.tokens if p_token in tokens])
-        exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
-
         # fuzzy score
-        text_score = 0
-        if fuzzy:
-            # text_score = fuzz.partial_ratio(' '.join(tokens), product.text)
-            text_score = fuzz.partial_token_sort_ratio(' '.join(tokens), ' '.join(product.tokens), force_ascii=False)
+        text_score = exact_score
+        if fuzzy and exact_score > 0:  # this will not help in case of short searches full of typos
+            # x = ' '.join(sorted(tokens))  # move this out of function
+            pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
+            # text_score = fuzz.token_sort_ratio(x, y, force_ascii=False, full_process=False)
+            # print('pt is ', pt)
+            # print('st is ', search_text)
+            # if 'perenaise' in pt:
+            #     print("PUTS")
+            #     print(pt)
+            #     print(search_text)
+            #     print(fuzz.partial_ratio(search_text, pt))
+            text_score = fuzz.partial_ratio(search_text, pt)
+            # fuzz.partial_token_sort_ratio()
+            # print(text_score, product.tokens)
+            # text_score = fuzz.partial_ratio(search_text, pt)
+            # matcher.set_seq1(pt)
+            # text_score = int(matcher.ratio() * 100)
+            # partial_ratio may be superior to ratio
 
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
@@ -107,8 +120,14 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             results: list[tuple[int, int]] = []
             search_tokens = ta.prepare(search)
             search_tokens, search_quantities = ta.parse_quantity(search_tokens, force_extraction=True)
+            search_tokens = set(search_tokens)
+
+            if len(search_tokens) == 0:
+                return Product.objects.none()
+
+            search_text = ' '.join(sorted(search_tokens))
             for product in self.products:
-                score = self.match(list(search_tokens), search_quantities, product)
+                score = self.match(search_text, search_tokens, search_quantities, product)
                 if score >= 5:
                     results.append((score, product.id))
             results.sort(key=lambda x: -x[0])

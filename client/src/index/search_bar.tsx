@@ -30,7 +30,7 @@ type SearchInputProps = {
 
 const SearchInput = (props: SearchInputProps) => {
     return (
-        <input type="text" autoComplete="off" name="search" maxLength={100} tabIndex={1}
+        <input type="text" autoComplete="off" name="search" maxLength={100}
                onChange={props.onChange} value={props.text} placeholder="Otsi tooteid..."
                className="flex-grow appearance-none h-12 px-4 py-2 focus:outline-none border-0
                           bg-stone-50 text-base text-stone-800" />

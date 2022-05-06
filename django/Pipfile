@@ -17,9 +17,8 @@ django-extensions = "*"
 html5lib = "*"
 django-cors-headers = "*"
 python-decouple = "*"
-thefuzz = "*"
-python-levenshtein = "*"
 gunicorn = "*"
+thefuzz = {extras = ["speedup"], version = "*"}
 
 [dev-packages]
 pre-commit = "*"
