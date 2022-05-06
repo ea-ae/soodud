@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import loadable from '@loadable/component';
 // import ECharts from 'echarts-for-react';
 
@@ -7,7 +7,9 @@ import { QueryEvents, DetailedProduct, DetailedStoreProduct, DetailedPrice, Prod
 import CloseButton from './buttons';
 
 
-const ECharts = loadable(props => import('echarts-for-react'))
+const ECharts = loadable(props => import('echarts-for-react'), {
+    fallback: <p>Laeme...</p>,
+})
 
 
 declare var __PRODUCTION__: string;
@@ -37,8 +39,6 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
     useEffect(() => {
         getProduct(props.product.id);
     }, [props.product]);
-
-    useEffect(() => console.log('initialize productdetails'), []);
 
     let details = <></>;
     if (isLoaded && !error) {
@@ -205,7 +205,7 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
         series: series
     };
 
-    return <ECharts option={options} style={{width: '100%'}} />
+    return <ECharts option={options} style={{width: '100%'}} />;
 }
 
 export default ProductDetails;
