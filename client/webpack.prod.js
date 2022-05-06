@@ -16,7 +16,7 @@ module.exports = merge(common, {
     optimization: {
         splitChunks: {
             chunks: 'all',
-            minSize: 35000, // 35kb
+            minSize: 20000, // 20kb
         },
     },
     plugins: [
