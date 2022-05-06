@@ -1,0 +1,2 @@
+# crontab -e && service crond restart
+0 1 * * * cd ~/soodud && docker exec soodud-django-1 /bin/bash -c 'python manage.py shell_plus -c "s.launch(); s.match()"' && tools/compose.sh > /var/log/productcron.log
