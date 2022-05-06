@@ -26,9 +26,10 @@ def main(saver: Generator[None, Product, None]):
 def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    # categories = [page.rstrip() for page in open(path, 'r').readlines()]
+    path = os.path.dirname(__file__) + '/prisma_sites.txt'
+    categories = [page.rstrip() for page in open(path, 'r').readlines()]
     # categories = parse_sitemaps()
-    categories = get_category_urls()
+    # categories = get_category_urls()
     for category in categories:
         first_soup = BeautifulSoup(get_page(category, 1), 'html5lib')
         product_count = sv.select('.products-shelf .category-items > b', first_soup)

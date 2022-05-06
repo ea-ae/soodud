@@ -1,10 +1,27 @@
 """Production settings."""
 
-from .base import BASE_REST_FRAMEWORK
+from decouple import config
+
+from .base import DATABASES, BASE_REST_FRAMEWORK
 
 
 DEBUG = False
-ALLOWED_HOSTS: list[str] = []
+
+DOMAIN = config('DOMAIN')
+ALLOWED_HOSTS: list[str] = ['django', f'https://{DOMAIN}']
+CSRF_TRUSTED_ORIGINS = [f'https://{DOMAIN}']
+CORS_ALLOWED_ORIGINS = [f'https://{DOMAIN}']
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+
+STATIC_ROOT = '/static'  # noqa
+STATIC_URL = 'django/'
+
+
+DB_HOST = config('DB_HOST')
+DATABASES['default']['HOST'] = 'db' if DB_HOST == 'default' else DB_HOST
+
 
 REST_FRAMEWORK = BASE_REST_FRAMEWORK | {
     'MAX_LIMIT': 100,

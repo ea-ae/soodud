@@ -2,10 +2,12 @@
 *.pickle
 *.csv
 *.pclprof
+*.pyd
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
+# used to be [cod]
+*.py[co]
 *$py.class
 
 # C extensions

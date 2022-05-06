@@ -1,15 +1,15 @@
 """Views."""
 
-from django.contrib.postgres.search import SearchQuery
+import os
+import pickle
+import logging
+import itertools as it
+from typing import NamedTuple
+# from django.contrib.postgres.search import SearchQuery
+from django.db.models import QuerySet
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import pagination
-from rest_framework.authentication import SessionAuthentication
-import pickle
-import os
-from timeit import default_timer as timer
-import itertools as it
-from typing import NamedTuple
 from thefuzz import fuzz
 
 from soodud.settings import REST_FRAMEWORK
@@ -18,10 +18,7 @@ from . import serializers
 from data.models import Product
 
 
-class CsrfExemptSessionAuthentication(SessionAuthentication):
-
-    def enforce_csrf(self, request):
-        return  # To not perform the csrf check previously happening
+logger = logging.getLogger('app')
 
 
 class ProductPagination(pagination.LimitOffsetPagination):
@@ -42,14 +39,16 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         """Prepares product data for performant fuzzy searches and stores it in RAM."""
         cls.products = []
         i = 0
+        product_count = Product.objects.all().count()
         for product in Product.objects.all().only('id', 'quantity'):  # quantities don't need to be in the db
             i += 1
             if i % 1000 == 0:
-                print(i)
+                print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded\r', end='')
             text = list(set(it.chain.from_iterable(
                 ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True))))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
             cls.products.append(CachedProduct(product.id, quantities, text))
+        print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded')
 
     @classmethod
     def load_data(cls):
@@ -58,12 +57,17 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             try:
                 cls.products = pickle.load(open(path, 'rb'))
             except OSError:
-                print('Creating product cache...')
-                cls.prepare_data()
-                pickle.dump(cls.products, open(path, 'wb'))
-                print('Product cache created')
-            else:
-                print('Product cache loaded')
+                cls.create_cache()
+            print('Product cache loaded')
+
+    @classmethod
+    def create_cache(cls):
+        path = os.path.dirname(__file__) + '/productcache.pickle'
+
+        print('Creating product cache...')
+        cls.prepare_data()
+        pickle.dump(cls.products, open(path, 'wb'))
+        print('Product cache created')
 
     @classmethod
     def match(cls, tokens: list[str], quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=False) -> int:
@@ -72,7 +76,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             return 0
 
         # quantity score
-        qty_score = 0
         q_matches = 0
         for product_qty, search_qty in it.product(product.quantities, quantities):
             if search_qty.unit == product_qty.unit:
@@ -83,7 +86,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
         # exact score
-        exact_score = 0
         matches = len([p_token for p_token in product.tokens if p_token in tokens])
         exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
 
@@ -96,20 +98,19 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
     def get_queryset(self):
-        start = timer()
-        self.load_data()
+        if len(self.products) == 0:  # product cache not loaded
+            self.load_data()
 
         if (search := self.request.query_params.get('search')) and len(search) <= 130:
+            logger.info(f'Search query: {search}')
+
             results: list[tuple[int, int]] = []
             search_tokens = ta.prepare(search)
             search_tokens, search_quantities = ta.parse_quantity(search_tokens, force_extraction=True)
-            print(search_tokens, search_quantities)
-            start2 = timer()
             for product in self.products:
                 score = self.match(list(search_tokens), search_quantities, product)
                 if score >= 5:
                     results.append((score, product.id))
-            print(f'Data search took {(timer() - start2) * 1000}ms with "{search}"')
             results.sort(key=lambda x: -x[0])
 
             # https://stackoverflow.com/a/25480488/4362799
@@ -118,22 +119,12 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             ordering = 'CASE %s END' % clauses
             qs = Product.objects.filter(id__in=ids).extra(
                 select={'ordering': ordering}, order_by=('ordering',))
-
-            print(f'New search query took {(timer() - start) * 1000}ms with "{search}"')
             return qs
 
+        # temporary calls to database for limit/offset API queries
         qs = Product.objects.all()
-
-        if (search := self.request.query_params.get('oldsearch')) and len(search) <= 130:
-            # start = timer()
-            # qs = qs.filter(storeproduct__name__search=search)  # ~170-250ms
-            qs = qs.filter(name__search=search)  # about the same??
-            # x = list(qs[:100])
-            # print(f'Search query took {(timer() - start) * 1000}ms with "{search}"')
-
         if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
-            qs = qs.order_by('-id')
-
+            qs = qs.order_by('-id')[:110]
         return qs
 
     def get_serializer_class(self):

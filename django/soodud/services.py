@@ -2,21 +2,26 @@
 import itertools as it
 import logging
 
-from .stores import StoreRegistry
+from data.stores import StoreRegistry
+from api.views import ProductViewSet
 
 
 def launch():
     """Update stores, for use by task schedulers and interactive shells."""
-    from .stores import coop, selver, rimi
-    # from .stores import prisma
+    from data.stores import coop, selver, rimi, prisma
     StoreRegistry.update_stores()
 
 
 def match():
     """Match products together."""
-    from .stores import coop, selver, rimi, prisma
+    from data.stores import coop, selver, rimi, prisma
     StoreRegistry.match_stores()
 
 
 def purge():
     """Purge Products with no associated StoreProducts, clear cache, etc."""
+
+
+def load_cache():
+    """Create a product cache."""
+    ProductViewSet.create_cache()

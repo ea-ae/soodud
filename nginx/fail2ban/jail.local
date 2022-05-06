@@ -1,0 +1,44 @@
+[sshd]
+enabled = false
+
+[nginx-badbots]
+enabled  = true
+filter   = apache-badbots
+action   = iptables-multiport[name=BadBots, port="http,https"]
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 1
+bantime  = 86400 # 1 day
+
+[nginx-noscript]
+enabled  = false
+filter   = nginx-noscript
+action   = iptables-multiport[name=NoScript, port="http,https"]
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 6
+bantime  = 86400 # 1 day
+
+[nginx-noproxy]
+enabled  = true
+filter   = nginx-noproxy
+action   = iptables-multiport[name=NoProxy, port="http,https"]
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 2
+bantime  = 3600 # 1 hour
+
+[nginx-noagent]
+enabled  = false
+filter   = nginx-noagent
+action   = iptables-multiport[name=NoAgent, port="http,https"]
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 3
+bantime  = 86400 # 1 day
+findtime = 86400 # 1 day
+
+[nginx-noscanners]
+enabled  = true
+filter   = nginx-noscanners
+action   = iptables-multiport[name=NoScanners, port="http,https"]
+logpath  = /var/log/nginx*/*access*.log
+maxretry = 5
+bantime  = 7200 # 2 hours
+findtime = 180 # 3 minutes

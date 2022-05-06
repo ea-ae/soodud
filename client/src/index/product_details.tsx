@@ -12,7 +12,7 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
     const [data, setData] = useState<DetailedProduct | null>(null);
 
     const fetchProductDetails = (events: QueryEvents, productId: number) => {
-        const url = `${location.protocol}//${location.hostname}:8001/api/v1/products/${productId}/`;
+        const url = `${location.protocol}//${location.hostname}/api/v1/products/${productId}/`;
         fetch(url, {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
             .then(events.onSuccess, events.onError)
@@ -92,13 +92,13 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
     let dateAxis = dates.map(dateNumber => {
         let date = new Date(dateNumber);
         let day = date.getDate().toString().padStart(2, '0');
-        let month = date.getMonth().toString().padStart(2, '0');
+        let month = (date.getMonth() + 1).toString().padStart(2, '0');
         let year = date.getFullYear(); // % 100 => 2022 -> 22
         return [day, month, year].join('/');
     });
 
     let storePrices = props.products.map(product => {
-        let priceHistory: (number | null)[] = []
+        let priceHistory: (number | null)[] = new Array(dates.length);
         let priceIndex = 0;
         let lastPrice = null;
 
@@ -106,12 +106,14 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
             let outOfPrices = priceIndex >= product.prices.length;
             if (!outOfPrices && getPriceDate(product.prices[priceIndex].start) == dates[dateIndex]) {
                 let price = product.prices[priceIndex].price;
-                priceHistory.push(price);
+                // priceHistory.push(price);
+                priceHistory[dateIndex] = price;
                 lastPrice = price;
                 priceIndex++; // price has been assigned, move onto next one
                 dateIndex--; // if next price is at the same date, overwrite
             } else {
-                priceHistory.push(lastPrice);
+                // priceHistory.push(lastPrice);
+                priceHistory[dateIndex] = lastPrice;
             }
         }
 

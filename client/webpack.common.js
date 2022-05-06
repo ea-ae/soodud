@@ -1,6 +1,11 @@
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+
+
+require('dotenv').config({ path: __dirname + '/../.env', override: true });
 
 
 module.exports = {
@@ -16,6 +21,10 @@ module.exports = {
             filename: 'index.html',
             chunks: ['index'],
             favicon: 'public/favicons/favicon.ico',
+        }),
+        new CopyWebpackPlugin({ patterns: [{ from: 'public' }]}),
+        new webpack.DefinePlugin({
+            __PRODUCTION__: process.env.PRODUCTION,
         }),
     ],
     module: { rules: [

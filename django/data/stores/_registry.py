@@ -11,7 +11,7 @@ from . import Discount
 from . import Product
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('app')
 
 
 class StoreRegistry:
