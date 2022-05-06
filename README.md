@@ -7,12 +7,20 @@ CI/CD is implemented through Github Actions and Docker Compose. Nginx & fail2ban
 ## Setup
 
 1. Clone the project.
-2. Create a valid `.env` file based on `.env.example`.
-3. If this is your initial configuration and you plan on using nginx, temporarily disable HTTPS in `nginx/nginx.conf`.
-4. Install dependencies using `cd client && npm install --dev` and `cd django && pipenv install`.
-5. If applicable, build the C++ project and move `clustering/out/clustering.(so|pyd)` into the `django/data/stores/` directory.
-6. In development, run the servers using `cd client && npm run server` and `tools/start_server.sh`.
-7. In production, run Docker Compose with `tools/compose.sh`.
-8. To scrape new product data and form updated product clusters, run `tools/run_service.sh launch` and `tools/run_service.sh match` respectively.
-9. Alternatively, create a new cronjob with `tools/cron.txt` as a reference. This will ensure that the product database is updated once a day.
-10. In order to contribute, be sure to install the required git commit hooks with `cd django && pipenv run pre-commit install`.
+1. Create a valid `.env` file based on `.env.example`.
+1. Install dependencies using `cd client && npm install --dev` and `cd django && pipenv install`.
+1. Optionally, start the Python virtual environment with `cd django && pipenv shell`.
+1. To scrape new product data and form updated product clusters, run `tools/run_service.sh launch` and `tools/run_service.sh match` respectively.
+1. In order to contribute, first install the required git commit hooks with `cd django && pipenv run pre-commit install`.
+
+### Development
+
+1. Build the C++ project and move `clustering/out/clustering.(so|pyd)` into the `django/data/stores/` directory.
+1. Start the webpack dev server using `cd client && npm run server`
+1. Start the Django dev server with `tools/start_server.sh`.
+
+### Production
+
+1. If this is your initial configuration, temporarily disable HTTPS in `nginx/nginx.conf` by commenting out the `include`.
+1. Run Docker Compose with `tools/compose.sh`.
+1. Create a new cronjob with `tools/cron.txt` as a reference. This will ensure that the product database is updated once a day.
