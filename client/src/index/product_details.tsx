@@ -194,6 +194,7 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
         ],
         tooltip: {
             trigger: 'axis',
+            valueFormatter: (value: number | string) => value == null ? '-' : Number(value).toFixed(2).toString() + '€',
         },
         series: series
     };
