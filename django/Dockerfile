@@ -6,8 +6,6 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# COPY ./clustering/src/* ./clustering/
-# RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev libc-dev gpgme-dev build-base
 RUN apt-get update && apt-get install --yes gcc python3-dev musl-dev build-essential
 RUN pip install --upgrade pip
 RUN pip install pipenv pybind11

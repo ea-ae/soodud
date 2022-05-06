@@ -32,6 +32,8 @@ services:
     restart: unless-stopped
     build:
       context: nginx/
+    cap_add:
+      - NET_ADMIN
     depends_on:
       - client
     env_file:

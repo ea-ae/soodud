@@ -11,8 +11,10 @@ COPY fail2ban/filter.d/* /etc/fail2ban/filter.d/
 RUN rm /var/log/nginx/*.log
 RUN touch /var/log/nginx/access.log
 RUN touch /var/log/nginx/error.log
-RUN service fail2ban restart
+# RUN service fail2ban restart
 COPY *.conf .
+
+CMD nginx && service fail2ban restart
 
 # CMD /bin/bash \
 #     envsubst < /etc/nginx/conf.d/nginx.template.conf > /etc/nginx/nginx.conf && \
