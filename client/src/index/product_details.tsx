@@ -6,13 +6,17 @@ import { QueryEvents, DetailedProduct, DetailedStoreProduct, DetailedPrice, Prod
 import CloseButton from './buttons';
 
 
+declare var __PRODUCTION__: string;
+
+
 const ProductDetails = (props: {onClose: () => void, product: Product}) => { // mx-1.5 my-10 sm:m-6 md:m-12 lg:m-20 xl:m-32
     const [error, setError] = useState<{message: string} | null>(null);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [data, setData] = useState<DetailedProduct | null>(null);
 
     const fetchProductDetails = (events: QueryEvents, productId: number) => {
-        const url = `${location.protocol}//${location.hostname}/api/v1/products/${productId}/`;
+        const port = __PRODUCTION__ ? '' : ':8001';
+        const url = `${location.protocol}//${location.hostname}${port}/api/v1/products/${productId}/`;
         fetch(url, {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
             .then(events.onSuccess, events.onError)

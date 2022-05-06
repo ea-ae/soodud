@@ -3,6 +3,8 @@ services:
   client:
     build:
       context: client/
+    env_file:
+      - .env
     volumes:
       - clientstatic:/app/dist
   django:

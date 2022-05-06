@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 
-require('dotenv').config({ path: __dirname + '/../.env', override: true });
+require('dotenv').config({ path: __dirname + '/../.env', override: false });
 
 
 module.exports = {
