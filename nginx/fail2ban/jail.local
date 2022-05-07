@@ -22,7 +22,7 @@ enabled  = true
 filter   = nginx-noproxy
 action   = iptables-multiport[name=NoProxy, port="http,https"]
 logpath  = /var/log/nginx*/*access*.log
-maxretry = 2
+maxretry = 1
 bantime  = 3600 # 1 hour
 
 [nginx-noagent]
@@ -39,6 +39,6 @@ enabled  = true
 filter   = nginx-noscanners
 action   = iptables-multiport[name=NoScanners, port="http,https"]
 logpath  = /var/log/nginx*/*access*.log
-maxretry = 4
-bantime  = 7200 # 2 hours
-findtime = 7200 # 2 hours
+maxretry = 6
+bantime  = 21600 # 6 hours
+findtime = 86400 # 1 day
