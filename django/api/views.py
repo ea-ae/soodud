@@ -73,10 +73,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     def match(cls, search_text: str, tokens: set[str],
               quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=True) -> int:
         """Matches a loaded product with the search query."""
-        # exact score
-        matches = len(tokens & product.tokens)
-        exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
-
         # quantity score
         q_matches = 0
         for product_qty, search_qty in it.product(product.quantities, quantities):
@@ -87,26 +83,15 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_count = len(product.quantities)
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
+        # exact score
+        matches = len(tokens & product.tokens)
+        exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
+
         # fuzzy score
         text_score = exact_score
         if fuzzy and exact_score > 0:  # this will not help in case of short searches full of typos
-            # x = ' '.join(sorted(tokens))  # move this out of function
             pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
-            # text_score = fuzz.token_sort_ratio(x, y, force_ascii=False, full_process=False)
-            # print('pt is ', pt)
-            # print('st is ', search_text)
-            # if 'perenaise' in pt:
-            #     print("PUTS")
-            #     print(pt)
-            #     print(search_text)
-            #     print(fuzz.partial_ratio(search_text, pt))
             text_score = fuzz.partial_ratio(search_text, pt)
-            # fuzz.partial_token_sort_ratio()
-            # print(text_score, product.tokens)
-            # text_score = fuzz.partial_ratio(search_text, pt)
-            # matcher.set_seq1(pt)
-            # text_score = int(matcher.ratio() * 100)
-            # partial_ratio may be superior to ratio
 
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 

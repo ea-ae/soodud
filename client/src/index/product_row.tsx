@@ -69,7 +69,7 @@ const ProductPrice = (props: {price: Price, cheapest: boolean, item_layout: stri
     }
     return (
         <div className={[priceStyle, color, props.cheapest ? 'font-bold' : ''].join(' ')}>
-            {props.price.actualPrice}
+            {Number(props.price.actualPrice).toFixed(2)}
         </div>
     );
 }
