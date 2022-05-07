@@ -116,13 +116,11 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
             let outOfPrices = priceIndex >= product.prices.length;
             if (!outOfPrices && getPriceDate(product.prices[priceIndex].start) == dates[dateIndex]) {
                 let price = product.prices[priceIndex].price;
-                // priceHistory.push(price);
                 priceHistory[dateIndex] = price;
                 lastPrice = price;
                 priceIndex++; // price has been assigned, move onto next one
                 dateIndex--; // if next price is at the same date, overwrite
             } else {
-                // priceHistory.push(lastPrice);
                 priceHistory[dateIndex] = lastPrice;
             }
         }
@@ -188,15 +186,8 @@ const PriceHistoryChart = (props: {products: DetailedStoreProduct[]}) => {
             axisLabel: { formatter: '{value}€' }
         },
         dataZoom: [
-            {
-                type: 'inside',
-                start: 0,
-                end: 100,
-            },
-            {
-                start: 0,
-                end: 100,
-            },
+            { type: 'inside', start: 0, end: 100 },
+            { start: 0, end: 100 },
         ],
         tooltip: {
             trigger: 'axis',
