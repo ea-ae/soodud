@@ -102,9 +102,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
             text_score = fuzz.partial_ratio(search_text, pt)
 
-        if exact_score > 0:
-            print(text_score, 'bruh')
-            print(product.tokens, qty_score * 0.1, exact_score * 0.4, price_score * 0.2, text_score * 0.3)
         return int(qty_score * 0.2 + exact_score * 0.5 + price_score * 0.2 + text_score * 0.2)
 
     def get_queryset(self):
@@ -124,7 +121,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 return Product.objects.none()
 
             search_text = ' '.join(sorted(search_tokens))
-            print('matching')
             for product in self.products:
                 score = self.match(search_text, search_tokens, search_quantities, product)
                 if score >= 5:

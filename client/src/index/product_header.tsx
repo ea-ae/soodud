@@ -31,10 +31,18 @@ const MenuButton = () => { // basis-full
         <div className="z-10 relative h-0 w-0">
              <Popup trigger={menuButton} modal>
                 {(onClose: () => void) => (
-                    <div className="shadow-xl border bg-stone-50 font-main text-neutral-800">
+                    <div className="shadow-xl border w-[90vw] md:w-[80vw] xl:w-[60vw] bg-stone-50 font-main text-neutral-800">
                         <CloseButton onClose={onClose} />
                         <div className="flex flex-col justify-center items-center">
-                            <p className="px-12 py-16 align-middle">Kontakt: soodudee, gmail.</p>
+                            <p className="px-12 pt-16 align-middle">
+                                Tootehinnad on uuendatud korra päevas ja kehtivad ainult e-poodidele.
+                                E-poodides leiduvad hinnad ja kampaaniad ei kajasta alati kohalolevaid pakkumisi.
+                                Tooteanalüüsija ei ole alati võimeline ideaalselt ühendama poodide vahelisi tooteid,
+                                mistõttu on alati kasulik kontrollida võrreldavaid tooted üle enne ostu. Ainult
+                                Prisma ja Selveri e-poed avalikustavad oma toodete triipkoode, tänu millele on
+                                võimalik nende kahe poe tooteid kokku sobitada 100% täpsusega.
+                            </p>
+                            <p className="px-12 py-8 align-middle">Kontakt: soodudee, gmail.</p>
                         </div>
                     </div>
                 )}
