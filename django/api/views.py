@@ -7,6 +7,8 @@ import itertools as it
 from typing import NamedTuple
 # from django.contrib.postgres.search import SearchQuery
 from django.db.models import QuerySet
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import pagination
@@ -33,6 +35,10 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     throttle_scope = 'product'
     pagination_class = ProductPagination
     permission_classes = [permissions.AllowAny]
+
+    @method_decorator(cache_page(3600))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     @classmethod
     def prepare_data(cls):
@@ -89,7 +95,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
         # fuzzy score
         text_score = exact_score
-        if fuzzy and exact_score > 0:  # this will not help in case of short searches full of typos
+        if fuzzy and 1 > exact_score > 0:  # this will not help in case of short searches full of typos
             pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
             text_score = fuzz.partial_ratio(search_text, pt)
 
