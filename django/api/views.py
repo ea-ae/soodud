@@ -15,14 +15,14 @@ from thefuzz import fuzz
 
 from . import serializers
 from data import text_analysis as ta
-from data.models import Product
+from data.models import Product, StoreProduct
 from soodud.settings import REST_FRAMEWORK
 
 
 logger = logging.getLogger('app')
 
 
-CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=set[str])
+CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=set[str], sp_count=int)
 
 
 class ProductPagination(pagination.LimitOffsetPagination):
@@ -46,7 +46,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         progress_i = 0
         cls.products = []
         product_count = Product.objects.all().count()
-        for product in Product.objects.all().only('id', 'quantity'):  # ps: quantities don't need to be in the db
+        for product in Product.objects.all().only('id', 'quantity'):
             progress_i += 1
             if progress_i % 1000 == 0:
                 print(f'{progress_i / product_count:.1%}\t {progress_i}/{product_count} products loaded\r', end='')
@@ -54,7 +54,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             text = set(it.chain.from_iterable(  # concat all store product names
                 ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True)))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
-            cls.products.append(CachedProduct(product.id, quantities, text))
+            sp_count = StoreProduct.objects.filter(product=product).count()
+            cls.products.append(CachedProduct(product.id, quantities, text, sp_count))
         print(f'{progress_i / product_count:.1%}\t {progress_i}/{product_count} products loaded')
 
     @classmethod
@@ -91,15 +92,20 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_count = len(product.quantities)
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
-        matches = len(tokens & product.tokens)  # exact score
-        exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
+        token_matches = len(tokens & product.tokens)  # exact score
+        exact_score = (token_matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100
+
+        price_score = product.sp_count / 0.04  # price count score (more stores have product = more relevance)
 
         text_score = exact_score  # fuzzy score
-        if fuzzy and 1 > exact_score > 0:  # this will not help in case of short searches full of typos
+        if fuzzy and 100 > exact_score > 0:  # this will not help in case of short searches full of typos
             pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
             text_score = fuzz.partial_ratio(search_text, pt)
 
-        return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
+        if exact_score > 0:
+            print(text_score, 'bruh')
+            print(product.tokens, qty_score * 0.1, exact_score * 0.4, price_score * 0.2, text_score * 0.3)
+        return int(qty_score * 0.2 + exact_score * 0.5 + price_score * 0.2 + text_score * 0.2)
 
     def get_queryset(self):
         """Get API call queryset with a custom override for search queries."""
@@ -118,6 +124,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 return Product.objects.none()
 
             search_text = ' '.join(sorted(search_tokens))
+            print('matching')
             for product in self.products:
                 score = self.match(search_text, search_tokens, search_quantities, product)
                 if score >= 5:

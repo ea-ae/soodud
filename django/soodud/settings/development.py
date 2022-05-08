@@ -22,3 +22,10 @@ REST_FRAMEWORK = BASE_REST_FRAMEWORK | {
         'search': '30000/minute',
     },
 }
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
