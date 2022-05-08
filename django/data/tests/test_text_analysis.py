@@ -1,7 +1,6 @@
 """Test text analysis."""
 
 import pytest
-import pytest_dependency
 
 from data import text_analysis as ta
 

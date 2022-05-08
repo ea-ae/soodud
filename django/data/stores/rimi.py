@@ -1,12 +1,13 @@
 """Rimi."""
 
-import requests
-import regex
-from xml.etree import ElementTree as et
-from bs4 import BeautifulSoup
+from typing import Iterable, Generator
 import itertools as it
+
+from bs4 import BeautifulSoup
+from xml.etree import ElementTree as et
+import regex
+import requests
 import soupsieve as sv
-from typing import Callable, Iterable, Generator, Any
 
 from data.stores import Discount, Product, StoreRegistry, product_hash
 
@@ -64,7 +65,7 @@ def get_all(saver: Generator[None, Product, None]):
 
 
 def parse_page(soup: BeautifulSoup) -> Iterable[Product]:
-    """Parses a store page."""
+    """Parse a store page."""
     for listing in sv.select('.js-product-container.card', soup):  # li.product-grid__item
         if 'Ei ole saadaval' in listing.text:
             continue

@@ -1,7 +1,8 @@
 """Django settings for soodud project."""
 
-from pathlib import Path
 from decouple import config
+from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # BASE_DIR / 'subdir'
 SECRET_KEY = config('SECRET_KEY')

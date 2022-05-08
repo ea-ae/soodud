@@ -1,7 +1,7 @@
 """Test registry."""
 
-import pytest
 from typing import Callable
+import pytest
 
 from data.stores import StoreRegistry
 

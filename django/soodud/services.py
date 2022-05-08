@@ -1,6 +1,4 @@
 """Services."""
-import itertools as it
-import logging
 
 from data.stores import StoreRegistry
 from api.views import ProductViewSet

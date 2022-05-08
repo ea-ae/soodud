@@ -1,13 +1,12 @@
 """Coop."""
 
-import requests
 from time import sleep
-from typing import Generator, Callable, Any
+from typing import Generator, Any
+import requests
 
 from data.stores import Discount, Product, StoreRegistry, product_hash
 
 
-PAGE_LIMIT = 100_000  # don't accidentally DOS the site
 BASE_URL = 'http://api.ecoop.ee/supermarket/products'
 BASE_PAGE_PARAMS: dict[str, str | int] = {
     'orderby': 'name',
@@ -27,7 +26,7 @@ def get_all(saver: Generator[None, Product, None]):
     result = get_page(1)
     page_count, _ = result['metadata']['pages'], result['metadata']['count']
     print('Coop pages:', page_count)
-    pages = (get_page(page) for page in range(1, min(page_count, PAGE_LIMIT) + 1))
+    pages = (get_page(page) for page in range(1, page_count + 1))
 
     for i, page in enumerate(pages):
         if (i + 1) % 50 == 0:
@@ -63,7 +62,6 @@ def get_page(page: int) -> dict[str, Any]:
     response = requests.get(BASE_URL, headers=headers, params=query)
 
     # slow down!
-    # print(f'\rPage {page:03}', end='', flush=True)
     if page % 5 == 0:
         sleep(2)
 

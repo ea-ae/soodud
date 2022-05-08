@@ -1,14 +1,15 @@
-from django.db import transaction
-import logging
 from concurrent import futures
 from datetime import datetime
 from typing import Generator, Callable, NamedTuple
+import logging
 
+from django.db import transaction
+
+from . import Discount
+from . import Product
 from . import clustering  # noqa
 from data import models
 from data import text_analysis
-from . import Discount
-from . import Product
 
 
 logger = logging.getLogger('app')
@@ -24,16 +25,16 @@ class StoreRegistry:
     registry: list[Store] = []
 
     def __init__(self, name: str):
-        """Initialize."""
+        """Initialize a new store."""
         self.store_name = name
 
     def __call__(self, func: Callable):
-        """Called by decorators."""
+        """Add store to class-level registry. Method is called by decorators."""
         self.add_store(self.store_name, func)
 
     @classmethod
     def add_store(cls, name: str, func: Callable):
-        """Add store to registry."""
+        """Add store to class-level registry."""
         model, _ = models.Store.objects.get_or_create(name=name)
         if name not in (store.name for store in cls.registry):  # do not add duplicate stores
             cls.registry.append(cls.Store(name, func, model))
@@ -50,7 +51,7 @@ class StoreRegistry:
     def update_store(store: Store):
         """Update a store."""
         def save_prices() -> Generator[None, Product, None]:
-            """Save the new prices."""
+            """Save new product price."""
             while True:
                 product = yield
                 store_product, product_created = models.StoreProduct.objects.get_or_create(
@@ -75,7 +76,7 @@ class StoreRegistry:
                     if not product_created:  # price update
                         update = (f'{store_product.name} {store_product.current_price.price} -> {price.price} '
                                   f'({store_product.current_price.discount} -> {price.discount})')
-                        print(update)  # temp
+                        print(update)
                         logger.info(update)
                     price.save()
                     store_product.current_price = price
@@ -111,7 +112,7 @@ class StoreRegistry:
         print('Saving products to database')
 
         with transaction.atomic():
-            models.Product.objects.all().delete()  # migrating existing clusters is too much unnecessary work
+            models.Product.objects.all().delete()  # delete previous clustering results
             for cluster in clusters:
                 cls.add_product(cluster.get_items())  # bulk creation is not viable
 

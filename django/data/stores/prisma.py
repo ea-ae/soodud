@@ -1,14 +1,15 @@
 """Prisma."""
 
-import requests
-import urllib3
-from xml.etree import ElementTree as et
-from bs4 import BeautifulSoup
-import soupsieve as sv
-import itertools as it
-import os
-import math
 from typing import Generator, Iterable
+import itertools as it
+import math
+import os
+
+from bs4 import BeautifulSoup
+from xml.etree import ElementTree as et
+import requests
+import soupsieve as sv
+import urllib3
 
 from data.stores import Discount, Product, StoreRegistry, product_hash
 
@@ -27,9 +28,7 @@ def get_all(saver: Generator[None, Product, None]):
     """Get all products."""
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     path = os.path.dirname(__file__) + '/prisma_sites.txt'
-    categories = [page.rstrip() for page in open(path, 'r').readlines()]
-    # categories = parse_sitemaps()
-    # categories = get_category_urls()
+    categories = [page.rstrip() for page in open(path, 'r').readlines()]  # or parse_sitemaps(), get_category_urls()
     for category in categories:
         first_soup = BeautifulSoup(get_page(category, 1), 'html5lib')
         product_count = sv.select('.products-shelf .category-items > b', first_soup)

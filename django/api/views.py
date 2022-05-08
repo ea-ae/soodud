@@ -1,33 +1,32 @@
 """Views."""
 
+from typing import NamedTuple
+import itertools as it
+import logging
 import os
 import pickle
-import logging
-import itertools as it
-from typing import NamedTuple
-# from django.contrib.postgres.search import SearchQuery
-from django.db.models import QuerySet
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_framework import viewsets
-from rest_framework import permissions
 from rest_framework import pagination
+from rest_framework import permissions
+from rest_framework import viewsets
 from thefuzz import fuzz
 
-from soodud.settings import REST_FRAMEWORK
-from data import text_analysis as ta
 from . import serializers
+from data import text_analysis as ta
 from data.models import Product
+from soodud.settings import REST_FRAMEWORK
 
 
 logger = logging.getLogger('app')
 
 
+CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=set[str])
+
+
 class ProductPagination(pagination.LimitOffsetPagination):
     max_limit = REST_FRAMEWORK['MAX_LIMIT']
-
-
-CachedProduct = NamedTuple('CachedProduct', id=int, quantities=tuple[ta.Quantity, ...], tokens=set[str])
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
@@ -38,26 +37,29 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     @method_decorator(cache_page(3600))
     def dispatch(self, *args, **kwargs):
+        """Cache all API calls."""
         return super().dispatch(*args, **kwargs)
 
     @classmethod
     def prepare_data(cls):
-        """Prepares product data for performant fuzzy searches and stores it in RAM."""
+        """Prepare product data for faster search queries and store it in RAM."""
+        progress_i = 0
         cls.products = []
-        i = 0
         product_count = Product.objects.all().count()
-        for product in Product.objects.all().only('id', 'quantity'):  # quantities don't need to be in the db
-            i += 1
-            if i % 1000 == 0:
-                print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded\r', end='')
-            text = set(it.chain.from_iterable(
+        for product in Product.objects.all().only('id', 'quantity'):  # ps: quantities don't need to be in the db
+            progress_i += 1
+            if progress_i % 1000 == 0:
+                print(f'{progress_i / product_count:.1%}\t {progress_i}/{product_count} products loaded\r', end='')
+
+            text = set(it.chain.from_iterable(  # concat all store product names
                 ta.prepare(x) for x in product.storeproduct_set.values_list('name', flat=True)))
             quantities = tuple(ta.Quantity(q[0], q[1]) for q in product.quantity)
             cls.products.append(CachedProduct(product.id, quantities, text))
-        print(f'{i / product_count:.1%}\t {i}/{product_count} products loaded')
+        print(f'{progress_i / product_count:.1%}\t {progress_i}/{product_count} products loaded')
 
     @classmethod
     def load_data(cls):
+        """Load pickled product data into memory."""
         if len(cls.products) == 0:
             path = os.path.dirname(__file__) + '/productcache.pickle'
             try:
@@ -68,6 +70,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     @classmethod
     def create_cache(cls):
+        """Pickle product data for later cache loads."""
         path = os.path.dirname(__file__) + '/productcache.pickle'
 
         print('Creating product cache...')
@@ -79,8 +82,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     def match(cls, search_text: str, tokens: set[str],
               quantities: set[ta.Quantity], product: CachedProduct, *, fuzzy=True) -> int:
         """Matches a loaded product with the search query."""
-        # quantity score
-        q_matches = 0
+        q_matches = 0  # quantity score
         for product_qty, search_qty in it.product(product.quantities, quantities):
             if search_qty.unit == product_qty.unit:
                 if search_qty.amount != product_qty.amount:
@@ -89,12 +91,10 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_count = len(product.quantities)
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
-        # exact score
-        matches = len(tokens & product.tokens)
+        matches = len(tokens & product.tokens)  # exact score
         exact_score = (matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100  # may go over 100, it's fine
 
-        # fuzzy score
-        text_score = exact_score
+        text_score = exact_score  # fuzzy score
         if fuzzy and 1 > exact_score > 0:  # this will not help in case of short searches full of typos
             pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
             text_score = fuzz.partial_ratio(search_text, pt)
@@ -102,6 +102,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return int(qty_score * 0.2 + exact_score * 0.5 + text_score * 0.3)
 
     def get_queryset(self):
+        """Get API call queryset with a custom override for search queries."""
         if len(self.products) == 0:  # product cache not loaded
             self.load_data()
 
@@ -131,13 +132,14 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 select={'ordering': ordering}, order_by=('ordering',))
             return qs
 
-        # temporary calls to database for limit/offset API queries
+        # temporary(?) calls to database for limit/offset API queries
         qs = Product.objects.all()
         if (reverse := self.request.query_params.get('reverse')) and reverse == 'true':
             qs = qs.order_by('-id')[:110]
         return qs
 
     def get_serializer_class(self):
+        """Get appropriate serializer class depending on API call type."""
         if self.action == 'retrieve':
             return serializers.DetailedProductSerializer
         return serializers.ProductSerializer

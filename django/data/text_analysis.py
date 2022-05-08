@@ -1,15 +1,10 @@
 """Product title text analysis."""
 
-import regex
-from unidecode import unidecode
-# from collections import Counter
-import itertools as it
 from typing import Iterable, NamedTuple, Sequence
+import itertools as it
 
-# import line_profiler
-# import atexit
-# profile = line_profiler.LineProfiler()
-# atexit.register(profile.print_stats)
+from unidecode import unidecode
+import regex
 
 
 BLACKLIST = ('ja', 'hulgi', 'rimi', 'coop', 'selver', 'selveri pagarid', 'selveri köök', 'coop kokad')
@@ -26,39 +21,23 @@ Quantity = NamedTuple('Quantity', amount=float, unit=str)
 Text = NamedTuple('Text', id=int, barcode=str, tokens=Sequence[str], quantity=set[Quantity])  # original=str
 
 
-# ratios = {}
-
-
 def prepare_store(store: dict) -> list[Text]:
     """Prepare all products of a store."""
     results: list[Text] = []
-    # counter, tokens_total = Counter(), 0
     for product in store:
         tokens = prepare(product['name'])
         if len(tokens) == 0:
             continue
         tokens, quantities = parse_quantity(tokens)
 
-        # counter.update(tokens)
-        # tokens_total += len(tokens)
-
         barcode = product['hash'] if product['has_barcode'] else ''
         text_record = Text(product['id'], barcode, tokens, quantities)
         results.append(text_record)
-
-    # for k, v in counter.items():
-    #     ratios.setdefault(k, []).append(v / tokens_total)
-    # real_ratios = {k: sum(v) / 3 for k, v in ratios.items()}
-    # real_ratios = sorted(real_ratios.items(), key=lambda it: -it[1])[:1000]
-    # hi = max(real_ratios, key=lambda r: r[1])[1]
-    # for k, v in real_ratios[::-1]:
-    #     print(f'{k}: {v / hi:.2%}', end=' | ')
-    # print()
     return results
 
 
 def prepare(text: str) -> list[str]:
-    """Prepares text through tokenization, transformation, normalization, and filtering."""
+    """Prepare text through tokenization, transformation, normalization, and filtering."""
     text = regex.sub(r'\u00B4|\u24C7|`|"|\'|\+', '', text.lower())
     text = regex.sub(r'\u00D7|\+|&|\(|\)', ' ', text)
     text = regex.sub(r',\s*(\D)', r' \1', text)
@@ -97,7 +76,7 @@ def prepare(text: str) -> list[str]:
 
 
 def parse_quantity(tokens: Sequence[str], *, force_extraction=False) -> tuple[Sequence[str], set[Quantity]]:
-    """Parses quantities from tokens and deletes quantity tokens."""
+    """Parse quantities from tokens and delete quantity tokens."""
     quantities, processed_tokens = set(), []
     units = '|'.join(SI_UNITS + SPECIAL_UNITS)
 
@@ -132,7 +111,7 @@ def parse_quantity(tokens: Sequence[str], *, force_extraction=False) -> tuple[Se
 
 
 def token_equality_check(a: Text, b: Text) -> float:
-    """Checks for entirely equal tokens. Very rudimentary."""
+    """Check for entirely equal tokens."""
     lengths = (len(a.tokens), len(b.tokens))
     matches = len(set(a.tokens) & set(b.tokens))
     length = min(lengths) if min(lengths) >= 4 else max(lengths)  # 'Aura apple juice 0.5L' vs 'Apple'
@@ -144,12 +123,7 @@ def token_equality_check(a: Text, b: Text) -> float:
 
 
 def similarity_check(a: Text, b: Text) -> float:
-    """Performs similary checks on two token sequences (combining multiple similarity check algorithms).
-
-    Different stores have differing naming formats, meaning that certain store crossovers will tend to have
-    higher similarity scores on average. Because of this, similarities must be normalized against a whole
-    set of comparisons between two stores.
-    """
+    """Perform similary checks on two token sequences (combining multiple similarity check algorithms)."""
     if a.quantity != b.quantity:
         return 0
     return token_equality_check(a, b)
@@ -182,17 +156,3 @@ def find_matches(groups: Sequence[Sequence[Text]]) -> Iterable[SimilarityScore]:
 
     print('Storing results...')
     yield from results
-
-
-if __name__ == '__main__':
-    SAMPLE = True
-
-    if SAMPLE:
-        sample = '- MINU, rimi coop! 3,5  % 3 * 0,5l kg % plus+ leib- sai a b c '
-        result = prepare(sample)
-        print(' '.join(result))
-        quantity = parse_quantity(result)
-        print(quantity)
-    # else:
-        # groups = prepare_all()
-        # find_clusters(groups)

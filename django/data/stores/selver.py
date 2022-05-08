@@ -1,7 +1,7 @@
 """Coop."""
 
+from typing import Generator, Any
 import requests
-from typing import Generator, Callable, Any
 
 from data.stores import Discount, Product, StoreRegistry, product_hash
 
