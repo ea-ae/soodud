@@ -1,7 +1,9 @@
 """Services."""
 
-from data.stores import StoreRegistry
+from django.core.cache import cache
+
 from api.views import ProductViewSet
+from data.stores import StoreRegistry
 
 
 def launch():
@@ -14,10 +16,12 @@ def match():
     """Match products together."""
     from data.stores import coop, selver, rimi, prisma
     StoreRegistry.match_stores()
+    purge()
 
 
 def purge():
     """Purge Products with no associated StoreProducts, clear cache, etc."""
+    cache.clear()
 
 
 def load_cache():

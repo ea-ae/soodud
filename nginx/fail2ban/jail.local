@@ -39,6 +39,6 @@ enabled  = true
 filter   = nginx-noscanners
 action   = iptables-multiport[name=NoScanners, port="http,https"]
 logpath  = /var/log/nginx*/*access*.log
-maxretry = 6
+maxretry = 5
 bantime  = 21600 # 6 hours
 findtime = 86400 # 1 day

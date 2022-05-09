@@ -35,7 +35,7 @@ const MenuButton = () => { // basis-full
                         <CloseButton onClose={onClose} />
                         <div className="flex flex-col justify-center items-center">
                             <p className="px-12 pt-16 align-middle">
-                                Tootehinnad on uuendatud korra päevas ja kehtivad ainult e-poodidele.
+                                Tootehinnad uuendatakse korra päevas ja kehtivad ainult e-poodidele.
                                 E-poodides leiduvad hinnad ja kampaaniad ei kajasta alati kohalolevaid pakkumisi.
                                 Tooteanalüüsija ei ole alati võimeline ideaalselt ühendama poodide vahelisi tooteid,
                                 mistõttu on alati kasulik kontrollida võrreldavaid tooted üle enne ostu. Ainult
