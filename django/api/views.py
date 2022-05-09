@@ -109,7 +109,9 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         if len(self.products) == 0:  # product cache not loaded
             self.load_data()
 
-        if (search := self.request.query_params.get('search')) and len(search) <= 130:
+        search = self.request.query_params.get('search')
+        search = '' if search is None else search
+        if len(search) <= 130:
             logger.info(f'Search query: {search}')
 
             results: list[tuple[int, int]] = []
@@ -117,8 +119,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             search_tokens, search_quantities = ta.parse_quantity(search_tokens, force_extraction=True)
             search_tokens = set(search_tokens)
 
-            if len(search_tokens) == 0:
-                return Product.objects.none()
+            # if len(search_tokens) == 0:
+            #     return Product.objects.none()
 
             search_text = ' '.join(sorted(search_tokens))
             for product in self.products:
