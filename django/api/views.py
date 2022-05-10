@@ -110,8 +110,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             self.load_data()
 
         search = self.request.query_params.get('search')
-        search = '' if search is None else search
-        if len(search) <= 130:
+        # search = '' if search is None else search
+        if search and len(search) <= 130:
             logger.info(f'Search query: {search}')
 
             results: list[tuple[int, int]] = []

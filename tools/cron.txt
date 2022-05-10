@@ -1,2 +1,2 @@
 # crontab -e && sudo service cron restart
-0 1 * * * ( date && cd ~/soodud && docker exec soodud-django-1 /bin/bash -c 'python manage.py shell_plus -c "s.launch(); s.match()"' && docker-compose up -d --build --force-recreate ) >> /var/log/productcron.log
+0 1 * * * ( date && cd root/soodud && docker exec soodud-django-1 /bin/bash -c 'python manage.py shell_plus -c "s.launch(); s.match()"' && date && docker-compose up --detach --build --force-recreate ) >> /var/log/productcron.log

@@ -22,7 +22,7 @@ const ProductDetails = (props: {onClose: () => void, product: Product}) => { // 
 
     const fetchProductDetails = (events: QueryEvents, productId: number) => {
         const port = __PRODUCTION__ ? '' : ':8001';
-        const url = `${location.protocol}//${location.hostname}${port}/api/v1/products/${productId}/`;
+        const url = `${location.protocol}//${location.hostname}${port}/api/v1/products/${productId}/?search=`;
         fetch(url, {method: 'GET', headers: {'Content-Type': 'text/plain'}})
             .then(res => res.json())
             .then(events.onSuccess, events.onError)

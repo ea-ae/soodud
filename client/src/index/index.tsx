@@ -23,7 +23,7 @@ const App = () => {
 
     const fetchProducts = (events: QueryEvents, query: ProductListAPIQuery) => {
         const port = __PRODUCTION__ ? '' : ':8001';
-        const base_url = `${location.protocol}//${location.hostname}${port}/api/v1/products/?`;
+        const base_url = `${location.protocol}//${location.hostname}${port}/api/v1/products/?search=`;
         let params = `limit=${query.length}&offset=${query.offset}&reverse=${query.reverse}`;
         if (query.search !== undefined) params += `&search=${query.search}`;
 
