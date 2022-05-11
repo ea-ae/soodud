@@ -93,7 +93,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         qty_score = 0 if qty_count == 0 else (q_matches / qty_count) * 100
 
         token_matches = len(tokens & product.tokens)  # exact score
-        exact_score = (token_matches / (0.9 * len(tokens) + 0.1 * len(product.tokens))) * 100
+        exact_score = (token_matches / (0.95 * len(tokens) + 0.05 * len(product.tokens))) * 100
 
         price_score = product.sp_count / 0.04  # price count score (more stores have product = more relevance)
 
@@ -102,7 +102,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             pt = ' '.join(sorted(product.tokens))  # as well as this (saves 10% or 100ms/request total!)
             text_score = fuzz.partial_ratio(search_text, pt)
 
-        return int(qty_score * 0.2 + exact_score * 0.5 + price_score * 0.2 + text_score * 0.2)
+        return int(qty_score * 0.15 + exact_score * 0.4 + price_score * 0.3 + text_score * 0.2)
 
     def get_queryset(self):
         """Get API call queryset with a custom override for search queries."""
