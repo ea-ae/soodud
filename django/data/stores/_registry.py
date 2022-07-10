@@ -65,24 +65,50 @@ class StoreRegistry:
                 )
                 store_product.last_checked = datetime.now()
 
-                price, price_created = models.Price.objects.get_or_create(
-                    product=store_product,
-                    base_price=product.base_price,
-                    sale_price=None if product.discount == Discount.NONE else product.price,
-                    members_only=product.discount == Discount.MEMBER
-                )
+                latest_price = store_product.current_price
+                latest_price_data = (
+                    latest_price.base_price,
+                    latest_price.sale_price,
+                    latest_price.members_only)
+                price_data = (
+                    product.base_price,
+                    None if product.discount == Discount.NONE else product.price,
+                    product.discount == Discount.MEMBER)
 
-                if price_created:  # price has changed, update
-                    if not product_created:  # price update
-                        update = (f'{store_product.name} {store_product.current_price.price} -> {price.price} '
-                                  f'({store_product.current_price.discount} -> {price.discount})')
-                        print(update)
-                        logger.info(update)
+                if latest_price_data != price_data:  # price has changed
+                    price = models.Price.objects.create(
+                        product=store_product,
+                        base_price=price_data[0],
+                        sale_price=price_data[1],
+                        members_only=price_data[2]
+                    )
+                    update = (f'{store_product.name} {store_product.current_price.price} -> {price.price} '
+                              f'({store_product.current_price.discount} -> {price.discount})')
+                    print(update)
+                    logger.info(update)
                     price.save()
                     store_product.current_price = price
-                else:  # should be redundant, somewhy isn't
-                    store_product.current_price = price
+
                 store_product.save()
+
+                # price, price_created = models.Price.objects.get_or_create(
+                #     product=store_product,
+                #     base_price=product.base_price,
+                #     sale_price=None if product.discount == Discount.NONE else product.price,
+                #     members_only=product.discount == Discount.MEMBER
+                # )
+
+                # if price_created:  # price has changed, update
+                #     if not product_created:  # price update
+                #         update = (f'{store_product.name} {store_product.current_price.price} -> {price.price} '
+                #                   f'({store_product.current_price.discount} -> {price.discount})')
+                #         print(update)
+                #         logger.info(update)
+                #     price.save()
+                #     store_product.current_price = price
+                # else:  # should be redundant, somewhy isn't
+                #     store_product.current_price = price
+                # store_product.save()
 
         saver_gen = save_prices()
         next(saver_gen)
