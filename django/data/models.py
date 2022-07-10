@@ -68,5 +68,4 @@ class Price(models.Model):
         return Discount.NORMAL
 
     def __str__(self) -> str:
-        # return f'{self.sale_price} sale; {self.base_price} base; {self.start}'
         return f'{self.price:.2f} @ {self.product.name}'

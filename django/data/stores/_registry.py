@@ -75,7 +75,14 @@ class StoreRegistry:
                     None if product.discount == Discount.NONE else product.price,
                     product.discount == Discount.MEMBER)
 
-                if latest_price_data != price_data:  # price has changed
+                override_creation = False
+                if latest_price_data == price_data:  # temp code, necessary to revert bugged data from issue #14
+                    actual_latest_price = store_product.price_set.latest('start')
+                    if actual_latest_price != latest_price:  # invalid store product!
+                        print(f'Fixing invalid product: {store_product.name}')
+                        override_creation = True
+
+                if override_creation or latest_price_data != price_data:  # price has changed
                     price = models.Price.objects.create(
                         product=store_product,
                         base_price=price_data[0],

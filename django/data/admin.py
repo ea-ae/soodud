@@ -73,7 +73,6 @@ class StoreProductAdmin(admin.ModelAdmin):
 
     @admin.display()
     def price(self, obj):
-        # return obj.current_price
         return obj.current_price.price
 
     @admin.display()
