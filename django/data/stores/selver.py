@@ -1,5 +1,6 @@
 """Coop."""
 
+from time import sleep
 from typing import Generator, Any
 import requests
 
@@ -61,6 +62,7 @@ def get_page(page: int) -> dict[str, Any]:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:77.0) Gecko/20190101 Firefox/77.0'}
     query = PARAMS | {'size': RESULTS_PER_PAGE, 'from': RESULTS_PER_PAGE * (page - 1)}
     response = requests.get(BASE_URL, headers=headers, params=query)
+    sleep(5)  # safety measure
     return response.json()
 
 

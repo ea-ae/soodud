@@ -73,7 +73,7 @@ class StoreProductAdmin(admin.ModelAdmin):
 
     @admin.display()
     def price(self, obj):
-        return obj.current_price.price
+        return 'None' if obj.current_price is None else obj.current_price.price
 
     @admin.display()
     def price_amount(self, obj):
