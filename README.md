@@ -8,16 +8,16 @@ CI/CD is implemented through Github Actions and Docker Compose. Nginx & fail2ban
 
 1. Clone the project.
 1. Create a valid `.env` file based on `.env.example`.
-1. Install dependencies using `cd client && npm install --dev` and `cd django && pipenv install`.
-1. Optionally, start the Python virtual environment with `cd django && pipenv shell`.
-1. To scrape new product data and form updated product clusters, run `tools/run_service.sh launch` and `tools/run_service.sh match` respectively.
 1. In order to contribute, first install the required git commit hooks with `cd django && pipenv run pre-commit install`.
 
 ### Development
 
+1. Install dependencies using `cd client && npm install --dev` and `cd django && pipenv install`.
 1. Build the C++ project and move `clustering/out/clustering.(so|pyd)` into the `django/data/stores/` directory.
 1. Start the webpack dev server using `cd client && npm run server`
+1. Start the Python virtual environment with `cd django && pipenv shell`.
 1. Start the Django dev server with `tools/start_server.sh`.
+1. To scrape new product data and form updated product clusters, run `tools/run_service.sh launch` and `tools/run_service.sh match` respectively.
 
 ### Production
 
