@@ -4,6 +4,8 @@ Soodud is a webapp that scrapes data from online stores with Python and then use
 
 CI/CD is implemented through Github Actions and Docker Compose. Nginx & fail2ban are used to compress/cache/serve static files, provide rate limiting, and detect malicious bots. All commits are ran through flake8 and other pre-commit filters.
 
+![image](https://github.com/ea-ae/soodud/assets/90932525/40cb78c6-0f2e-4387-974b-0fa9bf48e53e)
+
 ## Setup
 
 1. Clone the project.
